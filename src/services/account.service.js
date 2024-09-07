@@ -47,7 +47,8 @@ class AccountService {
   }
 
   async updateRoom(roomId, requestBody) {
-    return this.api.put(`/account/room/${roomId}`, requestBody);
+    const response = await this.api.put(`/account/room/${roomId}`, requestBody);
+    return response.data.room
   }
 
   async deleteRoom(roomId) {

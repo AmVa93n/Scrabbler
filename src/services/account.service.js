@@ -19,6 +19,12 @@ class ExampleService {
     });
   }
 
+  async getProfile() {
+    const response = await this.api.get('/account/profile');
+    return response.data.user
+  }
+
+  /*
   // POST /api/examples
   createOne = async (requestBody) => {
     return this.api.post('/api/examples', requestBody);
@@ -43,7 +49,7 @@ class ExampleService {
   deleteProject = async (id) => {
     return this.api.delete(`/api/examples/${id}`);
   } 
-
+  */
 
 }
 

@@ -21,8 +21,11 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import CountrySelect from './CountrySelect';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import Avatar from '@mui/material/Avatar';
 import authService from "../../services/auth.service";
 import { useNavigate } from "react-router-dom";
+import { useNotifications } from '@toolpad/core/useNotifications';
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
@@ -55,6 +58,18 @@ const SignUpContainer = styled(Stack)(({ theme }) => ({
   }),
 }));
 
+const VisuallyHiddenInput = styled('input')({
+  clip: 'rect(0 0 0 0)',
+  clipPath: 'inset(50%)',
+  height: 1,
+  overflow: 'hidden',
+  position: 'absolute',
+  bottom: 0,
+  left: 0,
+  whiteSpace: 'nowrap',
+  width: 1,
+});
+
 export default function SignUp() {
   const SignUpTheme = createTheme(getSignUpTheme('light'));
   const [emailError, setEmailError] = React.useState(false);
@@ -64,7 +79,9 @@ export default function SignUp() {
   const [nameError, setNameError] = React.useState(false);
   const [nameErrorMessage, setNameErrorMessage] = React.useState('');
   const [date, setDate] = React.useState(dayjs());
+  const [pfpPreview, setPfpPreview] = React.useState("/broken-image.jpg");
   const navigate = useNavigate();
+  const notifications = useNotifications();
 
   const validateInputs = () => {
     const email = document.getElementById('email');
@@ -103,34 +120,39 @@ export default function SignUp() {
     return isValid;
   };
 
+  function handleFilePreview(event) {
+    const reader = new FileReader();
+    reader.onload = function(){
+      setPfpPreview(reader.result)
+    }
+    reader.readAsDataURL(event.target.files[0]);
+  }
+
   function handleSubmit(event) {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
-
-    // Create an object representing the request body
-    const requestBody = {
-      name: data.get('name'),
-      email: data.get('email'),
-      password: data.get('password'),
-      gender: data.get('gender'),
-      birthdate: date.$d,
-      country: data.get('country'),
-      profilePic: data.get('profilePic'),
-    };
-    console.log(requestBody)
+    const formData = new FormData(event.currentTarget);
+    formData.set('birthdate', date.toISOString().split('T')[0]);
 
     authService
-      .signup(requestBody)
+      .signup(formData)
       .then((response) => {
         // If the POST request is successful redirect to the login page
+        notify('Successfully created account!','success',5000)
         navigate("/login");
       })
       .catch((error) => {
         // If the request resolves with an error, set the error message in the state
         const errorDescription = error.response.data.message;
-        alert(errorDescription);
+        notify(errorDescription,'error',5000)
       });
   };
+
+  function notify(message, type, duration) {
+    notifications.show(message, {
+      severity: type,
+      autoHideDuration: duration,
+    });
+  }
 
   return (
       <ThemeProvider theme={SignUpTheme}>
@@ -208,6 +230,7 @@ export default function SignUp() {
                     aria-labelledby="demo-radio-buttons-group-label"
                     defaultValue="male"
                     name="gender"
+                    row
                   >
                     <FormControlLabel value="male" control={<Radio />} label="Male" />
                     <FormControlLabel value="female" control={<Radio />} label="Female" />
@@ -228,6 +251,26 @@ export default function SignUp() {
                 <FormControl>
                   <FormLabel>Country of Residence</FormLabel>
                   <CountrySelect />
+                </FormControl>
+
+                <FormControl>
+                  <FormLabel>Profile Picture</FormLabel>
+                  <Avatar src={pfpPreview} sx={{mx: "auto", width: '12rem', height: '12rem', mb: '1rem'}} />
+                  <Button
+                    component="label"
+                    role={undefined}
+                    variant="contained"
+                    tabIndex={-1}
+                    startIcon={<CloudUploadIcon />}
+                    sx={{ mx: "auto", width: 'fit-content'}}
+                  >
+                    Upload file
+                    <VisuallyHiddenInput
+                      name="profilePic"
+                      type="file"
+                      onChange={handleFilePreview}
+                    />
+                  </Button>
                 </FormControl>
 
                 <Button

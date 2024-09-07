@@ -198,14 +198,17 @@ function Navbar() {
 
           <Box sx={{ flexGrow: 0 }}>
             {isLoggedIn && (
+              <Tooltip title="Messages">
                 <IconButton size="large" aria-label="show new mails" color="inherit">
                     <Badge badgeContent={unread_messages.length} color="error">
                         <MailIcon />
                     </Badge>
                 </IconButton>
+              </Tooltip>
             )}
 
             {isLoggedIn && (
+              <Tooltip title="Notifications">
                 <IconButton
                     size="large"
                     aria-label="show new notifications"
@@ -215,12 +218,13 @@ function Navbar() {
                         <NotificationsIcon />
                     </Badge>
                 </IconButton>
+              </Tooltip>
             )}
             
             <Tooltip title={isLoggedIn ? user.name: "Guest"}>
             {isLoggedIn ? (
                 <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt="User" src="/static/images/avatar/2.jpg" />
+                <Avatar alt="User" src={user.profilePic || "/broken-image.jpg"} />
               </IconButton>
             ) : (
                 <IconButton

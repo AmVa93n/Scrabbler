@@ -16,6 +16,7 @@ import CountryIcon from '@mui/icons-material/Home';
 import BirthdateIcon from '@mui/icons-material/Event';
 import EditIcon from '@mui/icons-material/Edit';
 import Tooltip from '@mui/material/Tooltip';
+import Paper from '@mui/material/Paper';
 import accountService from "../services/account.service";
 
 const Demo = styled('div')(({ theme }) => ({
@@ -41,11 +42,12 @@ function ProfilePage() {
   }, [])
 
   return (
+    <Paper elevation={3} sx={{ width: '50dvw', height: '80dvh', mx: 'auto'}}>
+      <Typography sx={{ mt: 4, mb: 2, mx: 'auto', width: 'fit-content', pt: 2 }} variant="h5" component="div">
+          My Profile
+      </Typography>
     <Box sx={{ maxWidth: '30dvw', mx: 'auto' }}>
         <Grid item xs={12} md={6}>
-          <Typography sx={{ mt: 4, mb: 2 }} variant="h6" component="div">
-            My Profile
-          </Typography>
           <Demo>
             <List dense={false}>
               {fields.map(field =>
@@ -73,6 +75,7 @@ function ProfilePage() {
           </Demo>
         </Grid>
     </Box>
+    </Paper >
   );
 }
 

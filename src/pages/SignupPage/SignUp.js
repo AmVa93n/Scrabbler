@@ -128,23 +128,19 @@ export default function SignUp() {
     reader.readAsDataURL(event.target.files[0]);
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     formData.set('birthdate', date.toISOString().split('T')[0]);
 
-    authService
-      .signup(formData)
-      .then((response) => {
-        // If the POST request is successful redirect to the login page
-        notify('Successfully created account!','success',5000)
-        navigate("/login");
-      })
-      .catch((error) => {
-        // If the request resolves with an error, set the error message in the state
-        const errorDescription = error.response.data.message;
-        notify(errorDescription,'error',5000)
-      });
+    try {
+      await authService.signup(formData)
+      notify('Successfully created account!','success',5000)
+      navigate("/login");
+    } catch (error) {
+      const errorDescription = error.response.data.message;
+      notify(errorDescription,'error',5000)
+    }
   };
 
   function notify(message, type, duration) {

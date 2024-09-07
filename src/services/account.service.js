@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-class ExampleService {
+class AccountService {
   constructor() {
     this.api = axios.create({
       baseURL: process.env.REACT_APP_SERVER_URL || "http://localhost:5005"
@@ -24,36 +24,38 @@ class ExampleService {
     return response.data.user
   }
 
-  /*
-  // POST /api/examples
-  createOne = async (requestBody) => {
-    return this.api.post('/api/examples', requestBody);
+  async updateProfile(requestBody) {
+    return this.api.put(`/account/profile`, requestBody);
   }
 
-  // GET /api/examples
-  getAll = async () => {
-    return this.api.get('/api/examples');
+  async deleteAccount() {
+    return this.api.delete(`/account/profile`);
   }
 
-  // GET /api/examples/:id
-  getOne = async (id) => {
-    return this.api.get(`/api/examples/${id}`);
+  async getRooms() {
+    const response = await this.api.get(`/account/rooms`);
+    return response.data.rooms
   }
 
-  // PUT /api/examples/:id
-  updateOne = async (id, requestBody) => {
-    return this.api.put(`/api/examples/${id}`, requestBody);
+  async getRoom(roomId) {
+    const response = await this.api.get(`/account/room/${roomId}`);
+    return response.data.room
   }
 
-  // DELETE /api/examples/:id
-  deleteProject = async (id) => {
-    return this.api.delete(`/api/examples/${id}`);
-  } 
-  */
+  async createRoom(requestBody) {
+    return this.api.post('/account/room', requestBody);
+  }
 
+  async updateRoom(roomId, requestBody) {
+    return this.api.put(`/account/room/${roomId}`, requestBody);
+  }
+
+  async deleteRoom(roomId) {
+    return this.api.delete(`/account/room/${roomId}`);
+  }
 }
 
 // Create one instance of the service
-const exampleService = new ExampleService();
+const accountService = new AccountService();
 
-export default exampleService;
+export default accountService;

@@ -24,9 +24,10 @@ import { useContext } from "react";
 import { AuthContext } from "../context/auth.context";
 
 const navLinks = ['NavLink 1', 'NavLink 2', 'NavLink 3'];
-const DropdownLinks = ['Login', 'Profile', 'Logout'];
+const DropdownLinks = ['Login', 'Profile', 'Rooms', 'Logout'];
 const routes = {
     'Profile': '/profile',
+    'Rooms': '/rooms',
     'Sign Up': '/signup',
     'Login': '/login',
 };
@@ -258,7 +259,7 @@ function Navbar() {
               onClose={handleCloseUserMenu}
             >
               {DropdownLinks.map((link) => (
-                (['Profile','Logout'].includes(link) && isLoggedIn) ||  // Show only if logged in
+                (['Profile','Rooms','Logout'].includes(link) && isLoggedIn) ||  // Show only if logged in
                 (link === 'Login' && !isLoggedIn) // Show only if logged out
                 ) && (
                 <MenuItem key={link} component={RouterLink} to={routes[link]} onClick={() => {

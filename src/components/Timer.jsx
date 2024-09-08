@@ -28,7 +28,7 @@ function Timer({ duration, onTimeout }) {
 
     return (
         <div>
-            <h3>Time Left: {seconds} {seconds === 1 ? 'second' : 'seconds'}</h3>
+            <span>{seconds}</span>
         </div>
     );
 }

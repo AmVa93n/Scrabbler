@@ -1,111 +1,22 @@
-import { useEffect, useState, useContext } from 'react';
-import { useParams } from 'react-router-dom';
+import { useContext } from 'react';
 import accountService from "../services/account.service";
 import { useSocket } from '../context/socket.context';
 import { AuthContext } from "../context/auth.context";
+import { RoomContext } from '../context/room.context';
 import { useNotifications } from '@toolpad/core/useNotifications';
-import Timer from '../components/Timer';
 import TurnAlertModal from '../components/TurnAlertModal';
+import { Grid, Paper, Box, Typography } from '@mui/material';
+import UserList from '../components/UserList';
+import RoomChat from '../components/RoomChat';
+import Loading from '../components/Loading/Loading';
+import ChatInput from '../components/ChatInput';
 
 function RoomPage() {
-    const [room, setRoom] = useState(null)
-    const { roomId } = useParams();
-    const [usersWaiting, setUsersWaiting] = useState([])
     const socket = useSocket();
     const User = useContext(AuthContext).user;
+    const { roomId, room, setRoom, usersWaiting, turnPlayer, turnNumber, 
+            isModalOpen, setIsModalOpen, modalMessage } = useContext(RoomContext)
     const notifications = useNotifications();
-    const [turnPlayer, setTurnPlayer] = useState(null);
-    const [turnEndTime, setTurnEndTime] = useState(null);
-    const [turnNumber, setturnNumber] = useState(0);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [modalMessage, setModalMessage] = useState('');
-
-    useEffect(() => {
-        async function init() {
-            try {
-                const room = await accountService.getRoom(roomId)
-                setRoom(room)
-                socket.emit('joinRoom', roomId);
-            } catch (error) {
-                const errorDescription = error.response.data.message;
-                alert(errorDescription);
-            }
-        }
-        init()
-
-        // Get room state when user joins
-        socket.on('initRoomState', (waitingUsers, sessionData) => {
-            setUsersWaiting(waitingUsers);
-            if (sessionData) {
-                setTurnPlayer(sessionData.turnPlayer);
-                setTurnEndTime(new Date(sessionData.turnEndTime).getTime());
-                setturnNumber(sessionData.turnNumber)
-            }
-        });
-
-        // Listen for players joining the room
-        socket.on('userJoined', (user) => {
-            // Check if the user is already in the players array by comparing IDs
-            setUsersWaiting((prevUsers) => {
-                const isUserAlreadyIn = prevUsers.some(waitingUser => waitingUser._id === user._id);
-                if (isUserAlreadyIn) return prevUsers;  // Return previous players if already in the list
-                return [...prevUsers, user];  // Add the new user if not already present
-            });
-        });
-
-        // Listen for players leaving the room
-        socket.on('userLeft', (user) => {
-            setUsersWaiting((prevPlayers) => prevPlayers.filter(player => player._id !== user._id));
-        });
-
-        // Listen for room updates by the host
-        socket.on('roomUpdated', (updatedRoom) => {
-            setRoom(updatedRoom);
-        });
-
-        socket.on('turnStart', (turnPlayer, turnEndTime, turnNumber) => {
-            // Update UI to indicate it's the current player's turn
-            setTurnPlayer(turnPlayer);
-            setTurnEndTime(new Date(turnEndTime).getTime()); // Convert ISO string back to a timestamp (milliseconds)
-            setturnNumber(turnNumber)
-            if (turnPlayer._id === User._id) {
-                setModalMessage("It's your turn!");
-                setIsModalOpen(true);
-            }
-            // Auto-close the modal after 3 seconds
-            const timer = setTimeout(() => setIsModalOpen(false), 3000);
-            // Clear the timeout if the component unmounts
-            return () => clearTimeout(timer);
-        });
-        
-        socket.on('turnTimeout', (turnPlayer) => {
-            // Notify the UI that the player’s turn timed out
-            if (turnPlayer._id === User._id) {
-                setModalMessage("Your turn has timed out!");
-                setIsModalOpen(true);
-            }
-            // Auto-close the modal after 3 seconds
-            const timer = setTimeout(() => setIsModalOpen(false), 3000);
-            // Clear the timeout if the component unmounts
-            return () => clearTimeout(timer);
-        });
-        
-        //socket.on('userMove', (moveData) => {
-            // Update game state with the move made by the player
-            //updateGameState(moveData);
-        //});
-
-        // Clean up listeners on component unmount
-        return () => {
-            socket.off('initRoomState');
-            socket.off('userJoined');
-            socket.off('userLeft');
-            socket.off('roomUpdated');
-            socket.off('turnStart');
-            socket.off('turnTimeout');
-            //socket.off('userMove');
-        };
-    }, [roomId, socket, User._id])
 
     async function handleStartGame() {
         const requestBody = {
@@ -154,7 +65,7 @@ function RoomPage() {
           autoHideDuration: duration,
         });
     }
-
+/*
     return (
         <div>
             {room ? (
@@ -162,23 +73,15 @@ function RoomPage() {
                     <h1>{room.name}</h1>
                     {room.gameSession ? (
                         <div>
-                            <TurnAlertModal isOpen={isModalOpen} message={modalMessage} onClose={() => setIsModalOpen(false)} />
+                            
                             <h2>Game is active</h2>
                             <p>Turn {turnNumber}</p>
                             <p>it is {turnPlayer ? turnPlayer.name : ''}'s turn</p>
-                            {turnEndTime && (
-                                <Timer 
-                                    duration={(turnEndTime - Date.now()) / 1000} // Convert to seconds
-                                    onTimeout={() => {
-                                        // The server will handle the timeout
-                                    }}
-                                />
-                            )}
+                            
                             {room.gameSession.players.map(player => player && (
                                 <p key={player._id}>{player.name} {player._id === room.creator && '(Host)'}</p>
                             ))}
-                            {(turnPlayer && User._id === turnPlayer._id) && <button onClick={handleMakeMove}>Make Move</button>}
-                            {User._id === room.creator && <button onClick={handleEndGame}>End Game</button>}
+                            
                         </div>
                     ) : (
                         <div>
@@ -186,7 +89,7 @@ function RoomPage() {
                             {usersWaiting.map(user => (
                                 <p key={user._id}>{user.name} {user._id === room.creator && '(Host)'}</p>
                             ))}
-                            {User._id === room.creator && <button onClick={handleStartGame} disabled={usersWaiting.length < 2}>Start Game</button>}
+                            
                         </div>
                     )}
                 </>
@@ -194,6 +97,58 @@ function RoomPage() {
                 <p>Loading room data...</p>
             )}
         </div>
+    );
+*/
+    return (
+        <>
+        {room ? (
+            <Grid container spacing={2} style={{ padding: '10px' }}>
+                {/* Left Panel - Player List & Turn Data */}
+                <Grid item xs={3}>
+                    <Paper style={{ height: '81vh', padding: '20px' }}>
+                        <Typography variant="h5">Players</Typography>
+                        {/* List of Players */}
+                        <Box>
+                            <UserList />
+                        </Box>
+                    </Paper>
+                </Grid>
+
+                {/* Middle Panel - Game Board */}
+                <Grid item xs={6}>
+                    <Paper style={{ height: '81vh', padding: '20px' }}>
+                        <TurnAlertModal isOpen={isModalOpen} message={modalMessage} onClose={() => setIsModalOpen(false)} />
+                        {/* Game Board goes here */}
+                        {room.gameSession ? (
+                            <>
+                            {(turnPlayer && User._id === turnPlayer._id) && <button onClick={handleMakeMove}>Make Move</button>}
+                            {(User._id === room.creator) && <button onClick={handleEndGame}>End Game</button>}
+                            </>
+                        ) : (
+                            User._id === room.creator && <button onClick={handleStartGame} disabled={usersWaiting.length < 2}>Start Game</button>
+                        )}
+                    </Paper>
+                </Grid>
+
+                {/* Right Panel - Live Chat */}
+                <Grid item xs={3}>
+                    <Paper style={{ height: '81vh', padding: '20px', display: 'flex', flexDirection: 'column' }}>
+                        <Typography variant="h5">Live Chat</Typography>
+                        <Box style={{ flex: 1, overflowY: 'scroll' }}>
+                            {/* Chat messages here */}
+                            <RoomChat />
+                        </Box>
+                        <Box>
+                            {/* Chat input field */}
+                            <ChatInput />
+                        </Box>
+                    </Paper>
+                </Grid>
+            </Grid>
+    ) : (
+        <Loading />
+    )}
+    </>
     );
 }
 

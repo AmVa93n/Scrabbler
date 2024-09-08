@@ -13,7 +13,7 @@ import IsAnon from "./components/IsAnon/IsAnon";
 import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
-import '@fontsource/roboto/700.css';
+import { RoomProvider } from "./context/room.context";
 
 function App() {
   return (
@@ -63,7 +63,9 @@ function App() {
           path="/rooms/:roomId"
           element={
             <IsPrivate>
-              <RoomPage />
+              <RoomProvider>
+                <RoomPage />
+              </RoomProvider>
             </IsPrivate>
           }
         />

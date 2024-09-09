@@ -6,6 +6,7 @@ import { BrowserRouter as Router } from "react-router-dom";
 import { AuthProviderWrapper } from "./context/auth.context";
 import { NotificationsProvider } from '@toolpad/core/useNotifications';
 import { SocketProvider } from './context/socket.context';
+import DragDropContext from './context/dragdrop.context';
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
@@ -14,7 +15,9 @@ root.render(
     <AuthProviderWrapper>
       <SocketProvider>
         <NotificationsProvider>
-          <App />
+          <DragDropContext>
+            <App />
+          </DragDropContext>
         </NotificationsProvider>
       </SocketProvider>
     </AuthProviderWrapper>

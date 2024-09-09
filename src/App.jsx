@@ -54,7 +54,7 @@ function App() {
           path="/rooms/edit"
           element={
             <IsPrivate>
-              <CreateRoomPage />
+              {/*<EditRoomPage />*/}
             </IsPrivate>
           }
         />

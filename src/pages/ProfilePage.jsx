@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import { styled } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import List from '@mui/material/List';
@@ -18,6 +18,8 @@ import EditIcon from '@mui/icons-material/Edit';
 import Tooltip from '@mui/material/Tooltip';
 import Paper from '@mui/material/Paper';
 import accountService from "../services/account.service";
+import { useSocket } from '../context/socket.context';
+import { AuthContext } from "../context/auth.context";
 
 const Demo = styled('div')(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
@@ -27,6 +29,8 @@ function ProfilePage() {
   const [initValues, setInitValues] = useState(null)
   const fields = ['name', 'email', 'gender', 'country', 'birthdate']
   const icons = [<NameIcon />,<EmailIcon />,<GenderIcon />,<CountryIcon />,<BirthdateIcon />]
+  const socket = useSocket();
+  const User = useContext(AuthContext).user;
 
   useEffect(() => {
     async function init() {
@@ -40,6 +44,10 @@ function ProfilePage() {
     }
     init()
   }, [])
+
+  useEffect(() => {
+    socket.emit('leaveRoom', `${User.name} left the room`);
+  }, []);
 
   return (
     <Paper elevation={3} sx={{ width: '50dvw', height: '80dvh', mx: 'auto'}}>

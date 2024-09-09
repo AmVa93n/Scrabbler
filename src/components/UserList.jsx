@@ -8,18 +8,28 @@ import Avatar from '@mui/material/Avatar';
 import { RoomContext } from '../context/room.context';
 import { AuthContext } from "../context/auth.context";
 import BlockIcon from '@mui/icons-material/Block';
+import FastForwardIcon from '@mui/icons-material/FastForward';
 import Tooltip from '@mui/material/Tooltip';
 import Badge from '@mui/material/Badge';
 import Chip from '@mui/material/Chip';
 import TimerIcon from '@mui/icons-material/Timer';
 import Timer from '../components/Timer';
 import '@fontsource/roboto/700.css';
+import { useSocket } from '../context/socket.context';
 
 export default function UserList() {
     const User = useContext(AuthContext).user;
-    const { roomId, room, setRoom, usersWaiting, turnPlayer, turnEndTime, turnNumber, 
-        isModalOpen, setIsModalOpen, modalMessage, inactivePlayerIds } = useContext(RoomContext)
+    const { roomId, room, usersWaiting, turnPlayer, turnEndTime, inactivePlayerIds } = useContext(RoomContext)
     const list = room.gameSession ? room.gameSession.players : usersWaiting
+    const socket = useSocket();
+
+    function handleSkip(userId) {
+      socket.emit('skipPlayer', roomId, userId)
+    }
+
+    function handleKick(user) {
+      socket.emit('kickUser', roomId, user)
+    }
 
   return (
     <List dense sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}>
@@ -29,10 +39,10 @@ export default function UserList() {
           <ListItem
             key={user._id}
             secondaryAction={
-                (User._id === room.creator && User._id !== user._id) && 
-                <IconButton edge="end" aria-label="skip" disabled={!inactivePlayerIds.includes(user._id)}>
+                (room.gameSession && User._id === room.creator && User._id !== user._id) && 
+                <IconButton edge="end" aria-label="skip" disabled={!inactivePlayerIds.includes(user._id)} onClick={() => handleSkip(user._id)}>
                     <Tooltip title="Skip turns">
-                        <BlockIcon />
+                        <FastForwardIcon />
                     </Tooltip>
                 </IconButton>
             }
@@ -53,6 +63,13 @@ export default function UserList() {
             <ListItemText id={labelId} primary={user.name} sx={{
                 fontWeight: room.gameSession && turnPlayer && user._id === turnPlayer._id ? 'bold' : 'normal'
             }} />
+            {(!room.gameSession && User._id === room.creator && User._id !== user._id) && (
+              <IconButton edge="end" aria-label="kick" onClick={() => handleKick(user)}>
+                <Tooltip title="Kick">
+                  <BlockIcon />
+                </Tooltip>
+              </IconButton>
+            )}
             {(room.gameSession && turnPlayer && user._id === turnPlayer._id) &&
                 <Chip icon={<TimerIcon />} label={
                     <Timer 

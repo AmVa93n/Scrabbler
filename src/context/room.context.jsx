@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { AuthContext } from "../context/auth.context";
 import { useSocket } from '../context/socket.context';
 import accountService from "../services/account.service";
@@ -11,6 +11,7 @@ function RoomProvider(props) {
     const socket = useSocket();
     const User = useContext(AuthContext).user;
     const [room, setRoom] = useState(null)
+    const [messages, setMessages] = useState([])
     const [usersWaiting, setUsersWaiting] = useState([])
     const [turnPlayer, setTurnPlayer] = useState(null);
     const [turnEndTime, setTurnEndTime] = useState(null);
@@ -18,12 +19,14 @@ function RoomProvider(props) {
     const [inactivePlayerIds, setInactivePlayerIds] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalMessage, setModalMessage] = useState('');
+    const navigate = useNavigate();
 
     useEffect(() => {
         async function init() {
             try {
                 const room = await accountService.getRoom(roomId)
                 setRoom(room)
+                setMessages(room.messages)
                 socket.emit('joinRoom', roomId);
             } catch (error) {
                 const errorDescription = error.response.data.message;
@@ -33,7 +36,7 @@ function RoomProvider(props) {
         init()
 
         // Get room state when user joins
-        socket.on('initRoomState', (waitingUsers, sessionData) => {
+        socket.on('refreshRoom', (waitingUsers, sessionData) => {
             setUsersWaiting(waitingUsers);
             if (sessionData) {
                 setTurnPlayer(sessionData.turnPlayer);
@@ -56,6 +59,17 @@ function RoomProvider(props) {
         // Listen for room updates by the host
         socket.on('roomUpdated', (updatedRoom) => {
             setRoom(updatedRoom);
+            for (let userId of updatedRoom.kickedUsers) {
+                if (userId === User._id) {
+                    socket.emit('leaveRoom', `The host kicked ${User.name} from the room`);
+                    navigate('/')
+                }
+            }
+        });
+
+        // Listen for new messages
+        socket.on('chatUpdated', (newMsg) => {
+            setMessages(prevMessages => [...prevMessages, newMsg]);
         });
 
         let timer;
@@ -94,10 +108,11 @@ function RoomProvider(props) {
 
         // Clean up listeners on component unmount
         return () => {
-            socket.off('initRoomState');
+            socket.off('refreshRoom');
             socket.off('userJoined');
             socket.off('userLeft');
             socket.off('roomUpdated');
+            socket.off('chatUpdated');
             socket.off('turnStart');
             socket.off('turnTimeout');
             //socket.off('userMove');
@@ -118,6 +133,7 @@ function RoomProvider(props) {
             modalMessage,
             roomId,
             inactivePlayerIds,
+            messages
         }}>
             {props.children}
         </RoomContext.Provider>

@@ -20,7 +20,7 @@ import dayjs from 'dayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
-import CountrySelect from './CountrySelect';
+import CountrySelect from '../../components/CountrySelect';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import Avatar from '@mui/material/Avatar';
 import authService from "../../services/auth.service";
@@ -99,9 +99,9 @@ export default function SignUp() {
       setEmailErrorMessage('');
     }
 
-    if (!password.value || password.value.length < 6) {
+    if (!password.value || password.value.length < 8) {
       setPasswordError(true);
-      setPasswordErrorMessage('Password must be at least 6 characters long.');
+      setPasswordErrorMessage('Password must be at least 8 characters long.');
       isValid = false;
     } else {
       setPasswordError(false);
@@ -131,7 +131,7 @@ export default function SignUp() {
   async function handleSubmit(event) {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-    formData.set('birthdate', date.toISOString().split('T')[0]);
+    formData.set('birthdate', date.startOf('day').format('YYYY-MM-DD'));
 
     try {
       await authService.signup(formData)

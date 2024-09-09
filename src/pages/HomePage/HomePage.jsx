@@ -8,7 +8,7 @@ function HomePage() {
   const User = useContext(AuthContext).user;
 
   useEffect(() => {
-    socket.emit('leaveRoom', `${User.name} left the room`);
+    if (socket && User) socket.emit('leaveRoom', `${User.name} left the room`);
   }, []);
 
   return (

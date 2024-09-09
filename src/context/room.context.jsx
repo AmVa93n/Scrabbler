@@ -35,7 +35,7 @@ function RoomProvider(props) {
         }
         init()
 
-        // Get room state when user joins
+        // Get room data when user joins (that is not saved in DB)
         socket.on('refreshRoom', (waitingUsers, sessionData) => {
             setUsersWaiting(waitingUsers);
             if (sessionData) {

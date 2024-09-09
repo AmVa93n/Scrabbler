@@ -1,45 +1,57 @@
-import { useEffect, useState, useContext } from 'react';
+import { useEffect, useState, useContext, useRef } from 'react';
 import { styled } from '@mui/material/styles';
+import { TextField, IconButton, ListItem, ListItemAvatar, ListItemText, Avatar, RadioGroup, Radio, Badge,  
+          FormControlLabel  } from '@mui/material';
 import Box from '@mui/material/Box';
 import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemAvatar from '@mui/material/ListItemAvatar';
-import ListItemText from '@mui/material/ListItemText';
-import Avatar from '@mui/material/Avatar';
-import IconButton from '@mui/material/IconButton';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+import dayjs from 'dayjs';
 import NameIcon from '@mui/icons-material/Badge';
 import EmailIcon from '@mui/icons-material/AlternateEmail';
 import GenderIcon from '@mui/icons-material/Wc';
 import CountryIcon from '@mui/icons-material/Home';
 import BirthdateIcon from '@mui/icons-material/Event';
 import EditIcon from '@mui/icons-material/Edit';
+import SaveIcon from '@mui/icons-material/Save';
+import CancelIcon from '@mui/icons-material/Cancel';
 import Tooltip from '@mui/material/Tooltip';
 import Paper from '@mui/material/Paper';
+import CountrySelect from '../components/CountrySelect';
 import accountService from "../services/account.service";
 import { useSocket } from '../context/socket.context';
 import { AuthContext } from "../context/auth.context";
+import { useNotifications } from '@toolpad/core/useNotifications';
+import { blue } from '@mui/material/colors';
 
 const Demo = styled('div')(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
 }));
 
 function ProfilePage() {
-  const [initValues, setInitValues] = useState(null)
-  const fields = ['name', 'email', 'gender', 'country', 'birthdate']
-  const icons = [<NameIcon />,<EmailIcon />,<GenderIcon />,<CountryIcon />,<BirthdateIcon />]
+  const [fieldValues, setFieldValues] = useState(null)
+  const [editMode, setEditMode] = useState({}); // Manage edit state for each field
+  const [inputValues, setInputValues] = useState({});
+  const fields = ['name', 'email', 'gender', 'birthdate', 'country']
+  const icons = [<NameIcon />,<EmailIcon />,<GenderIcon />,<BirthdateIcon />,<CountryIcon />,]
   const socket = useSocket();
   const User = useContext(AuthContext).user;
+  const notifications = useNotifications();
+  const [pfpPreview, setPfpPreview] = useState(null);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     async function init() {
       try {
         const profile = await accountService.getProfile()
-        setInitValues(profile)
+        setFieldValues(profile)
+        setPfpPreview(profile.profilePic)
       } catch (error) {
         const errorDescription = error.response.data.message;
-        alert(errorDescription);
+        notify(errorDescription,'error',5000)
       }
     }
     init()
@@ -49,34 +61,164 @@ function ProfilePage() {
     socket.emit('leaveRoom', `${User.name} left the room`);
   }, []);
 
+  function handleEdit(field) {
+    setEditMode((prev) => ({ ...prev, [field]: true })); // Turn on edit mode
+    setInputValues((prev) => ({ ...prev, [field]: fieldValues[field] }));
+    if (fileInputRef.current && field === "profilePic") {
+      fileInputRef.current.click(); // Trigger the click on hidden input
+    }
+  };
+
+  function handleInputChange(field, value) {
+    setInputValues((prev) => ({ ...prev, [field]: value }));
+  };
+
+  async function handleSave(field) {
+    try {
+      const formData = new FormData();
+      if (field === 'birthdate') {
+        formData.append('birthdate', inputValues.birthdate.startOf('day').format('YYYY-MM-DD'));
+      } else if (field === 'country') {
+        formData.append('country', inputValues.country.label);
+      } else if (field === 'profilePic') {
+        formData.append('profilePic', inputValues.profilePic);
+      } else {
+        formData.append(field, inputValues[field]);
+      }
+      console.log(inputValues['profilePic'])
+      await accountService.updateProfile(formData); // Save updated field to the server
+      if (field === 'birthdate') setFieldValues((prev) => ({ ...prev, birthdate: inputValues.birthdate.startOf('day').format('YYYY-MM-DD')}));
+      else if (field === 'country') setFieldValues((prev) => ({ ...prev, country: inputValues.country.label}));
+      else setFieldValues((prev) => ({ ...prev, [field]: inputValues[field] }));
+      notify('Profile updated','success',5000)
+    } catch (error) {
+      const errorDescription = error.response.data.message;
+      notify(errorDescription,'error',5000)
+    }
+    setEditMode((prev) => ({ ...prev, [field]: false })); // Turn off edit mode
+  };
+
+  function handleCancel(field) {
+    setInputValues((prev) => ({ ...prev, [field]: fieldValues[field] })); // Revert to the original value
+    setEditMode(false);          // Exit edit mode
+  };
+
+  function notify(message, type, duration) {
+    notifications.show(message, {
+      severity: type,
+      autoHideDuration: duration,
+    });
+  }
+
+  function handleFilePreview(event) {
+    const reader = new FileReader();
+    reader.onload = function(){
+      setPfpPreview(reader.result)
+      setInputValues((prev) => ({ ...prev, profilePic: event.target.files[0] }));
+    }
+    reader.readAsDataURL(event.target.files[0]);
+  }
+
   return (
-    <Paper elevation={3} sx={{ width: '50dvw', height: '80dvh', mx: 'auto'}}>
+    <Paper elevation={3} sx={{ width: '50dvw', height: 'fit-content', mx: 'auto'}}>
       <Typography sx={{ mt: 4, mb: 2, mx: 'auto', width: 'fit-content', pt: 2 }} variant="h5" component="div">
           My Profile
       </Typography>
+      <Badge
+        overlap="circular"
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right',
+        }}
+        badgeContent={
+          <Tooltip title={editMode.profilePic ? "Save" : "Edit"}>
+            <IconButton edge="end" aria-label="edit" sx={{ bgcolor: 'lightgrey' }}
+              onClick={() => editMode.profilePic ? handleSave('profilePic') : handleEdit('profilePic')}>
+                {editMode.profilePic ? <SaveIcon /> : <EditIcon />}
+                <input
+                  type="file"
+                  ref={fileInputRef} // Attach the ref to the hidden input
+                  style={{ display: 'none' }} // Hide the input
+                  onChange={handleFilePreview} // Handle the file selection
+                  name='profilePic'
+                />
+            </IconButton>
+          </Tooltip>
+        }
+        sx={{mx: "auto", width: 'fit-content', display: 'block'}}
+        >
+        <Avatar src={pfpPreview} sx={{mx: "auto", width: '12rem', height: '12rem', mb: '1rem'}} />
+      </Badge>
     <Box sx={{ maxWidth: '30dvw', mx: 'auto' }}>
         <Grid item xs={12} md={6}>
           <Demo>
             <List dense={false}>
               {fields.map(field =>
                 <ListItem
+                  key={field}
                   secondaryAction={
-                    <IconButton edge="end" aria-label="edit">
-                      <Tooltip title="Edit">
-                        <EditIcon />
-                      </Tooltip>
-                    </IconButton>
+                    <Tooltip title={editMode[field] ? "Save" : "Edit"}>
+                      <IconButton edge="end" aria-label="edit" onClick={() => editMode[field] ? handleSave(field) : handleEdit(field)}>
+                          {editMode[field] ? <SaveIcon /> : <EditIcon />}
+                      </IconButton>
+                    </Tooltip>
                   }
                 >
                   <ListItemAvatar>
-                    <Avatar>
+                    <Avatar sx={{ bgcolor: blue[500] }}>
                       {icons[fields.indexOf(field)]}
                     </Avatar>
                   </ListItemAvatar>
+                  {editMode[field] ? (
+                    field === 'gender' ? (
+                      <RadioGroup
+                        aria-labelledby="radio-buttons-group-label"
+                        defaultValue={inputValues[field]}
+                        name="gender"
+                        row
+                        onChange={(e) => handleInputChange(field, e.target.value)}
+                      >
+                        <FormControlLabel value="male" control={<Radio />} label="Male" />
+                        <FormControlLabel value="female" control={<Radio />} label="Female" />
+                        <FormControlLabel value="other" control={<Radio />} label="Other" />
+                      </RadioGroup>
+                    ) : field === 'birthdate' ? (
+                      <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <DatePicker
+                          value={dayjs(inputValues[field])}
+                          onChange={(newValue) => handleInputChange(field, newValue)}
+                        />
+                      </LocalizationProvider>
+                    ) : field === 'country' ? (
+                      <CountrySelect
+                        value={inputValues[field]}
+                        onChange={(newValue) => handleInputChange(field, newValue)}
+                       />
+                    ) : (
+                    <TextField
+                      fullWidth
+                      value={inputValues[field]}
+                      onChange={(e) => handleInputChange(field, e.target.value)}
+                      variant="outlined"
+                      slotProps= {{
+                        input: {
+                          endAdornment: (
+                            <Tooltip title="Cancel">
+                              <IconButton edge="end" aria-label="edit" onClick={() => handleCancel(field)}>
+                                  <CancelIcon />
+                              </IconButton>
+                            </Tooltip>
+                          ),
+                        }
+                      }}
+                    />
+                    )
+                  ) : (
                   <ListItemText
-                    primary={initValues ? initValues[field] : ''}
+                    primary={fieldValues ? fieldValues[field] : ''}
                     secondary={null}
                   />
+                  )}
                 </ListItem>,
               )}
             </List>

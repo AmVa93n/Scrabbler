@@ -3,9 +3,11 @@ import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 
-export default function CountrySelect() {
+export default function CountrySelect({ value, onChange }) {
   return (
     <Autocomplete
+      value={countries.find(country => country.label === value)}
+      onChange={(event, newValue) => onChange(newValue)}
       id="country-select-demo"
       sx={{ width: 300 }}
       options={countries}

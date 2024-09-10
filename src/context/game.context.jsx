@@ -1,30 +1,41 @@
-import { createContext, useState } from 'react';
+import { createContext, useState, useEffect } from 'react';
+import { useSocket } from '../context/socket.context';
 
 const GameContext = createContext();
 
 function GameProvider(props) {
     const boardSize = 15
-    const [board, setBoard] = useState(
-        Array.from({ length: boardSize }, (_, row) =>
-        Array.from({ length: boardSize }, (_, col) => ({
-            x: col,
-            y: row,
-            occupied: false,
-            content: null,
-        }))
-        )
-    );
-    //const BankSize = 7
-    const [bank, setBank] = useState([
-        { id: 1, letter: 'A', placed: false },
-        { id: 2, letter: 'A', placed: false },
-        { id: 3, letter: 'B', placed: false },
-        { id: 4, letter: 'B', placed: false },
-        { id: 5, letter: 'C', placed: false },
-        { id: 6, letter: 'C', placed: false },
-        { id: 7, letter: 'D', placed: false },
-        // other letters
-      ]);
+    const bankSize = 7
+    const [board, setBoard] = useState(null);
+    const [bank, setBank] = useState([]);
+    const [leftInBag, setLeftInBag] = useState(100);
+    const socket = useSocket();
+
+    useEffect(() => {
+      // Get game data when user joins (that is not saved in DB)
+      socket.on('refreshGame', (sessionData) => {
+          setBoard(sessionData.board);
+          setLeftInBag(sessionData.leftInBag)
+          setBank(sessionData.letterBank) 
+      });
+
+      // Listen for game updates
+      socket.on('gameUpdated', (sessionData) => {
+          setBoard(sessionData.board);
+          setLeftInBag(sessionData.leftInBag)
+      });
+
+      // Listen for letter bank updates (only to relevant player)
+      socket.on('letterBankUpdated', (letterBank) => {
+          setBank(letterBank)
+      });
+
+      // Clean up listeners on component unmount
+      return () => {
+          socket.off('refreshGame');
+          socket.off('gameUpdated');
+      };
+  }, [socket]);
 
     function handleDrop(x, y, letter) {
         setBoard((prevBoard) => {
@@ -54,7 +65,9 @@ function GameProvider(props) {
             handleDrop,
             bank,
             setBank,
-            boardSize
+            boardSize,
+            bankSize,
+            leftInBag
         }}>
             {props.children}
         </GameContext.Provider>

@@ -4,9 +4,11 @@ import { GameContext } from '../context/game.context';
 import { useContext } from 'react';
 
 function LetterBank() {
-    const { bank } = useContext(GameContext)
+    const { bank, bankSize } = useContext(GameContext)
   
     return (
+        <>
+        {bank && (
         <Paper sx={{ 
             display: 'flex', 
             flexDirection: 'column', 
@@ -14,7 +16,7 @@ function LetterBank() {
             padding: '5px', 
             bgcolor: 'grey', 
             width: 35,
-            height: ((35 * 7) + (5 * 6)),
+            height: ((35 * bankSize) + (5 * bankSize-1)),
             position: 'absolute',
             }}>
                 {bank.map((letter) => (
@@ -26,6 +28,8 @@ function LetterBank() {
                     />
                 ))}
         </Paper>
+        )}
+        </>
     );
 }
 

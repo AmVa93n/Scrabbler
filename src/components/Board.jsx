@@ -7,6 +7,8 @@ function Board() {
     const { board, boardSize } = useContext(GameContext)
 
   return (
+    <>
+    {board && (
     <Grid2 
         container 
         columns={boardSize}
@@ -33,6 +35,8 @@ function Board() {
         )
       )}
     </Grid2>
+    )}
+    </>
   );
 };
 

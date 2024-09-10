@@ -36,14 +36,16 @@ function RoomProvider(props) {
         init()
 
         // Get room data when user joins (that is not saved in DB)
-        socket.on('refreshRoom', (waitingUsers, sessionData) => {
+        socket.on('refreshRoom', (waitingUsers) => {
             setUsersWaiting(waitingUsers);
-            if (sessionData) {
-                setTurnPlayer(sessionData.turnPlayer);
-                setTurnEndTime(new Date(sessionData.turnEndTime).getTime());
-                setturnNumber(sessionData.turnNumber)
-                setInactivePlayerIds(sessionData.inactivePlayerIds)
-            }
+        });
+
+        // Get game data when user joins (that is not saved in DB)
+        socket.on('refreshGame', (sessionData) => {
+            setTurnPlayer(sessionData.turnPlayer);
+            setTurnEndTime(new Date(sessionData.turnEndTime).getTime());
+            setturnNumber(sessionData.turnNumber)
+            setInactivePlayerIds(sessionData.inactivePlayerIds)
         });
 
         // Listen for players joining the room
@@ -89,33 +91,27 @@ function RoomProvider(props) {
             return () => clearTimeout(timer);
         });
         
-        socket.on('turnTimeout', (turnPlayer) => {
+        // inform player that their turn timed out
+        socket.on('turnTimeout', () => {
             // Notify the UI that the player’s turn timed out
-            if (turnPlayer._id === User._id) {
-                setModalMessage("Your turn has timed out!");
-                setIsModalOpen(true);
-            }
+            setModalMessage("Your turn has timed out!");
+            setIsModalOpen(true);
             // Auto-close the modal after 3 seconds
             timer = setTimeout(() => setIsModalOpen(false), 3000);
             // Clear the timeout if the component unmounts
             return () => clearTimeout(timer);
         });
-        
-        //socket.on('userMove', (moveData) => {
-            // Update game state with the move made by the player
-            //updateGameState(moveData);
-        //});
 
         // Clean up listeners on component unmount
         return () => {
             socket.off('refreshRoom');
+            socket.off('refreshGame');
             socket.off('userJoined');
             socket.off('userLeft');
             socket.off('roomUpdated');
             socket.off('chatUpdated');
             socket.off('turnStart');
             socket.off('turnTimeout');
-            //socket.off('userMove');
             clearTimeout(timer);
         };
     }, [roomId, socket, User._id]);

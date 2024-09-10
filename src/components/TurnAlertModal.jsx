@@ -1,5 +1,6 @@
-import React from 'react';
+import { useContext } from 'react';
 import { Modal, Box, Typography, Button } from '@mui/material';
+import { GameContext } from '../context/game.context';
 
 const style = {
     position: 'absolute',
@@ -13,19 +14,21 @@ const style = {
     p: 4,
 };
 
-function TurnAlertModal({ isOpen, message, onClose }) {
+function TurnAlertModal() {
+    const { isModalOpen, setIsModalOpen, modalMessage } = useContext(GameContext)
+
     return (
         <Modal
-            open={isOpen}
-            onClose={onClose}
+            open={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
             aria-labelledby="modal-title"
             aria-describedby="modal-description"
         >
             <Box sx={style}>
                 <Typography id="modal-title" variant="h6" component="h2">
-                    {message}
+                    {modalMessage}
                 </Typography>
-                <Button onClick={onClose} sx={{ mt: 2 }} variant="contained">
+                <Button onClick={() => setIsModalOpen(false)} sx={{ mt: 2 }} variant="contained">
                     Close
                 </Button>
             </Box>

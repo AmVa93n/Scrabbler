@@ -7,7 +7,7 @@ import { useContext } from 'react';
 const ItemType = 'LETTER';
 
 function Tile({ tile }) {
-  const { handleDrop } = useContext(GameContext)
+  const { setBoard, setBank } = useContext(GameContext)
 
   const [{ isOver, canDrop }, drop] = useDrop({
     accept: ItemType,
@@ -18,6 +18,27 @@ function Tile({ tile }) {
       canDrop: monitor.canDrop(),
     }),
   });
+
+  function handleDrop(x, y, letter) {
+    setBoard((prevBoard) => {
+      const newBoard = [...prevBoard];
+      // Find the previous position of the letter
+      for (let row of newBoard) {
+        for (let tile of row) {
+          if (tile.content && tile.content.id === letter.id) {
+            tile.content = null; // Remove the letter from the previous tile
+            tile.occupied = false
+          }
+        }
+      }
+      // Place the letter in the new tile
+      newBoard[y][x].content = letter;
+      newBoard[y][x].occupied = true;
+      return newBoard;
+    });
+    // remove letter from bank
+    setBank((prevBank) => prevBank.filter(letterInBank => letterInBank.id !== letter.id));
+  };
 
   return (
     <Paper

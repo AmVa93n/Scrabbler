@@ -6,6 +6,7 @@ import ListItemAvatar from '@mui/material/ListItemAvatar';
 import IconButton from '@mui/material/IconButton';
 import Avatar from '@mui/material/Avatar';
 import { RoomContext } from '../context/room.context';
+import { GameContext } from '../context/game.context';
 import { AuthContext } from "../context/auth.context";
 import BlockIcon from '@mui/icons-material/Block';
 import FastForwardIcon from '@mui/icons-material/FastForward';
@@ -19,8 +20,9 @@ import { useSocket } from '../context/socket.context';
 
 export default function UserList() {
     const User = useContext(AuthContext).user;
-    const { roomId, room, usersWaiting, turnPlayer, turnEndTime, inactivePlayerIds } = useContext(RoomContext)
-    const list = room.gameSession ? room.gameSession.players : usersWaiting
+    const { roomId, hostId, usersInRoom, isActive, players } = useContext(RoomContext)
+    const { turnPlayer, turnEndTime, inactivePlayerIds } = useContext(GameContext)
+    const userList = isActive ? players : usersInRoom
     const socket = useSocket();
 
     function handleSkip(userId) {
@@ -33,13 +35,13 @@ export default function UserList() {
 
   return (
     <List dense sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}>
-      {list.map((user) => {
+      {userList.map((user) => {
         const labelId = `checkbox-list-secondary-label-${user}`;
         return (
           <ListItem
             key={user._id}
             secondaryAction={
-                (room.gameSession && User._id === room.creator && User._id !== user._id) && 
+                (isActive && User._id === hostId && User._id !== user._id) && 
                 <IconButton edge="end" aria-label="skip" disabled={!inactivePlayerIds.includes(user._id)} onClick={() => handleSkip(user._id)}>
                     <Tooltip title="Skip turns">
                         <FastForwardIcon />
@@ -52,7 +54,7 @@ export default function UserList() {
                     overlap="circular"
                     anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
                     badgeContent={'👑'}
-                    invisible={user._id !== room.creator}
+                    invisible={user._id !== hostId}
                 >
                     <Avatar
                         alt={`Avatar n°${user + 1}`}
@@ -61,16 +63,16 @@ export default function UserList() {
                 </Badge>
             </ListItemAvatar>
             <ListItemText id={labelId} primary={user.name} sx={{
-                fontWeight: room.gameSession && turnPlayer && user._id === turnPlayer._id ? 'bold' : 'normal'
+                fontWeight: isActive && turnPlayer && user._id === turnPlayer._id ? 'bold' : 'normal'
             }} />
-            {(!room.gameSession && User._id === room.creator && User._id !== user._id) && (
+            {(!isActive && User._id === hostId && User._id !== user._id) && (
               <IconButton edge="end" aria-label="kick" onClick={() => handleKick(user)}>
                 <Tooltip title="Kick">
                   <BlockIcon />
                 </Tooltip>
               </IconButton>
             )}
-            {(room.gameSession && turnPlayer && user._id === turnPlayer._id) &&
+            {(isActive && turnPlayer && user._id === turnPlayer._id) &&
                 <Chip icon={<TimerIcon />} label={
                     <Timer 
                         duration={(turnEndTime - Date.now()) / 1000} // Convert to seconds

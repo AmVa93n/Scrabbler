@@ -1,6 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 
-import HomePage from "./pages/HomePage/HomePage";
+import HomePage from "./pages/HomePage";
 import ProfilePage from "./pages/ProfilePage";
 import SignupPage from "./pages/SignupPage/SignUp";
 import LoginPage from "./pages/LoginPage";
@@ -14,6 +14,7 @@ import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import { RoomProvider } from "./context/room.context";
+import { GameProvider } from './context/game.context';
 
 function App() {
   return (
@@ -64,7 +65,9 @@ function App() {
           element={
             <IsPrivate>
               <RoomProvider>
-                <RoomPage />
+                <GameProvider>
+                  <RoomPage />
+                </GameProvider>
               </RoomProvider>
             </IsPrivate>
           }

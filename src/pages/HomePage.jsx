@@ -1,6 +1,5 @@
-import "./HomePage.css";
-import { useSocket } from '../../context/socket.context';
-import { AuthContext } from "../../context/auth.context";
+import { useSocket } from '../context/socket.context';
+import { AuthContext } from "../context/auth.context";
 import { useEffect, useContext } from 'react';
 
 function HomePage() {
@@ -8,8 +7,8 @@ function HomePage() {
   const User = useContext(AuthContext).user;
 
   useEffect(() => {
-    if (socket && User) socket.emit('leaveRoom', `${User.name} left the room`);
-  }, []);
+    if (socket && User) socket.emit('leaveRoom', 'left');
+  }, [socket]);
 
   return (
     <div>

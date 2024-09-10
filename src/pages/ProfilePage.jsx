@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { styled } from '@mui/material/styles';
 import { TextField, IconButton, ListItem, ListItemAvatar, ListItemText, Avatar, RadioGroup, Radio, Badge,  
           FormControlLabel  } from '@mui/material';
@@ -23,7 +23,6 @@ import Paper from '@mui/material/Paper';
 import CountrySelect from '../components/CountrySelect';
 import accountService from "../services/account.service";
 import { useSocket } from '../context/socket.context';
-import { AuthContext } from "../context/auth.context";
 import { useNotifications } from '@toolpad/core/useNotifications';
 import { blue } from '@mui/material/colors';
 
@@ -38,7 +37,6 @@ function ProfilePage() {
   const fields = ['name', 'email', 'gender', 'birthdate', 'country']
   const icons = [<NameIcon />,<EmailIcon />,<GenderIcon />,<BirthdateIcon />,<CountryIcon />,]
   const socket = useSocket();
-  const User = useContext(AuthContext).user;
   const notifications = useNotifications();
   const [pfpPreview, setPfpPreview] = useState(null);
   const fileInputRef = useRef(null);
@@ -58,8 +56,8 @@ function ProfilePage() {
   }, [])
 
   useEffect(() => {
-    socket.emit('leaveRoom', `${User.name} left the room`);
-  }, []);
+    socket.emit('leaveRoom', 'left');
+  }, [socket]);
 
   function handleEdit(field) {
     setEditMode((prev) => ({ ...prev, [field]: true })); // Turn on edit mode

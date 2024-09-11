@@ -10,6 +10,7 @@ function GameProvider(props) {
     const bankSize = 7
     const [board, setBoard] = useState(null);
     const [bank, setBank] = useState([]);
+    const [placedLetters, setPlacedLetters] = useState([]);
     const [leftInBag, setLeftInBag] = useState(100);
     const [turnPlayer, setTurnPlayer] = useState(null);
     const [turnEndTime, setTurnEndTime] = useState(null);
@@ -17,6 +18,8 @@ function GameProvider(props) {
     const [inactivePlayerIds, setInactivePlayerIds] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalMessage, setModalMessage] = useState('');
+    const [blank, setBlank] = useState(null);
+    const [isLetterSelectlOpen, setIsLetterSelectlOpen] = useState(false);
     const socket = useSocket();
     const User = useContext(AuthContext).user;
     const { setIsActive, setPlayers } = useContext(RoomContext)
@@ -42,6 +45,7 @@ function GameProvider(props) {
       // Listen for letter bank updates (private)
       socket.on('letterBankUpdated', (letterBank) => {
           setBank(letterBank)
+          setPlacedLetters([]) // reset placed letters
       });
 
       let timer;
@@ -66,8 +70,10 @@ function GameProvider(props) {
       });
       
       // Listen for turn timeout (private)
-      socket.on('turnTimedOut', (letterBank) => {
+      socket.on('turnTimedOut', (letterBank, board) => {
           setBank(letterBank) // reset player's letter bank
+          setBoard(board) // reset board
+          setPlacedLetters([]) // reset placed letters
           setModalMessage("Your turn has timed out!");
           setIsModalOpen(true);
           timer = setTimeout(() => setIsModalOpen(false), 3000); // Auto-close after 3 seconds
@@ -85,13 +91,21 @@ function GameProvider(props) {
           setPlayers(players) // player list set from the server to ensure it's the same for everyone
       });
 
-    // Listen for when a game ends (public)
-    socket.on('gameEnded', () => {
+      // Listen for when a game ends (public)
+      socket.on('gameEnded', () => {
           setIsActive(false)
           setPlayers([])
           setTurnPlayer(null); 
           setTurnEndTime(null); 
           setturnNumber(null);
+      });
+
+      // Listen for when a move was rejected (private)
+      socket.on('moveRejected', () => {
+          setModalMessage("Some of your words are not valid!");
+          setIsModalOpen(true);
+          timer = setTimeout(() => setIsModalOpen(false), 3000); // Auto-close after 3 seconds
+          return () => clearTimeout(timer); // Clear the timeout if the component unmounts
       });
 
       // Clean up listeners on component unmount
@@ -105,26 +119,27 @@ function GameProvider(props) {
           socket.off('playerCanBeSkipped');
           socket.off('gameStarted');
           socket.off('gameEnded');
+          socket.off('moveRejected');
           clearTimeout(timer);
       };
   }, [socket, User._id]);
 
     return (
         <GameContext.Provider value={{
-            board,
-            setBoard,
-            bank,
-            setBank,
+            board, setBoard,
+            bank, setBank,
+            placedLetters, setPlacedLetters,
             boardSize,
             bankSize,
             leftInBag,
             turnPlayer,
             turnEndTime,
             turnNumber,
-            isModalOpen,
-            setIsModalOpen,
+            isModalOpen, setIsModalOpen,
             modalMessage,
             inactivePlayerIds,
+            blank, setBlank,
+            isLetterSelectlOpen, setIsLetterSelectlOpen
         }}>
             {props.children}
         </GameContext.Provider>

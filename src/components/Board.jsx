@@ -16,7 +16,10 @@ function Board() {
         sx={{
             height: '100%',
             aspectRatio: '1 / 1', // Maintain a square aspect ratio
-            mx: 'auto'
+            //ml: 'auto',
+            border: 'solid 3px brown',
+            boxSizing: 'border-box',
+            overflow: 'hidden',
         }}
         >
       {board.map((row, rowIndex) =>

@@ -14,7 +14,7 @@ const style = {
     p: 4,
 };
 
-function TurnAlertModal() {
+function AlertModal() {
     const { isModalOpen, setIsModalOpen, modalMessage } = useContext(GameContext)
 
     return (
@@ -36,4 +36,4 @@ function TurnAlertModal() {
     );
 }
 
-export default TurnAlertModal;
+export default AlertModal;

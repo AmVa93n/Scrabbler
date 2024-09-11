@@ -20,6 +20,7 @@ function GameProvider(props) {
     const [modalMessage, setModalMessage] = useState('');
     const [blank, setBlank] = useState(null);
     const [isLetterSelectlOpen, setIsLetterSelectlOpen] = useState(false);
+    const [isLetterReplacelOpen, setIsLetterReplacelOpen] = useState(false);
     const socket = useSocket();
     const User = useContext(AuthContext).user;
     const { setIsActive, setPlayers } = useContext(RoomContext)
@@ -46,6 +47,13 @@ function GameProvider(props) {
       socket.on('letterBankUpdated', (letterBank) => {
           setBank(letterBank)
           setPlacedLetters([]) // reset placed letters
+      });
+
+      // Listen for turn pass (private)
+      socket.on('turnPassed', (letterBank, board) => {
+        setBank(letterBank) // reset player's letter bank
+        setBoard(board) // reset board
+        setPlacedLetters([]) // reset placed letters
       });
 
       let timer;
@@ -139,7 +147,8 @@ function GameProvider(props) {
             modalMessage,
             inactivePlayerIds,
             blank, setBlank,
-            isLetterSelectlOpen, setIsLetterSelectlOpen
+            isLetterSelectlOpen, setIsLetterSelectlOpen,
+            isLetterReplacelOpen, setIsLetterReplacelOpen
         }}>
             {props.children}
         </GameContext.Provider>

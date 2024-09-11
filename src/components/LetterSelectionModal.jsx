@@ -6,11 +6,6 @@ function LetterSelectionModal() {
   const { setBoard, isLetterSelectlOpen, setIsLetterSelectlOpen, blank, setBlank } = useContext(GameContext)
   const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
-  function handleLetterClick(letter) {
-    handleLetterSelect(letter);
-    setIsLetterSelectlOpen(false);
-  };
-
   function handleLetterSelect(selectedLetter) {
     if (blank) {
       // Update the blank tile with the chosen letter
@@ -21,6 +16,7 @@ function LetterSelectionModal() {
         return newBoard;
       });
       setBlank(null); // Reset after placement
+      setIsLetterSelectlOpen(false);
     }
   }
 
@@ -34,7 +30,7 @@ function LetterSelectionModal() {
           {letters.map((letter) => (
             <Grid2 item xs={3} key={letter}>
               <Paper
-                onClick={() => handleLetterClick(letter)}
+                onClick={() => handleLetterSelect(letter)}
                 sx={{
                   width: 35,
                   height: 35,

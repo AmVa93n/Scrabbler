@@ -20,17 +20,27 @@ export default function RoomChat() {
     }
   }, [messages]);
 
+  function renderDivider(message, index) {
+    if (index === messages.length - 1) return false
+    if (message.minor) return false
+    const nextMsg = messages[index+1]
+    if (nextMsg?.minor) return false
+    return true
+  }
+
   return (
     <Box style={{ flex: 1, overflowY: 'auto' }} ref={chatContainerRef}>
         <List sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}>
-            {messages.map(message =>
+            {messages.map((message, index) =>
                 <Fragment key={message._id}>
                     <ListItem alignItems="flex-start">
-                        <ListItemAvatar>
-                            <Avatar alt="Remy Sharp" src={message.sender ? message.sender.profilePic : ''} />
-                        </ListItemAvatar>
+                        {(message.sender || message.title) && 
+                            <ListItemAvatar>
+                                <Avatar src={message.title ? `/system.jpg` : message.sender ? message.sender.profilePic : ''} />
+                            </ListItemAvatar>}
+                        
                     <ListItemText
-                        primary={message.sender ? message.sender.name : 'System'}
+                        primary={message.sender ? message.sender.name : message.title}
                         secondary={
                             <>
                             <Typography
@@ -45,8 +55,8 @@ export default function RoomChat() {
                         }
                     />
                     </ListItem>
-
-                    <Divider variant="fullWidth" component="li" />
+                    {renderDivider(message, index) &&
+                    <Divider variant="fullWidth" component="li" />}
                 </Fragment>
             )}
         </List>

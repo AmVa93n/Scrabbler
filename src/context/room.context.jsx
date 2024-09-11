@@ -15,7 +15,6 @@ function RoomProvider(props) {
     const [players, setPlayers] = useState([])
     const [messages, setMessages] = useState([])
     const [usersInRoom, setUsersInRoom] = useState([])
-    const [banList, setBanList] = useState([])
     const [isRoomLoaded, setIsRoomLoaded] = useState(false)
     const navigate = useNavigate();
 
@@ -24,8 +23,7 @@ function RoomProvider(props) {
             try { // Get DB room data when user joins
                 const roomData = await accountService.getRoom(roomId)
                 const { kickedUsers, creator, messages, gameSession } = roomData
-                setBanList(kickedUsers)
-                if (banList.includes(User._id)) { // redirect to home if user was kicked before
+                if (kickedUsers.includes(User._id)) { // redirect to home if user was kicked before
                     navigate('/')
                     return
                 }

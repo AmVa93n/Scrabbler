@@ -32,9 +32,11 @@ function LetterBank() {
             return newBoard;
         });
         // add letter to bank
+        if (letter.isBlank) letter.letter = ''
         setBank(prevBank => prevBank.some(letterInBank => letterInBank.id === letter.id) ? prevBank : [...prevBank, letter]);
         // remove from letters placed this turn
         setPlacedLetters((prev) => prev.filter(placedLetter => placedLetter.id !== letter.id));
+        
     };
   
     return (

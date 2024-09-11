@@ -5,6 +5,7 @@ import { RoomContext } from '../context/room.context';
 import { GameContext } from '../context/game.context';
 import AlertModal from '../components/AlertModal';
 import LetterSelectionModal from '../components/LetterSelectionModal';
+import LetterReplaceModal from '../components/ReplaceLettersModal';
 import { Grid2, Paper, Box, Typography } from '@mui/material';
 import UserList from '../components/UserList';
 import RoomChat from '../components/RoomChat';
@@ -18,7 +19,7 @@ function RoomPage() {
     const socket = useSocket();
     const User = useContext(AuthContext).user;
     const { roomId, isRoomLoaded, usersInRoom, isActive, hostId } = useContext(RoomContext)
-    const { turnPlayer, placedLetters, board, leftInBag } = useContext(GameContext)
+    const { turnPlayer, placedLetters, board, leftInBag, setIsLetterReplacelOpen } = useContext(GameContext)
 
     function handleStartGame() { 
         const gameSession = {players: [...usersInRoom]}
@@ -33,11 +34,43 @@ function RoomPage() {
         socket.emit('validateMove', roomId, placedLetters, board)
     }
 
+    function handlePass() {
+        if (leftInBag > 0) setIsLetterReplacelOpen(true)
+        else socket.emit('passTurn', roomId)
+    }
+
     function isLetterPlacementValid() {
+        // If there's only one letter placed and it's the only letter on the board
+        const allLettersOnBoard = board.flat().filter(tile => tile.occupied);
+        const isFirstWord = placedLetters.length === allLettersOnBoard.length
+        if (isFirstWord && placedLetters.length === 1) {
+            return false; // Invalid move: Only one letter on the board for the first word
+        }
+
         const firstPlacedLetter = placedLetters[0];
         const isSameRow = placedLetters.every(letter => letter.y === firstPlacedLetter.y);
         const isSameColumn = placedLetters.every(letter => letter.x === firstPlacedLetter.x);
         if (!isSameRow && !isSameColumn) return false;
+
+        // Check if any of the new letters connects to existing letters
+        if (!isFirstWord) {
+            const existingLetters = new Set(
+                board.flat().filter(tile => tile.fixed).map(tile => `${tile.x},${tile.y}`)
+            );
+            
+            const anyNewLettersConnected = placedLetters.some(letter => {
+                // Check if the letter is adjacent to an existing letter
+                const adjacentPositions = [
+                    { x: letter.x - 1, y: letter.y }, // left
+                    { x: letter.x + 1, y: letter.y }, // right
+                    { x: letter.x, y: letter.y - 1 }, // up
+                    { x: letter.x, y: letter.y + 1 }, // down
+                ];
+                return adjacentPositions.some(pos => existingLetters.has(`${pos.x},${pos.y}`));
+            });
+
+            if (!anyNewLettersConnected) return false;
+        }
       
         // If all placed letters are in the same row
         if (isSameRow) {
@@ -150,6 +183,7 @@ function RoomPage() {
                 {/* Middle Panel - Game Board */}
                 <AlertModal />
                 <LetterSelectionModal />
+                <LetterReplaceModal />
                 <Grid2 item size={2} sx={{ height: '100%', boxSizing: 'border-box' }}>
                     <Paper sx={{ padding: '10px', height: '97%', display: 'flex'}}>
                         {isActive ? (
@@ -159,15 +193,25 @@ function RoomPage() {
                                     <LetterBank />
                                     <Typography variant="body2">{leftInBag} Letters left in the bag</Typography>
                                     {(turnPlayer && User._id === turnPlayer._id) && 
-                                    <Button 
-                                        variant="contained" 
-                                        color="primary" 
-                                        sx= {{mx: 'auto', mt: 'auto', alignSelf: 'center'}}
-                                        onClick={handleValidateMove}
-                                        disabled={placedLetters.length === 0 || !isLetterPlacementValid()}
-                                        >
-                                        Submit
-                                    </Button>}
+                                    <>
+                                        <Button 
+                                            variant="contained" 
+                                            color="primary" 
+                                            sx= {{mx: 'auto', mt: 'auto', alignSelf: 'center'}}
+                                            onClick={handlePass}
+                                            >
+                                            {leftInBag > 0 ? 'Replace' : 'Pass'}
+                                        </Button>
+                                        <Button 
+                                            variant="contained" 
+                                            color="primary" 
+                                            sx= {{mx: 'auto', mt: 1, alignSelf: 'center'}}
+                                            onClick={handleValidateMove}
+                                            disabled={placedLetters.length === 0 || !isLetterPlacementValid()}
+                                            >
+                                            Submit
+                                        </Button>
+                                    </>}
                                 </Box>
                                 <Board />
                             </>

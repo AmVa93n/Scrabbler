@@ -54,6 +54,16 @@ class AccountService {
   async deleteRoom(roomId) {
     return this.api.delete(`/account/room/${roomId}`);
   }
+
+  async getBoards() {
+    const response = await this.api.get(`/account/boards`);
+    return response.data.boards
+  }
+
+  async getLetterBags() {
+    const response = await this.api.get(`/account/letterbags`);
+    return response.data.letterBags
+  }
 }
 
 // Create one instance of the service

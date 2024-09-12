@@ -6,8 +6,6 @@ import { RoomContext } from '../context/room.context';
 const GameContext = createContext();
 
 function GameProvider(props) {
-    const boardSize = 15
-    const bankSize = 7
     const [board, setBoard] = useState(null);
     const [bank, setBank] = useState([]);
     const [placedLetters, setPlacedLetters] = useState([]);
@@ -142,8 +140,6 @@ function GameProvider(props) {
             board, setBoard,
             bank, setBank,
             placedLetters, setPlacedLetters,
-            boardSize,
-            bankSize,
             leftInBag,
             turnPlayer,
             turnEndTime,

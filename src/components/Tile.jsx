@@ -83,6 +83,7 @@ function Tile({ tile }) {
             id={tile.content.id} 
             letter={tile.content.letter} 
             isBlank={tile.content.isBlank} 
+            points={tile.content.points}
             fixed={tile.fixed} 
           /> 
       ) : (

@@ -1,13 +1,15 @@
 import Letter from '../components/Letter';
 import { Paper } from '@mui/material';
 import { GameContext } from '../context/game.context';
+import { RoomContext } from '../context/room.context';
 import { useContext } from 'react';
 import { useDrop } from 'react-dnd';
 
 const ItemType = 'LETTER';
 
 function LetterBank() {
-    const { bank, bankSize, setBoard, setBank, setPlacedLetters } = useContext(GameContext)
+    const { bank, setBoard, setBank, setPlacedLetters } = useContext(GameContext)
+    const { bankSize } = useContext(RoomContext)
 
     const [{ isOver }, drop] = useDrop({
         accept: ItemType,
@@ -60,6 +62,7 @@ function LetterBank() {
                         id={letter.id} 
                         letter={letter.letter}
                         isBlank={letter.isBlank}
+                        points={letter.points}
                     />
                 ))}
         </Paper>

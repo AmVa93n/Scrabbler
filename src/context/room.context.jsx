@@ -13,6 +13,8 @@ function RoomProvider(props) {
     const [hostId, setHostId] = useState('')
     const [isActive, setIsActive] = useState(false)
     const [players, setPlayers] = useState([])
+    const [boardSize, setBoardSize] = useState(null)
+    const [bankSize, setBankSize] = useState(null)
     const [messages, setMessages] = useState([])
     const [usersInRoom, setUsersInRoom] = useState([])
     const [isRoomLoaded, setIsRoomLoaded] = useState(false)
@@ -30,10 +32,15 @@ function RoomProvider(props) {
                 setHostId(creator)
                 setMessages(messages)
                 setIsActive(!!gameSession)
-                if (gameSession) setPlayers(gameSession.players)
+                if (gameSession) {
+                    setPlayers(gameSession.players)
+                    setBoardSize(gameSession.settings.board.size)
+                    setBankSize(gameSession.settings.bankSize)
+                } 
                 setIsRoomLoaded(true)
                 socket.emit('joinRoom', roomId);
             } catch (error) {
+                console.log(error)
                 const errorDescription = error.response.data.message;
                 alert(errorDescription);
             }
@@ -81,10 +88,10 @@ function RoomProvider(props) {
             usersInRoom,
             roomId,
             messages,
-            isActive,
-            setIsActive,
-            players,
-            setPlayers,
+            isActive, setIsActive,
+            players, setPlayers,
+            boardSize, setBoardSize,
+            bankSize, setBankSize,
             hostId,
             isRoomLoaded
         }}>

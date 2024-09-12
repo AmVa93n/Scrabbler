@@ -6,13 +6,13 @@ import { GameContext } from '../context/game.context';
 
 const ItemType = 'LETTER';
 
-function Letter({ id, letter, isBlank, fixed }) {
+function Letter({ id, letter, isBlank, points, fixed }) {
   const User = useContext(AuthContext).user;
-  const { turnPlayer } = useContext(GameContext)
+  const { turnPlayer, placedLetters } = useContext(GameContext)
 
   const [{ isDragging, canDrag }, drag] = useDrag({
     type: ItemType,
-    item: { id, letter, isBlank, fixed },
+    item: { id, letter, isBlank, points, fixed },
     canDrag: () => !fixed && turnPlayer && User._id === turnPlayer._id,
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
@@ -29,11 +29,21 @@ function Letter({ id, letter, isBlank, fixed }) {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: isDragging ? 'lightgrey' : fixed ? 'white' : 'beige',
-        cursor: canDrag ? 'move' : 'default'
+        backgroundColor: isDragging ? 'lightgrey' : placedLetters.find(letter => letter.id === id) ? 'lightgreen' : 'beige',
+        cursor: canDrag ? 'move' : 'default',
+        position: 'relative'
       }}
     >
-      <Typography variant="body2">{letter}</Typography>
+      <Typography 
+        variant="body2"
+        sx={{fontWeight: 400, fontSize: 20, color: isBlank ? 'red' : 'black'}}
+        >
+          {letter}</Typography>
+      <Typography 
+        variant="body2"
+        sx={{position: 'absolute', right: 1, bottom: 1, fontSize: 10}}
+        >
+          {points}</Typography>
     </Paper>
   );
 }

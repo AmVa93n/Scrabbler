@@ -51,12 +51,18 @@ function LetterReplaceModal() {
           ))}
         </Grid2>
         <Button 
-            onClick={handleReplace} sx={{ mt: 2 }} variant="contained"
+            onClick={handleReplace} 
+            sx={{ mt: 2 }} 
+            variant="contained"
             disabled={selectedLetters.length < 1 || selectedLetters.length > leftInBag}
             >
                     Replace
                 </Button>
-        <Button onClick={() => setIsLetterReplacelOpen(false)} sx={{ mt: 2 }} variant="contained">
+        <Button 
+            onClick={() => setIsLetterReplacelOpen(false)} 
+            sx={{ mt: 2 }} 
+            variant="contained" 
+            color='secondary'>
                     Cancel
                 </Button>
       </DialogContent>

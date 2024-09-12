@@ -6,6 +6,7 @@ import { GameContext } from '../context/game.context';
 import AlertModal from '../components/AlertModal';
 import LetterSelectionModal from '../components/LetterSelectionModal';
 import LetterReplaceModal from '../components/ReplaceLettersModal';
+import SelectRulesetModal from '../components/SelectRulesetModal';
 import { Grid2, Paper, Box, Typography } from '@mui/material';
 import UserList from '../components/UserList';
 import RoomChat from '../components/RoomChat';
@@ -19,11 +20,10 @@ function RoomPage() {
     const socket = useSocket();
     const User = useContext(AuthContext).user;
     const { roomId, isRoomLoaded, usersInRoom, isActive, hostId } = useContext(RoomContext)
-    const { turnPlayer, placedLetters, board, leftInBag, setIsLetterReplacelOpen } = useContext(GameContext)
+    const { turnPlayer, placedLetters, board, leftInBag, setIsLetterReplacelOpen, setIsRulesetSelectOpen } = useContext(GameContext)
 
     function handleStartGame() { 
-        const gameSession = {players: [...usersInRoom]}
-        socket.emit('startGame', roomId, hostId, gameSession)
+        setIsRulesetSelectOpen(true)
     }
 
     function handleEndGame() {
@@ -184,6 +184,7 @@ function RoomPage() {
                 <AlertModal />
                 <LetterSelectionModal />
                 <LetterReplaceModal />
+                <SelectRulesetModal />
                 <Grid2 item size={2} sx={{ height: '100%', boxSizing: 'border-box' }}>
                     <Paper sx={{ padding: '10px', height: '97%', display: 'flex'}}>
                         {isActive ? (

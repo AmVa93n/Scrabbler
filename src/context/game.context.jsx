@@ -11,7 +11,7 @@ function GameProvider(props) {
     const [board, setBoard] = useState(null);
     const [bank, setBank] = useState([]);
     const [placedLetters, setPlacedLetters] = useState([]);
-    const [leftInBag, setLeftInBag] = useState(100);
+    const [leftInBag, setLeftInBag] = useState('');
     const [turnPlayer, setTurnPlayer] = useState(null);
     const [turnEndTime, setTurnEndTime] = useState(null);
     const [turnNumber, setturnNumber] = useState(0);
@@ -21,6 +21,7 @@ function GameProvider(props) {
     const [blank, setBlank] = useState(null);
     const [isLetterSelectlOpen, setIsLetterSelectlOpen] = useState(false);
     const [isLetterReplacelOpen, setIsLetterReplacelOpen] = useState(false);
+    const [isRulesetSelectOpen, setIsRulesetSelectOpen] = useState(false);
     const socket = useSocket();
     const User = useContext(AuthContext).user;
     const { setIsActive, setPlayers } = useContext(RoomContext)
@@ -106,6 +107,10 @@ function GameProvider(props) {
           setTurnPlayer(null); 
           setTurnEndTime(null); 
           setturnNumber(null);
+          setBank([])
+          setBoard(null)
+          setPlacedLetters([])
+          setLeftInBag('')
       });
 
       // Listen for when a move was rejected (private)
@@ -148,7 +153,8 @@ function GameProvider(props) {
             inactivePlayerIds,
             blank, setBlank,
             isLetterSelectlOpen, setIsLetterSelectlOpen,
-            isLetterReplacelOpen, setIsLetterReplacelOpen
+            isLetterReplacelOpen, setIsLetterReplacelOpen,
+            isRulesetSelectOpen, setIsRulesetSelectOpen,
         }}>
             {props.children}
         </GameContext.Provider>

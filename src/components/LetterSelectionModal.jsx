@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { Dialog, DialogTitle, DialogContent, Button, Grid2, Paper, Typography } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, Grid2, Paper, Typography } from '@mui/material';
 import { GameContext } from '../context/game.context';
 
 function LetterSelectionModal() {

@@ -66,7 +66,12 @@ function Tile({ tile }) {
       sx={{
         width: '100%',
         height: '100%',
-        backgroundColor: isOver && canDrop ? 'yellow' : '#F5DEB3',
+        backgroundColor: isOver && canDrop ? 'yellow' 
+                          : tile.bonusType === 'tripleWord' ? '#FF3333'
+                          : tile.bonusType === 'doubleWord' ? '#FF9999'
+                          : tile.bonusType === 'tripleLetter' ? '#3399FF'
+                          : tile.bonusType === 'doubleLetter' ? '#99CCFF'
+                          : '#F5DEB3',
         border: 'solid 1px white',
         display: 'flex',
         justifyContent: 'center',

@@ -12,7 +12,10 @@ class AccountService {
       const storedToken = localStorage.getItem("authToken");
 
       if (storedToken) {
-        config.headers = { Authorization: `Bearer ${storedToken}` };
+        config.headers = {
+          ...config.headers, // Preserve existing headers
+          Authorization: `Bearer ${storedToken}`
+        };
       }
 
       return config;

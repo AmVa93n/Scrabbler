@@ -26,26 +26,25 @@ function LoginPage() {
   const navigate = useNavigate();
   const { storeToken, authenticateUser } = useContext(AuthContext);
 
-  function handleLoginSubmit(provider, formData) {
+  async function handleLoginSubmit(provider, formData) {
     const email = formData?.get('email');
     const password = formData?.get('password');
     const requestBody = { email, password };
 
-    authService
-      .login(requestBody)
-      .then((response) => {
-        // If the POST request is successful store the authentication token,
-        // after the token is stored authenticate the user
-        // and at last navigate to the home page
-        storeToken(response.data.authToken);
-        authenticateUser();
-        navigate("/");
-      })
-      .catch((error) => {
-        // If the request resolves with an error, set the error message in the state
-        const errorDescription = error.response.data.message;
-        alert(errorDescription);
-      });
+    try {
+      const response = await authService.login(requestBody)
+      // If the POST request is successful store the authentication token,
+      // after the token is stored authenticate the user
+      // and at last navigate to the home page
+      storeToken(response.data.authToken);
+      authenticateUser();
+      navigate("/");
+      
+    } catch (error) {
+      // If the request resolves with an error, set the error message in the state
+      const errorDescription = error.response.data.message;
+      alert(errorDescription);
+    }
   };
 
   return (

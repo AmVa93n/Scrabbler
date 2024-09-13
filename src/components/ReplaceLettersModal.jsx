@@ -24,6 +24,11 @@ function LetterReplaceModal() {
     setSelectedLetters([])
   }
 
+  function handleCancel() {
+    setIsLetterReplacelOpen(false)
+    setSelectedLetters([])
+  }
+
   return (
     <Dialog 
       open={isLetterReplacelOpen} 
@@ -43,9 +48,19 @@ function LetterReplaceModal() {
                   justifyContent: 'center',
                   backgroundColor: selectedLetters.includes(letter.id) ? 'lightgreen' : 'beige',
                   cursor: 'pointer',
+                  position: 'relative'
                 }}
               >
-                <Typography variant="body2">{letter.letter}</Typography>
+                <Typography 
+                  variant="body2" 
+                  sx={{fontWeight: 400, fontSize: 20}}
+                  >
+                  {letter.letter}</Typography>
+                <Typography 
+                  variant="body2"
+                  sx={{position: 'absolute', right: 1, bottom: 1, fontSize: 10}}
+                  >
+                  {letter.points}</Typography>
               </Paper>
             </Grid2>
           ))}
@@ -59,7 +74,7 @@ function LetterReplaceModal() {
                     Replace
                 </Button>
         <Button 
-            onClick={() => setIsLetterReplacelOpen(false)} 
+            onClick={handleCancel} 
             sx={{ mt: 2 }} 
             variant="contained" 
             color='secondary'>

@@ -1,12 +1,11 @@
 import Grid2 from '@mui/material/Grid2';
 import Tile from '../components/Tile';
 import { GameContext } from '../context/game.context';
-import { RoomContext } from '../context/room.context';
 import { useContext } from 'react';
 
 function Board() {
     const { board } = useContext(GameContext)
-    const { boardSize } = useContext(RoomContext)
+    const boardSize = board?.length
 
   return (
     <>

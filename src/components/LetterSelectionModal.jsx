@@ -41,7 +41,11 @@ function LetterSelectionModal() {
                   cursor: 'pointer',
                 }}
               >
-                <Typography variant="body2">{letter}</Typography>
+                <Typography 
+                  variant="body2"
+                  sx={{fontWeight: 400, fontSize: 20}}
+                  >
+                    {letter}</Typography>
               </Paper>
             </Grid2>
           ))}

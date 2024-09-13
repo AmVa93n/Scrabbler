@@ -29,6 +29,7 @@ function GameProvider(props) {
       socket.on('refreshGame', (sessionData) => {
           setBoard(sessionData.board);
           setLeftInBag(sessionData.leftInBag)
+          setPlayers(sessionData.players)
           setBank(sessionData.letterBank) 
           setTurnPlayer(sessionData.turnPlayer);
           setTurnEndTime(new Date(sessionData.turnEndTime).getTime());
@@ -40,6 +41,7 @@ function GameProvider(props) {
       socket.on('gameUpdated', (sessionData) => {
           setBoard(sessionData.board);
           setLeftInBag(sessionData.leftInBag)
+          setPlayers(sessionData.players)
       });
 
       // Listen for letter bank updates (private)
@@ -95,7 +97,6 @@ function GameProvider(props) {
       // Listen for when a new game starts (public)
       socket.on('gameStarted', (players) => {
           setIsActive(true)
-          setPlayers(players) // player list set from the server to ensure it's the same for everyone
       });
 
       // Listen for when a game ends (public)

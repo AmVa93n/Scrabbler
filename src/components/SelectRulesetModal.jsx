@@ -4,17 +4,15 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Button, InputLabel, 
 import { RoomContext } from '../context/room.context';
 import { GameContext } from '../context/game.context';
 import { useSocket } from '../context/socket.context';
-import { useNotifications } from '@toolpad/core/useNotifications';
 import accountService from "../services/account.service";
 
 function SelectRulesetModal() {
-    const { roomId, usersInRoom, hostId, setBoardSize, setBankSize } = useContext(RoomContext)
+    const { roomId, usersInRoom, hostId, setBankSize } = useContext(RoomContext)
     const { isRulesetSelectOpen, setIsRulesetSelectOpen } = useContext(GameContext)
     const socket = useSocket();
     const [settings, setSettings] = useState(null)
     const [boards, setBoards] = useState([])
     const [letterBags, setLetterBags] = useState([])
-    const notifications = useNotifications();
 
     useEffect(() => {
         async function init() {
@@ -32,18 +30,11 @@ function SelectRulesetModal() {
             });
           } catch (error) {
             const errorDescription = error.response.data.message;
-            notify(errorDescription,'error',5000)
+            alert(errorDescription,'error',5000)
           }
         }
         init()
     }, [])
-
-    function notify(message, type, duration) {
-        notifications.show(message, {
-          severity: type,
-          autoHideDuration: duration,
-        });
-    }
 
     function handleChange(e, field) {
         let value = e.target.value
@@ -57,7 +48,6 @@ function SelectRulesetModal() {
         const gameSession = {players: [...usersInRoom], settings: gameSettings}
         socket.emit('startGame', roomId, hostId, gameSession)
         setIsRulesetSelectOpen(false)
-        setBoardSize(board.size)
         setBankSize(settings.bankSize)
     }
 

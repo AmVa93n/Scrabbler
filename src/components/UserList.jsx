@@ -81,6 +81,9 @@ export default function UserList() {
                 } 
                 />
             }
+            {isActive &&
+                <Chip label={`${user.score || 0} points`} />
+            }
           </ListItem>
         );
       })}

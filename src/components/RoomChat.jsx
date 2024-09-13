@@ -53,6 +53,7 @@ export default function RoomChat() {
                             {message.text}
                             </>
                         }
+                        sx={{whiteSpace: 'pre-line'}}
                     />
                     </ListItem>
                     {renderDivider(message, index) &&

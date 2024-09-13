@@ -13,7 +13,6 @@ function RoomProvider(props) {
     const [hostId, setHostId] = useState('')
     const [isActive, setIsActive] = useState(false)
     const [players, setPlayers] = useState([])
-    const [boardSize, setBoardSize] = useState(null)
     const [bankSize, setBankSize] = useState(null)
     const [messages, setMessages] = useState([])
     const [usersInRoom, setUsersInRoom] = useState([])
@@ -33,8 +32,6 @@ function RoomProvider(props) {
                 setMessages(messages)
                 setIsActive(!!gameSession)
                 if (gameSession) {
-                    setPlayers(gameSession.players)
-                    setBoardSize(gameSession.settings.board.size)
                     setBankSize(gameSession.settings.bankSize)
                 } 
                 setIsRoomLoaded(true)
@@ -90,7 +87,6 @@ function RoomProvider(props) {
             messages,
             isActive, setIsActive,
             players, setPlayers,
-            boardSize, setBoardSize,
             bankSize, setBankSize,
             hostId,
             isRoomLoaded

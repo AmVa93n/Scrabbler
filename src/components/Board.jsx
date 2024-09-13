@@ -33,7 +33,7 @@ function Board() {
                         height: `calc(100% / ${boardSize})`, // Set height based on number of rows
                     }}
                     >
-                        <Tile tile={tile}/>
+                        <Tile tile={tile} isStart={rowIndex === boardSize/2-0.5 && colIndex === boardSize/2-0.5}/>
                 </Grid2>
             )
         )

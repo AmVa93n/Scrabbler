@@ -31,7 +31,8 @@ function RoomPage() {
     }
 
     function handleValidateMove() {
-        socket.emit('validateMove', roomId, placedLetters, board)
+        const wordsWithScores = extractWordsFromBoard(placedLetters, board)
+        socket.emit('validateMove', roomId, placedLetters, board, wordsWithScores)
     }
 
     function handlePass() {
@@ -43,8 +44,10 @@ function RoomPage() {
         // If there's only one letter placed and it's the only letter on the board
         const allLettersOnBoard = board.flat().filter(tile => tile.occupied);
         const isFirstWord = placedLetters.length === allLettersOnBoard.length
-        if (isFirstWord && placedLetters.length === 1) {
-            return false; // Invalid move: Only one letter on the board for the first word
+        if (isFirstWord) {
+            if (placedLetters.length === 1) return false; // Only one letter on the board for the first word
+            const center = board.length / 2 -0.5
+            if (!placedLetters.some(letter => letter.x === center && letter.y === center)) return false // First word must touch center
         }
 
         const firstPlacedLetter = placedLetters[0];
@@ -149,6 +152,113 @@ function RoomPage() {
         return false; // If letters are neither in a row nor a column
     }
 
+    function getScorePrediction() {
+        const wordsWithScores = extractWordsFromBoard(placedLetters, board)
+        const wordScoreList = wordsWithScores.map(w => `${w.word} (${w.score})`).join('\n');
+        const totalScore = wordsWithScores.reduce((sum, w) => sum + w.score, 0);
+        if (totalScore > 0 && isLetterPlacementValid()) {
+            return (
+                <Box sx= {{mx: 'auto', mt: 1, alignSelf: 'center'}}>
+                    <Typography variant='body2' sx={{whiteSpace: 'pre-line'}}>{wordScoreList}</Typography>
+                    <Typography variant='body2' sx={{fontWeight: 'bold'}}>Total: {totalScore}</Typography>
+                </Box>
+            );
+        }
+        return '';
+    }
+
+    function extractWordsFromBoard(newlyPlacedLetters, updatedBoard) {
+        const wordsWithScores = [];
+        
+        // Helper function to check if a word contains a new letter
+        function letterPlacedThisTurn(tileSeq) {
+          const newlyPlacedLetterIds = newlyPlacedLetters.map(letter => letter.id);
+          return tileSeq.some(tile => tile.content && newlyPlacedLetterIds.includes(tile.content.id));
+        }
+        
+        // Horizontal words
+        for (let row = 0; row < updatedBoard.length; row++) {
+          let tileSeq = [];
+          for (let col = 0; col < updatedBoard[row].length; col++) {
+            const tile = updatedBoard[row][col];
+            if (tile.content) {
+              tileSeq.push(tile); // Collect the tiles that form a word
+            } else {
+              if (tileSeq.length > 1 && letterPlacedThisTurn(tileSeq)) {
+                const word = tileSeq.map(tile => tile.content.letter).join('');
+                const score = calculateWordScore(tileSeq);
+                wordsWithScores.push({ word, score });
+              }
+              tileSeq = []; // Reset
+            }
+          }
+          if (tileSeq.length > 1 && letterPlacedThisTurn(tileSeq)) {
+            const word = tileSeq.map(tile => tile.content.letter).join('');
+            const score = calculateWordScore(tileSeq);
+            wordsWithScores.push({ word, score });
+          }
+        }
+      
+        // Vertical words
+        for (let col = 0; col < updatedBoard[0].length; col++) {
+          let tileSeq = [];
+          for (let row = 0; row < updatedBoard.length; row++) {
+            const tile = updatedBoard[row][col];
+            if (tile.content) {
+              tileSeq.push(tile); // Collect the tiles that form a word
+            } else {
+              if (tileSeq.length > 1 && letterPlacedThisTurn(tileSeq)) {
+                const word = tileSeq.map(tile => tile.content.letter).join('');
+                const score = calculateWordScore(tileSeq);
+                wordsWithScores.push({ word, score });
+              }
+              tileSeq = []; // Reset
+            }
+          }
+          if (tileSeq.length > 1 && letterPlacedThisTurn(tileSeq)) {
+            const word = tileSeq.map(tile => tile.content.letter).join('');
+            const score = calculateWordScore(tileSeq);
+            wordsWithScores.push({ word, score });
+          }
+        }
+        
+        return wordsWithScores;
+    }
+
+    function calculateWordScore(tileSeq) {
+        let wordScore = 0;
+        let wordMultiplier = 1;
+  
+        tileSeq.forEach(tile => {
+          const letterScore = tile.content.points;
+          
+          // Check if this tile was placed during this turn
+          if (!tile.fixed) {
+            // Apply the bonus based on tile.bonusType
+            if (tile.bonusType === 'doubleLetter') {
+              wordScore += letterScore * 2;
+            } else if (tile.bonusType === 'tripleLetter') {
+              wordScore += letterScore * 3;
+            } else if (tile.bonusType === 'doubleWord') {
+              wordScore += letterScore;
+              wordMultiplier *= 2; // Double the entire word score
+            } else if (tile.bonusType === 'tripleWord') {
+              wordScore += letterScore;
+              wordMultiplier *= 3; // Triple the entire word score
+            } else {
+              // No bonus, just add the letter score
+              wordScore += letterScore;
+            }
+          } else {
+            // No bonus for pre-existing letters, just add the letter score
+            wordScore += letterScore;
+          }
+        });
+  
+        // Apply the word multiplier (if any)
+        return wordScore * wordMultiplier;
+    }
+
     return (
         <>
         {isRoomLoaded ? (
@@ -158,7 +268,7 @@ function RoomPage() {
                 columns={4} 
                 sx={{ 
                     padding: '10px', 
-                    height: '90vh', 
+                    height: '625px', 
                     backgroundColor: 'lightblue',
                     boxSizing: 'border-box',
                 }}>
@@ -190,9 +300,23 @@ function RoomPage() {
                         {isActive ? (
                             <>
                                 <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', flexGrow: 1}}>
-                                    <Typography variant="body2">Letter Bank</Typography>
-                                    <LetterBank />
-                                    <Typography variant="body2">{leftInBag} Letters left in the bag</Typography>
+                                    <Box sx={{display: 'flex'}}>
+                                        <Box sx={{
+                                            backgroundImage: `url('/letterbag.png')`, 
+                                            backgroundSize: '100%', 
+                                            backgroundRepeat: 'no-repeat',
+                                            display: 'flex',
+                                            justifyContent: 'center',
+                                            alignItems: 'center',
+                                            width: '50%',
+                                            height: '31%',
+                                            mr: 1
+                                            }}>
+                                            <Typography color='beige' variant="h6" sx={{mt: 2}}>{leftInBag}</Typography>
+                                        </Box>
+                                        <LetterBank />
+                                    </Box>
+                                    {board && getScorePrediction()}
                                     {(turnPlayer && User._id === turnPlayer._id) && 
                                     <>
                                         <Button 

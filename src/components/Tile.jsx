@@ -6,7 +6,7 @@ import { useContext } from 'react';
 
 const ItemType = 'LETTER';
 
-function Tile({ tile }) {
+function Tile({ tile, isStart }) {
   const { setBoard, setBank, setPlacedLetters, setBlank, setIsLetterSelectlOpen } = useContext(GameContext)
 
   const [{ isOver, canDrop }, drop] = useDrop({
@@ -87,7 +87,7 @@ function Tile({ tile }) {
             fixed={tile.fixed} 
           /> 
       ) : (
-        <Typography variant="body2">{/*`${tile.x}, ${tile.y}`*/}</Typography>
+        isStart && (<Typography variant="h4">★</Typography>)
       )}
     </Box>
   );

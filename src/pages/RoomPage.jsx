@@ -20,7 +20,8 @@ function RoomPage() {
     const socket = useSocket();
     const User = useContext(AuthContext).user;
     const { roomId, isRoomLoaded, usersInRoom, isActive, hostId } = useContext(RoomContext)
-    const { turnPlayer, placedLetters, board, leftInBag, setIsLetterReplacelOpen, setIsRulesetSelectOpen } = useContext(GameContext)
+    const { turnPlayer, placedLetters, board, leftInBag, setIsLetterReplacelOpen, setIsRulesetSelectOpen, 
+        canClick, setCanClick } = useContext(GameContext)
 
     function handleStartGame() { 
         setIsRulesetSelectOpen(true)
@@ -33,11 +34,15 @@ function RoomPage() {
     function handleValidateMove() {
         const wordsWithScores = extractWordsFromBoard(placedLetters, board)
         socket.emit('validateMove', roomId, placedLetters, board, wordsWithScores)
+        setCanClick(false)
     }
 
     function handlePass() {
         if (leftInBag > 0) setIsLetterReplacelOpen(true)
-        else socket.emit('passTurn', roomId)
+        else {
+            socket.emit('passTurn', roomId)
+            setCanClick(false)
+        }
     }
 
     function isLetterPlacementValid() {
@@ -324,6 +329,7 @@ function RoomPage() {
                                             color="primary" 
                                             sx= {{mx: 'auto', mt: 'auto', alignSelf: 'center'}}
                                             onClick={handlePass}
+                                            disabled={!canClick}
                                             >
                                             {leftInBag > 0 ? 'Replace' : 'Pass'}
                                         </Button>
@@ -332,7 +338,7 @@ function RoomPage() {
                                             color="primary" 
                                             sx= {{mx: 'auto', mt: 1, alignSelf: 'center'}}
                                             onClick={handleValidateMove}
-                                            disabled={placedLetters.length === 0 || !isLetterPlacementValid()}
+                                            disabled={!canClick || placedLetters.length === 0 || !isLetterPlacementValid()}
                                             >
                                             Submit
                                         </Button>

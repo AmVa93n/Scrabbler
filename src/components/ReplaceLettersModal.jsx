@@ -7,7 +7,7 @@ import { useSocket } from '../context/socket.context';
 function LetterReplaceModal() {
   const socket = useSocket();
   const { roomId } = useContext(RoomContext)
-  const { bank, placedLetters, leftInBag, isLetterReplacelOpen, setIsLetterReplacelOpen } = useContext(GameContext)
+  const { bank, placedLetters, leftInBag, isLetterReplacelOpen, setIsLetterReplacelOpen, canClick, setCanClick } = useContext(GameContext)
   const [selectedLetters, setSelectedLetters] = useState([])
 
   function handleLetterClick(letterId) {
@@ -22,6 +22,7 @@ function LetterReplaceModal() {
     setIsLetterReplacelOpen(false)
     socket.emit('replaceLetters', roomId, selectedLetters)
     setSelectedLetters([])
+    setCanClick(false)
   }
 
   function handleCancel() {

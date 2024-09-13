@@ -20,6 +20,7 @@ function GameProvider(props) {
     const [isLetterSelectlOpen, setIsLetterSelectlOpen] = useState(false);
     const [isLetterReplacelOpen, setIsLetterReplacelOpen] = useState(false);
     const [isRulesetSelectOpen, setIsRulesetSelectOpen] = useState(false);
+    const [canClick, setCanClick] = useState(false);
     const socket = useSocket();
     const User = useContext(AuthContext).user;
     const { setIsActive, setPlayers } = useContext(RoomContext)
@@ -66,6 +67,7 @@ function GameProvider(props) {
           if (sessionData.turnPlayer._id === User._id) { // this is private
               setModalMessage("It's your turn!");
               setIsModalOpen(true);
+              setCanClick(true)
           }
           timer = setTimeout(() => setIsModalOpen(false), 3000); // Auto-close after 3 seconds
           return () => clearTimeout(timer); // Clear the timeout if the component unmounts
@@ -116,6 +118,7 @@ function GameProvider(props) {
       socket.on('moveRejected', () => {
           setModalMessage("Some of your words are not valid!");
           setIsModalOpen(true);
+          setCanClick(true)
           timer = setTimeout(() => setIsModalOpen(false), 3000); // Auto-close after 3 seconds
           return () => clearTimeout(timer); // Clear the timeout if the component unmounts
       });
@@ -152,6 +155,7 @@ function GameProvider(props) {
             isLetterSelectlOpen, setIsLetterSelectlOpen,
             isLetterReplacelOpen, setIsLetterReplacelOpen,
             isRulesetSelectOpen, setIsRulesetSelectOpen,
+            canClick, setCanClick,
         }}>
             {props.children}
         </GameContext.Provider>

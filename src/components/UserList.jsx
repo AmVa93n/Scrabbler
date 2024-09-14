@@ -21,7 +21,7 @@ import { useSocket } from '../context/socket.context';
 export default function UserList() {
     const User = useContext(AuthContext).user;
     const { roomId, hostId, usersInRoom, isActive, players } = useContext(RoomContext)
-    const { turnPlayer, turnEndTime, inactivePlayerIds } = useContext(GameContext)
+    const { turnPlayer, turnEndTime } = useContext(GameContext)
     const userList = isActive ? players : usersInRoom
     const socket = useSocket();
 
@@ -42,7 +42,7 @@ export default function UserList() {
             key={user._id}
             secondaryAction={
                 (isActive && User._id === hostId && User._id !== user._id) && 
-                <IconButton edge="end" aria-label="skip" disabled={!inactivePlayerIds.includes(user._id)} onClick={() => handleSkip(user._id)}>
+                <IconButton edge="end" aria-label="skip" disabled={!user.inactive} onClick={() => handleSkip(user._id)}>
                     <Tooltip title="Skip turns">
                         <FastForwardIcon />
                     </Tooltip>

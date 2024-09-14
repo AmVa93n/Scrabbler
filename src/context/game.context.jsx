@@ -13,7 +13,6 @@ function GameProvider(props) {
     const [turnPlayer, setTurnPlayer] = useState(null);
     const [turnEndTime, setTurnEndTime] = useState(null);
     const [turnNumber, setturnNumber] = useState(0);
-    const [inactivePlayerIds, setInactivePlayerIds] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalMessage, setModalMessage] = useState('');
     const [blank, setBlank] = useState(null);
@@ -35,7 +34,6 @@ function GameProvider(props) {
           setTurnPlayer(sessionData.turnPlayer);
           setTurnEndTime(new Date(sessionData.turnEndTime).getTime());
           setturnNumber(sessionData.turnNumber)
-          setInactivePlayerIds(sessionData.inactivePlayerIds)
       });
 
       // Listen for game updates (public)
@@ -92,8 +90,8 @@ function GameProvider(props) {
       });
 
       // Listen for when player can be skipped (private for host)
-      socket.on('playerCanBeSkipped', (inactivePlayerIds) => {
-          setInactivePlayerIds(inactivePlayerIds)
+      socket.on('playerCanBeSkipped', (players) => {
+          setPlayers(players)
       });
 
       // Listen for when a new game starts (public)
@@ -150,7 +148,6 @@ function GameProvider(props) {
             turnNumber,
             isModalOpen, setIsModalOpen,
             modalMessage,
-            inactivePlayerIds,
             blank, setBlank,
             isLetterSelectlOpen, setIsLetterSelectlOpen,
             isLetterReplacelOpen, setIsLetterReplacelOpen,

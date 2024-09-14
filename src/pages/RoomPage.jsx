@@ -15,6 +15,7 @@ import ChatInput from '../components/ChatInput';
 import Board from '../components/Board';
 import LetterBank from '../components/LetterBank';
 import Button from '@mui/material/Button';
+import accountService from "../services/account.service";
 
 function RoomPage() {
     const socket = useSocket();
@@ -27,19 +28,22 @@ function RoomPage() {
         setIsRulesetSelectOpen(true)
     }
 
-    function handleEndGame() {
+    async function handleEndGame() {
+        await accountService.ping()
         socket.emit('endGame', roomId)
     }
 
-    function handleValidateMove() {
+    async function handleSubmit() {
         const wordsWithScores = extractWordsFromBoard(placedLetters, board)
+        await accountService.ping()
         socket.emit('validateMove', roomId, placedLetters, board, wordsWithScores)
         setCanClick(false)
     }
 
-    function handlePass() {
+    async function handlePass() {
         if (leftInBag > 0) setIsLetterReplacelOpen(true)
         else {
+            await accountService.ping()
             socket.emit('passTurn', roomId)
             setCanClick(false)
         }
@@ -337,7 +341,7 @@ function RoomPage() {
                                             variant="contained" 
                                             color="primary" 
                                             sx= {{mx: 'auto', mt: 1, alignSelf: 'center'}}
-                                            onClick={handleValidateMove}
+                                            onClick={handleSubmit}
                                             disabled={!canClick || placedLetters.length === 0 || !isLetterPlacementValid()}
                                             >
                                             Submit

@@ -41,11 +41,12 @@ function SelectRulesetModal() {
         setSettings((prev) => ({ ...prev, [field]: value }));
     };
 
-    function handleConfirm() { 
+    async function handleConfirm() { 
         const board = boards.find(board => board._id === settings.board)
         const letterBag = letterBags.find(bag => bag._id === settings.letterBag)
         const gameSettings = { ...settings, board, letterBag}
         const gameSession = {players: [...usersInRoom], settings: gameSettings}
+        await accountService.ping()
         socket.emit('startGame', roomId, hostId, gameSession)
         setIsRulesetSelectOpen(false)
         setBankSize(settings.bankSize)

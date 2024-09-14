@@ -3,11 +3,12 @@ import { Dialog, DialogTitle, DialogContent, Button, Grid2, Paper, Typography } 
 import { RoomContext } from '../context/room.context';
 import { GameContext } from '../context/game.context';
 import { useSocket } from '../context/socket.context';
+import accountService from "../services/account.service";
 
 function LetterReplaceModal() {
   const socket = useSocket();
   const { roomId } = useContext(RoomContext)
-  const { bank, placedLetters, leftInBag, isLetterReplacelOpen, setIsLetterReplacelOpen, canClick, setCanClick } = useContext(GameContext)
+  const { bank, placedLetters, leftInBag, isLetterReplacelOpen, setIsLetterReplacelOpen } = useContext(GameContext)
   const [selectedLetters, setSelectedLetters] = useState([])
 
   function handleLetterClick(letterId) {
@@ -18,11 +19,11 @@ function LetterReplaceModal() {
     }
   }
 
-  function handleReplace() {
+  async function handleReplace() {
     setIsLetterReplacelOpen(false)
+    await accountService.ping()
     socket.emit('replaceLetters', roomId, selectedLetters)
     setSelectedLetters([])
-    setCanClick(false)
   }
 
   function handleCancel() {

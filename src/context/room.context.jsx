@@ -37,8 +37,8 @@ function RoomProvider(props) {
                 setIsRoomLoaded(true)
                 socket.emit('joinRoom', roomId);
             } catch (error) {
-                console.log(error)
                 const errorDescription = error.response.data.message;
+                console.log(error)
                 alert(errorDescription);
             }
         }

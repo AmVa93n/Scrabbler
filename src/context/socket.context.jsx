@@ -13,7 +13,7 @@ export const SocketProvider = ({ children }) => {
   const { user } = useContext(AuthContext); // Assume AuthContext is used to get user info
 
   useEffect(() => {
-    const newSocket = io(process.env.REACT_APP_SERVER_URL, { transports: ['websocket'] });
+    const newSocket = io(process.env.REACT_APP_DEV_SERVER_URL || process.env.REACT_APP_SERVER_URL, { transports: ['websocket'] });
     setSocket(newSocket);
 
     if (user) {

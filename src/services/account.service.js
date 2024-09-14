@@ -3,7 +3,7 @@ import axios from 'axios';
 class AccountService {
   constructor() {
     this.api = axios.create({
-      baseURL: process.env.REACT_APP_SERVER_URL || "http://localhost:5005"
+      baseURL: process.env.REACT_APP_DEV_SERVER_URL || process.env.REACT_APP_SERVER_URL
     });
 
     // Automatically set JWT token in the headers for every request
@@ -66,6 +66,10 @@ class AccountService {
   async getLetterBags() {
     const response = await this.api.get(`/account/letterbags`);
     return response.data.letterBags
+  }
+
+  ping() {
+    return this.api.get(`/account/ping`); // this is just to keep the server from spinning down
   }
 }
 

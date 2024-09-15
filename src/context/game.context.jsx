@@ -18,8 +18,7 @@ function GameProvider(props) {
     const [blank, setBlank] = useState(null);
     const [isLetterSelectlOpen, setIsLetterSelectlOpen] = useState(false);
     const [isLetterReplacelOpen, setIsLetterReplacelOpen] = useState(false);
-    const [isRulesetSelectOpen, setIsRulesetSelectOpen] = useState(false);
-    const [canClick, setCanClick] = useState(false);
+    const [canClick, setCanClick] = useState(true);
     const socket = useSocket();
     const User = useContext(AuthContext).user;
     const { setIsActive, setPlayers } = useContext(RoomContext)
@@ -151,7 +150,6 @@ function GameProvider(props) {
             blank, setBlank,
             isLetterSelectlOpen, setIsLetterSelectlOpen,
             isLetterReplacelOpen, setIsLetterReplacelOpen,
-            isRulesetSelectOpen, setIsRulesetSelectOpen,
             canClick, setCanClick,
         }}>
             {props.children}

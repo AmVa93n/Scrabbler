@@ -1,22 +1,22 @@
-//import { useState } from 'react';
 import accountService from "../services/account.service";
 import Button from '@mui/material/Button';
 import CreateIcon from '@mui/icons-material/AddCircle';
 import FormLabel from '@mui/material/FormLabel';
 import FormControl from '@mui/material/FormControl';
 import TextField from '@mui/material/TextField';
-import Box from '@mui/material/Box';
 import { useNotifications } from '@toolpad/core/useNotifications';
 import { useNavigate } from "react-router-dom";
+import { Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 
-function CreateRoomPage() {
+function CreateRoom({ creating, setCreating }) {
   const notifications = useNotifications();
   const navigate = useNavigate();
 
   async function handleSubmit(event) {
     event.preventDefault();
     const formData = {
-        name: event.currentTarget.name.value,  // Retrieve the value from the form input
+        name: event.currentTarget.name.value,
+        description: event.currentTarget.description.value,
     };
 
     try {
@@ -37,11 +37,17 @@ function CreateRoomPage() {
   }
 
   return (
-    <Box
+    <Dialog
+        open={creating}
         component="form"
         onSubmit={handleSubmit}
-        sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
+        sx={{ display: 'flex', flexDirection: 'column', gap: 2, maxWidth: 400, mx: 'auto' }}
+        fullWidth
     >
+      <DialogTitle>
+        Create a new room
+      </DialogTitle>
+      <DialogContent sx={{ display: 'flex', flexDirection: 'column' }}>
         <FormControl>
             <FormLabel htmlFor="name">Room name</FormLabel>
             <TextField
@@ -49,14 +55,35 @@ function CreateRoomPage() {
                 required
                 fullWidth
                 id="name"
-                placeholder="Just me and the boys"
+                placeholder="Scrabble and chill"
+                size="small"
+                sx={{mb: 2}}
             />
         </FormControl>
-        <Button variant="contained" startIcon={<CreateIcon />} type="submit">
-            Create Room
+        <FormControl>
+            <FormLabel htmlFor="name">Room Description</FormLabel>
+            <TextField
+                name="description"
+                required
+                fullWidth
+                id="description"
+                placeholder="Tell others what the room is for..."
+                multiline
+                rows={4}
+            />
+        </FormControl>
+      </DialogContent>
+      
+      <DialogActions>
+        <Button variant="contained" sx={{textTransform: 'none'}} startIcon={<CreateIcon />} type="submit">
+            Create
         </Button>
-    </Box>
+        <Button sx={{textTransform: 'none'}} onClick={()=>setCreating(false)}>
+            Cancel
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 }
 
-export default CreateRoomPage;
+export default CreateRoom;

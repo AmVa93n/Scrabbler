@@ -34,7 +34,7 @@ export default function UserList() {
     }
 
   return (
-    <List dense sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}>
+    <List dense sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper', flex: 1, overflowY: 'auto' }}>
       {userList.map((user) => {
         const labelId = `checkbox-list-secondary-label-${user}`;
         return (

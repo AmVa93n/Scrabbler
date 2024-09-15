@@ -1,20 +1,17 @@
 import { useEffect, useState } from 'react';
 import accountService from "../services/account.service";
-import Button from '@mui/material/Button';
 import CreateIcon from '@mui/icons-material/AddCircle';
 import JoinIcon from '@mui/icons-material/Login';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { Link } from 'react-router-dom';
-import Card from '@mui/material/Card';
-import CardActions from '@mui/material/CardActions';
-import CardContent from '@mui/material/CardContent';
-import Typography from '@mui/material/Typography';
 import { useNotifications } from '@toolpad/core/useNotifications';
 import { useNavigate } from "react-router-dom";
+import { Box, Card, CardActions, CardContent, CardMedia, Typography, Button } from '@mui/material';
+import CreateRoom from "../components/CreateRoom";
 
 function RoomsPage() {
   const [rooms, setRooms] = useState([])
+  const [creating, setCreating] = useState(false)
   const navigate = useNavigate();
   const notifications = useNotifications();
 
@@ -57,6 +54,10 @@ function RoomsPage() {
     }
   }
 
+  function handleCreate() {
+    setCreating(true)
+  }
+
   function notify(message, type, duration) {
     notifications.show(message, {
       severity: type,
@@ -66,29 +67,69 @@ function RoomsPage() {
 
   return (
     <>
-        {rooms.map(room => (
-            <Card variant="outlined" key={room._id}>
+      <Box sx={{mx: 'auto', mt: 2, width: 'fit-content', maxWidth: '80%'}}>
+          {rooms.map(room => (
+              <Card sx={{ maxWidth: 345 }} key={room._id}>
+                <CardMedia
+                  sx={{ height: 140 }}
+                  image="/room-default.jpg"
+                />
                 <CardContent>
-                    <Typography gutterBottom sx={{ color: 'text.secondary', fontSize: 14 }}>
-                        {room.name}
-                    </Typography>
+                  <Typography gutterBottom variant="h5" component="div">
+                    {room.name}
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                    {room.description}
+                  </Typography>
                 </CardContent>
                 <CardActions>
-                <Button variant="contained" startIcon={<JoinIcon />} onClick={handleJoin} id={room._id}>
-                    Join
-                </Button>
-                <Button variant="contained" startIcon={<EditIcon />} component={Link} to="/rooms/edit">
-                    Edit
-                </Button>
-                <Button variant="contained" startIcon={<DeleteIcon />} onClick={handleDelete} id={room._id}>
-                    Delete
-                </Button>
+                    <Button 
+                      size='small' 
+                      variant="contained" 
+                      startIcon={<JoinIcon />} 
+                      onClick={handleJoin} 
+                      id={room._id}
+                      sx={{textTransform: 'none'}}
+                      >
+                        Join
+                    </Button>
+                    <Button 
+                      size='small' 
+                      variant="contained" 
+                      startIcon={<EditIcon />}  
+                      to="/rooms/edit"
+                      sx={{textTransform: 'none'}}
+                      >
+                        Edit
+                    </Button>
+                    <Button 
+                      size='small' 
+                      variant="contained" 
+                      startIcon={<DeleteIcon />} 
+                      onClick={handleDelete} 
+                      id={room._id} 
+                      color='error'
+                      sx={{textTransform: 'none'}}
+                      >
+                        Delete
+                    </Button>
                 </CardActions>
-            </Card>
-        ))}
-        <Button variant="contained" startIcon={<CreateIcon />} component={Link} to="/rooms/create">
-            Create Room
-        </Button>
+              </Card>
+            ))
+          }
+        </Box>
+
+        <Box sx={{mt: 3, mx: 'auto', width: 'fit-content'}}>
+          <Button 
+            variant="contained" 
+            startIcon={<CreateIcon />} 
+            onClick={handleCreate}
+            sx={{textTransform: 'none'}}
+            >
+              Create Room
+          </Button>
+        </Box>
+        <CreateRoom creating={creating} setCreating={setCreating}/>
     </>
   );
 }

@@ -5,7 +5,6 @@ import ProfilePage from "./pages/ProfilePage";
 import SignupPage from "./pages/SignupPage/SignUp";
 import LoginPage from "./pages/LoginPage";
 import RoomsPage from "./pages/RoomsPage";
-import CreateRoomPage from "./pages/CreateRoomPage";
 import RoomPage from "./pages/RoomPage";
 import Navbar from "./components/Navbar";
 import IsPrivate from "./components/IsPrivate/IsPrivate";
@@ -18,7 +17,7 @@ import { GameProvider } from './context/game.context';
 
 function App() {
   return (
-    <div className="App">
+    <div className="App" style={{backgroundColor: 'lightblue', height: '100vh'}}>
       <Navbar />
 
       <Routes>
@@ -38,24 +37,6 @@ function App() {
           element={
             <IsPrivate>
               <RoomsPage />
-            </IsPrivate>
-          }
-        />
-
-        <Route
-          path="/rooms/create"
-          element={
-            <IsPrivate>
-              <CreateRoomPage />
-            </IsPrivate>
-          }
-        />
-
-        <Route
-          path="/rooms/edit"
-          element={
-            <IsPrivate>
-              {/*<EditRoomPage />*/}
             </IsPrivate>
           }
         />

@@ -6,7 +6,7 @@ import { GameContext } from '../context/game.context';
 import AlertModal from '../components/AlertModal';
 import LetterSelectionModal from '../components/LetterSelectionModal';
 import LetterReplaceModal from '../components/ReplaceLettersModal';
-import SelectRulesetModal from '../components/SelectRulesetModal';
+import GameSettings from '../components/GameSettings';
 import { Grid2, Paper, Box, Typography } from '@mui/material';
 import UserList from '../components/UserList';
 import RoomChat from '../components/RoomChat';
@@ -16,17 +16,14 @@ import Board from '../components/Board';
 import LetterBank from '../components/LetterBank';
 import Button from '@mui/material/Button';
 import accountService from "../services/account.service";
+import ChatIcon from '@mui/icons-material/Chat';
+import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
 
 function RoomPage() {
     const socket = useSocket();
     const User = useContext(AuthContext).user;
     const { roomId, isRoomLoaded, usersInRoom, isActive, hostId } = useContext(RoomContext)
-    const { turnPlayer, placedLetters, board, leftInBag, setIsLetterReplacelOpen, setIsRulesetSelectOpen, 
-        canClick, setCanClick } = useContext(GameContext)
-
-    function handleStartGame() { 
-        setIsRulesetSelectOpen(true)
-    }
+    const { turnPlayer, placedLetters, board, leftInBag, setIsLetterReplacelOpen, canClick, setCanClick } = useContext(GameContext)
 
     async function handleEndGame() {
         await accountService.ping()
@@ -278,24 +275,24 @@ function RoomPage() {
                 sx={{ 
                     padding: '10px', 
                     height: '625px', 
-                    backgroundColor: 'lightblue',
                     boxSizing: 'border-box',
                 }}>
                 {/* Left Panel - Player List & Turn Data */}
                 <Grid2 item size={1} sx={{ height: '100%', boxSizing: 'border-box'}}>
-                    <Paper sx={{ padding: '10px', height: '97%' }}>
-                        <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                            <Typography variant="h5">{isActive ? 'Players' : `Waiting for players to join... (${usersInRoom.length} in room)`}</Typography>
-                            <UserList />
-                            {(User._id === hostId && isActive) && <Button 
-                                    variant="contained" 
-                                    color="error" 
-                                    sx= {{mx: 'auto', mt: 'auto', alignSelf: 'center'}}
-                                    onClick={handleEndGame}
-                                    >
-                                        End Game
-                                </Button>}
+                    <Paper sx={{ padding: '10px', height: '97%', display: 'flex', flexDirection: 'column' }}>
+                        <Box sx={{display: 'flex', mb: 'auto', alignItems: 'center', mx: 'auto'}}>
+                            <PeopleAltIcon sx={{mr: 1}} />
+                            <Typography variant="h5">{isActive ? 'Players' : `${usersInRoom.length} Users in room`}</Typography>
                         </Box>
+                        <UserList />
+                        {(User._id === hostId && isActive) && <Button 
+                                variant="contained" 
+                                color="error" 
+                                sx= {{mx: 'auto', mt: 'auto', alignSelf: 'center'}}
+                                onClick={handleEndGame}
+                                >
+                                    End Game
+                            </Button>}
                     </Paper>
                 </Grid2>
 
@@ -303,7 +300,6 @@ function RoomPage() {
                 <AlertModal />
                 <LetterSelectionModal />
                 <LetterReplaceModal />
-                <SelectRulesetModal />
                 <Grid2 item size={2} sx={{ height: '100%', boxSizing: 'border-box' }}>
                     <Paper sx={{ padding: '10px', height: '97%', display: 'flex'}}>
                         {isActive ? (
@@ -352,21 +348,7 @@ function RoomPage() {
                             </>
                         ) : (
                             User._id === hostId && 
-                            <Box sx={{
-                                width: '100%', 
-                                height: '100%',
-                                display: 'flex',
-                                justifyContent: 'center',
-                                alignItems: 'center'
-                            }}>
-                                <Button 
-                                    variant="contained" 
-                                    color="success"
-                                    onClick={handleStartGame} 
-                                    disabled={usersInRoom.length < 1}>
-                                        Start Game
-                                </Button>
-                            </Box>
+                            <GameSettings />
                         )} 
                     </Paper>
                 </Grid2>
@@ -374,7 +356,10 @@ function RoomPage() {
                 {/* Right Panel - Live Chat */}
                 <Grid2 item size={1} sx={{ height: '100%', boxSizing: 'border-box'}}>
                     <Paper sx={{ padding: '10px', height: '97%', display: 'flex', flexDirection: 'column' }}>
-                        <Typography variant="h5">Room Chat</Typography>
+                        <Box sx={{display: 'flex', mb: 'auto', alignItems: 'center', mx: 'auto'}}>
+                            <ChatIcon sx={{mr: 1}} />
+                            <Typography variant="h5">Room Chat</Typography>
+                        </Box>
                             <RoomChat />
                         <Box>
                             <ChatInput />

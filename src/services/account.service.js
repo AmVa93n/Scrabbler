@@ -46,7 +46,8 @@ class AccountService {
   }
 
   async createRoom(requestBody) {
-    return this.api.post('/account/room', requestBody);
+    const response = await this.api.post('/account/room', requestBody);
+    return response.data.room
   }
 
   async updateRoom(roomId, requestBody) {

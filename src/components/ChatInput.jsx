@@ -24,6 +24,7 @@ function ChatInput() {
     return (
         <Box sx={{ padding: 1, display: 'flex', alignItems: 'center' }}>
             <TextField
+                size='small'
                 fullWidth
                 variant="outlined"
                 placeholder="Type your message..."
@@ -35,6 +36,7 @@ function ChatInput() {
             <Button 
                 variant="contained" 
                 color="primary" 
+                sx={{textTransform: 'none'}}
                 onClick={handleSend}
                 disabled={!message.trim()}
             >

@@ -5,6 +5,7 @@ import { GameContext } from '../context/game.context';
 import { useSocket } from '../context/socket.context';
 import accountService from "../services/account.service";
 import SettingsIcon from '@mui/icons-material/Settings';
+import PlayCircleIcon from '@mui/icons-material/PlayCircle';
 
 function GameSettings() {
     const { roomId, usersInRoom, hostId, setBankSize } = useContext(RoomContext)
@@ -156,6 +157,8 @@ function GameSettings() {
             
             <Button 
                 variant="contained" 
+                sx={{textTransform: 'none'}}
+                startIcon={<PlayCircleIcon />} 
                 color="success"
                 onClick={handleStartGame} 
                 disabled={usersInRoom.length < 1 || !canClick}>

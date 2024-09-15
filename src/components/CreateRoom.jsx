@@ -5,14 +5,12 @@ import FormLabel from '@mui/material/FormLabel';
 import FormControl from '@mui/material/FormControl';
 import TextField from '@mui/material/TextField';
 import { useNotifications } from '@toolpad/core/useNotifications';
-import { useNavigate } from "react-router-dom";
 import { Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 
-function CreateRoom({ creating, setCreating }) {
+function CreateRoom({ creating, setCreating, setRooms }) {
   const notifications = useNotifications();
-  const navigate = useNavigate();
 
-  async function handleSubmit(event) {
+  async function handleCreate(event) {
     event.preventDefault();
     const formData = {
         name: event.currentTarget.name.value,
@@ -20,13 +18,15 @@ function CreateRoom({ creating, setCreating }) {
     };
 
     try {
-        await accountService.createRoom(formData)
+        const createdRoom = await accountService.createRoom(formData)
+        setRooms((prev)=> [...prev, createdRoom])
         notify('Successfully created room!','success',5000)
-        navigate("/rooms");
+    
     } catch (error) {
         const errorDescription = error.response.data.message;
         notify(errorDescription,'error',5000)
     }
+    setCreating(false)
   }
 
   function notify(message, type, duration) {
@@ -40,7 +40,7 @@ function CreateRoom({ creating, setCreating }) {
     <Dialog
         open={creating}
         component="form"
-        onSubmit={handleSubmit}
+        onSubmit={handleCreate}
         sx={{ display: 'flex', flexDirection: 'column', gap: 2, maxWidth: 400, mx: 'auto' }}
         fullWidth
     >

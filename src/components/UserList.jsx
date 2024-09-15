@@ -17,6 +17,12 @@ import TimerIcon from '@mui/icons-material/Timer';
 import Timer from '../components/Timer';
 import '@fontsource/roboto/700.css';
 import { useSocket } from '../context/socket.context';
+import { keyframes } from '@mui/system';
+
+const shine = keyframes`
+  from {background-position: 100% 0;}
+  to {background-position: -100% 0;}
+}`
 
 export default function UserList() {
     const User = useContext(AuthContext).user;
@@ -38,17 +44,7 @@ export default function UserList() {
       {userList.map((user) => {
         const labelId = `checkbox-list-secondary-label-${user}`;
         return (
-          <ListItem
-            key={user._id}
-            secondaryAction={
-                (isActive && User._id === hostId && User._id !== user._id) && 
-                <IconButton edge="end" aria-label="skip" disabled={!user.inactive} onClick={() => handleSkip(user._id)}>
-                    <Tooltip title="Skip turns">
-                        <FastForwardIcon />
-                    </Tooltip>
-                </IconButton>
-            }
-          >
+          <ListItem key={user._id}>
             <ListItemAvatar>
                 <Badge
                     overlap="circular"
@@ -65,13 +61,22 @@ export default function UserList() {
             <ListItemText id={labelId} primary={user.name} sx={{
                 fontWeight: isActive && turnPlayer && user._id === turnPlayer._id ? 'bold' : 'normal'
             }} />
-            {(!isActive && User._id === hostId && User._id !== user._id) && (
+            {
+              (!isActive && User._id === hostId && User._id !== user._id) && 
               <IconButton edge="end" aria-label="kick" onClick={() => handleKick(user)}>
                 <Tooltip title="Kick">
                   <BlockIcon />
                 </Tooltip>
               </IconButton>
-            )}
+            }
+            {
+                (isActive && User._id === hostId && User._id !== user._id) && 
+                <IconButton edge="end" aria-label="skip" disabled={!user.inactive || user.skipped} onClick={() => handleSkip(user._id)}>
+                    <Tooltip title="Skip">
+                        <FastForwardIcon />
+                    </Tooltip>
+                </IconButton>
+            }
             {(isActive && turnPlayer && user._id === turnPlayer._id) &&
                 <Chip icon={<TimerIcon />} label={
                     <Timer 
@@ -82,7 +87,13 @@ export default function UserList() {
                 />
             }
             {isActive &&
-                <Chip label={`${user.score || 0} points`} />
+                <Chip label={`${user.score || 0} points`} 
+                      sx={{
+                        ml: 1,
+                        backgroundImage: 'linear-gradient(135deg, gold 25%, white 50%, gold 75%)',
+                        backgroundSize: '200% 100%',
+                        animation: `${shine} 3s linear infinite`,
+                      }} />
             }
           </ListItem>
         );

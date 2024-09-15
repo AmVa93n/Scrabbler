@@ -67,9 +67,9 @@ function RoomsPage() {
 
   return (
     <>
-      <Box sx={{mx: 'auto', mt: 2, width: 'fit-content', maxWidth: '80%'}}>
+      <Box sx={{mx: 'auto', mt: 2, width: 'fit-content', maxWidth: '80%', display: 'flex'}}>
           {rooms.map(room => (
-              <Card sx={{ maxWidth: 345 }} key={room._id}>
+              <Card sx={{ maxWidth: 345, mx: 1 }} key={room._id}>
                 <CardMedia
                   sx={{ height: 140 }}
                   image="/room-default.jpg"
@@ -129,7 +129,7 @@ function RoomsPage() {
               Create Room
           </Button>
         </Box>
-        <CreateRoom creating={creating} setCreating={setCreating}/>
+        <CreateRoom creating={creating} setCreating={setCreating} setRooms={setRooms}/>
     </>
   );
 }

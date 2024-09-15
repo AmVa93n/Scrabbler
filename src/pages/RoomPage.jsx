@@ -15,9 +15,12 @@ import ChatInput from '../components/ChatInput';
 import Board from '../components/Board';
 import LetterBank from '../components/LetterBank';
 import Button from '@mui/material/Button';
-import accountService from "../services/account.service";
 import ChatIcon from '@mui/icons-material/Chat';
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
+import CancelIcon from '@mui/icons-material/Cancel';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import LoopIcon from '@mui/icons-material/Loop';
+import FastForwardIcon from '@mui/icons-material/FastForward';
 
 function RoomPage() {
     const socket = useSocket();
@@ -25,22 +28,19 @@ function RoomPage() {
     const { roomId, isRoomLoaded, usersInRoom, isActive, hostId } = useContext(RoomContext)
     const { turnPlayer, placedLetters, board, leftInBag, setIsLetterReplacelOpen, canClick, setCanClick } = useContext(GameContext)
 
-    async function handleEndGame() {
-        await accountService.ping()
+    function handleEndGame() {
         socket.emit('endGame', roomId)
     }
 
-    async function handleSubmit() {
+    function handleSubmit() {
         const wordsWithScores = extractWordsFromBoard(placedLetters, board)
-        await accountService.ping()
         socket.emit('validateMove', roomId, placedLetters, board, wordsWithScores)
         setCanClick(false)
     }
 
-    async function handlePass() {
+    function handlePass() {
         if (leftInBag > 0) setIsLetterReplacelOpen(true)
         else {
-            await accountService.ping()
             socket.emit('passTurn', roomId)
             setCanClick(false)
         }
@@ -288,7 +288,8 @@ function RoomPage() {
                         {(User._id === hostId && isActive) && <Button 
                                 variant="contained" 
                                 color="error" 
-                                sx= {{mx: 'auto', mt: 'auto', alignSelf: 'center'}}
+                                startIcon={<CancelIcon />}
+                                sx= {{mx: 'auto', mt: 'auto', alignSelf: 'center', textTransform: 'none'}}
                                 onClick={handleEndGame}
                                 >
                                     End Game
@@ -327,7 +328,8 @@ function RoomPage() {
                                         <Button 
                                             variant="contained" 
                                             color="primary" 
-                                            sx= {{mx: 'auto', mt: 'auto', alignSelf: 'center'}}
+                                            sx= {{mx: 'auto', mt: 'auto', alignSelf: 'center', textTransform: 'none'}}
+                                            startIcon={leftInBag > 0 ? <LoopIcon /> : <FastForwardIcon />}
                                             onClick={handlePass}
                                             disabled={!canClick}
                                             >
@@ -335,8 +337,9 @@ function RoomPage() {
                                         </Button>
                                         <Button 
                                             variant="contained" 
-                                            color="primary" 
-                                            sx= {{mx: 'auto', mt: 1, alignSelf: 'center'}}
+                                            color="success"
+                                            sx= {{mx: 'auto', mt: 1, alignSelf: 'center', textTransform: 'none'}}
+                                            startIcon={<CheckCircleIcon />}
                                             onClick={handleSubmit}
                                             disabled={!canClick || placedLetters.length === 0 || !isLetterPlacementValid()}
                                             >

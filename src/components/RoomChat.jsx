@@ -1,4 +1,4 @@
-import { useContext, useRef, useEffect, Fragment } from 'react';
+import React, { useContext, useRef, useEffect, Fragment } from 'react';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import Divider from '@mui/material/Divider';
@@ -8,6 +8,7 @@ import Avatar from '@mui/material/Avatar';
 import Typography from '@mui/material/Typography';
 import { RoomContext } from '../context/room.context';
 import { Box } from '@mui/material';
+import Reactions from '../components/Reactions';
 
 export default function RoomChat() {
     const { messages } = useContext(RoomContext)
@@ -39,23 +40,24 @@ export default function RoomChat() {
                                 <Avatar src={message.title ? `/system.jpg` : message.sender ? message.sender.profilePic : ''} />
                             </ListItemAvatar>}
                         
-                    <ListItemText
-                        primary={message.sender ? message.sender.name : message.title}
-                        secondary={
-                            <>
-                            <Typography
-                                component="span"
-                                variant="body2"
-                                sx={{ color: 'text.primary', display: 'inline' }}
-                            >
-                                {''}
-                            </Typography>
-                            {message.text}
-                            </>
-                        }
-                        sx={{whiteSpace: 'pre-line'}}
-                    />
+                        <ListItemText
+                            primary={message.sender ? message.sender.name : message.title}
+                            secondary={
+                                <>
+                                <Typography
+                                    component="span"
+                                    variant="body2"
+                                    sx={{ color: 'text.primary', display: 'inline' }}
+                                >
+                                    {''}
+                                </Typography>
+                                {message.text}
+                                </>
+                            }
+                            sx={{whiteSpace: 'pre-line'}}
+                        />
                     </ListItem>
+                    {message.generated && <Reactions message={message} />}
                     {renderDivider(message, index) &&
                     <Divider variant="fullWidth" component="li" />}
                 </Fragment>

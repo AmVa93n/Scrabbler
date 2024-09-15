@@ -2,6 +2,7 @@ import { createContext, useState, useEffect, useContext } from 'react';
 import { useSocket } from '../context/socket.context';
 import { AuthContext } from "../context/auth.context";
 import { RoomContext } from '../context/room.context';
+import accountService from "../services/account.service";
 
 const GameContext = createContext();
 
@@ -57,7 +58,7 @@ function GameProvider(props) {
 
       let timer;
       // Listen for turn start (public)
-      socket.on('turnStarted', (sessionData) => {
+      socket.on('turnStarted', async (sessionData) => {
           setTurnPlayer(sessionData.turnPlayer);
           setTurnEndTime(new Date(sessionData.turnEndTime).getTime()); // Convert ISO string back to a timestamp (milliseconds)
           setturnNumber(sessionData.turnNumber)
@@ -65,6 +66,7 @@ function GameProvider(props) {
               setModalMessage("It's your turn!");
               setIsModalOpen(true);
               setCanClick(true)
+              await accountService.ping()
           }
           timer = setTimeout(() => setIsModalOpen(false), 3000); // Auto-close after 3 seconds
           return () => clearTimeout(timer); // Clear the timeout if the component unmounts
@@ -109,6 +111,7 @@ function GameProvider(props) {
           setBoard(null)
           setPlacedLetters([])
           setLeftInBag('')
+          setCanClick(true)
       });
 
       // Listen for when a move was rejected (private)

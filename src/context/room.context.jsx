@@ -70,6 +70,15 @@ function RoomProvider(props) {
             setMessages(prevMessages => [...prevMessages, newMsg]);
         });
 
+        // Listen for new reactions (public)
+        socket.on('reactionsUpdated', (messageId, updatedReactions) => {
+            setMessages((prevMessages) =>
+                prevMessages.map((message) =>
+                  message._id === messageId ? {...message, reactions: updatedReactions} : message
+                )
+              );
+        });
+
         // Clean up listeners on component unmount
         return () => {
             socket.off('refreshRoom');

@@ -1,13 +1,16 @@
 import { useContext, useState } from 'react';
-import { Dialog, DialogTitle, DialogContent, Button, Grid2, Paper, Typography } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Grid2, Paper, Typography } from '@mui/material';
 import { RoomContext } from '../context/room.context';
 import { GameContext } from '../context/game.context';
+import { AuthContext } from "../context/auth.context";
 import { useSocket } from '../context/socket.context';
-import accountService from "../services/account.service";
+import LoopIcon from '@mui/icons-material/Loop';
 
 function LetterReplaceModal() {
   const socket = useSocket();
-  const { roomId } = useContext(RoomContext)
+  const User = useContext(AuthContext).user;
+  const { roomId, players } = useContext(RoomContext)
+  const isPlaying = players.find(player => player._id === User._id)
   const { bank, placedLetters, leftInBag, isLetterReplacelOpen, setIsLetterReplacelOpen } = useContext(GameContext)
   const [selectedLetters, setSelectedLetters] = useState([])
 
@@ -21,7 +24,6 @@ function LetterReplaceModal() {
 
   async function handleReplace() {
     setIsLetterReplacelOpen(false)
-    await accountService.ping()
     socket.emit('replaceLetters', roomId, selectedLetters)
     setSelectedLetters([])
   }
@@ -38,7 +40,7 @@ function LetterReplaceModal() {
       <DialogTitle>Select Letters</DialogTitle>
       <DialogContent>
         <Grid2 container spacing={1}>
-          {[...bank, ...placedLetters].map((letter) => (
+          {isPlaying && [...bank, ...placedLetters].map((letter) => (
             <Grid2 item xs={3} key={letter.id}>
               <Paper
                 onClick={() => handleLetterClick(letter.id)}
@@ -67,22 +69,26 @@ function LetterReplaceModal() {
             </Grid2>
           ))}
         </Grid2>
+      </DialogContent>
+
+      <DialogActions>
         <Button 
             onClick={handleReplace} 
-            sx={{ mt: 2 }} 
+            sx={{ textTransform: 'none' }} 
             variant="contained"
+            startIcon={<LoopIcon />}
             disabled={selectedLetters.length < 1 || selectedLetters.length > leftInBag}
             >
                     Replace
                 </Button>
         <Button 
             onClick={handleCancel} 
-            sx={{ mt: 2 }} 
-            variant="contained" 
-            color='secondary'>
+            sx={{ textTransform: 'none' }} 
+            >
                     Cancel
                 </Button>
-      </DialogContent>
+      </DialogActions>
+        
     </Dialog>
   );
 }

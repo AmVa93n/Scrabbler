@@ -2,6 +2,7 @@ import Letter from '../components/Letter';
 import { Paper } from '@mui/material';
 import { GameContext } from '../context/game.context';
 import { RoomContext } from '../context/room.context';
+import { AuthContext } from "../context/auth.context";
 import { useContext } from 'react';
 import { useDrop } from 'react-dnd';
 
@@ -9,7 +10,9 @@ const ItemType = 'LETTER';
 
 function LetterBank() {
     const { bank, setBoard, setBank, setPlacedLetters } = useContext(GameContext)
-    const { bankSize } = useContext(RoomContext)
+    const { bankSize, players } = useContext(RoomContext)
+    const User = useContext(AuthContext).user;
+    const isPlaying = players.find(player => player._id === User._id)
 
     const [{ isOver }, drop] = useDrop({
         accept: ItemType,
@@ -43,7 +46,7 @@ function LetterBank() {
   
     return (
         <>
-        {bank && (
+        {(bank && isPlaying) && (
         <Paper 
             ref={drop}
             sx={{ 

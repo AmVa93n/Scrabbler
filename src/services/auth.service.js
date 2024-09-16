@@ -22,23 +22,27 @@ class AuthService {
     });
   }
 
-  login = (requestBody) => {
+  login(requestBody) {
     return this.api.post("/auth/login", requestBody);
     // same as
     // return axios.post("http://localhost:5005/auth/login");
   };
 
-  signup = (requestBody) => {
+  signup(requestBody) {
     return this.api.post("/auth/signup", requestBody);
     // same as
     // return axios.post("http://localhost:5005/auth/singup");
   };
 
-  verify = () => {
+  verify() {
     return this.api.get("/auth/verify");
     // same as
     // return axios.post("http://localhost:5005/auth/verify");
   };
+
+  google(requestBody) {
+    return this.api.post("/auth/google", requestBody);
+  }
 }
 
 // Create one instance (object) of the service

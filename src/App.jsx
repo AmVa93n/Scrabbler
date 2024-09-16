@@ -2,8 +2,8 @@ import { Routes, Route } from "react-router-dom";
 
 import HomePage from "./pages/HomePage";
 import ProfilePage from "./pages/ProfilePage";
-import SignupPage from "./pages/SignupPage/SignUp";
-import LoginPage from "./pages/LoginPage";
+import SignupPage from "./pages/SignUpPage";
+import LoginPage from "./pages/SignInPage";
 import RoomsPage from "./pages/RoomsPage";
 import RoomPage from "./pages/RoomPage";
 import Navbar from "./components/Navbar";
@@ -17,7 +17,7 @@ import { GameProvider } from './context/game.context';
 
 function App() {
   return (
-    <div className="App" style={{backgroundColor: 'lightblue', height: '100vh'}}>
+    <div className="App" style={{height: '100%', backgroundColor: 'lightblue'}}>
       <Navbar />
 
       <Routes>

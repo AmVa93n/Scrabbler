@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { useState, useRef } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import RadioGroup from '@mui/material/RadioGroup';
@@ -14,18 +14,19 @@ import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import MuiCard from '@mui/material/Card';
 import { createTheme, ThemeProvider, styled } from '@mui/material/styles';
-import getSignUpTheme from './theme/getSignUpTheme';
-import { GoogleIcon, FacebookIcon } from './CustomIcons';
+import getSignUpTheme from '../themes/SignupPage/theme/getSignUpTheme';
+import { GoogleIcon, FacebookIcon } from '../themes/SignupPage/CustomIcons';
 import dayjs from 'dayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
-import CountrySelect from '../../components/CountrySelect';
+import CountrySelect from '../components/CountrySelect';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import Avatar from '@mui/material/Avatar';
-import authService from "../../services/auth.service";
+import authService from "../services/auth.service";
 import { useNavigate } from "react-router-dom";
 import { useNotifications } from '@toolpad/core/useNotifications';
+import GoogleSignInButton from "../components/GoogleAuth"
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
@@ -49,13 +50,6 @@ const Card = styled(MuiCard)(({ theme }) => ({
 const SignUpContainer = styled(Stack)(({ theme }) => ({
   height: '100%',
   padding: 4,
-  backgroundImage:
-    'radial-gradient(ellipse at 50% 50%, hsl(210, 100%, 97%), hsl(0, 0%, 100%))',
-  backgroundRepeat: 'no-repeat',
-  ...theme.applyStyles('dark', {
-    backgroundImage:
-      'radial-gradient(at 50% 50%, hsla(210, 100%, 16%, 0.5), hsl(220, 30%, 5%))',
-  }),
 }));
 
 const VisuallyHiddenInput = styled('input')({
@@ -72,14 +66,14 @@ const VisuallyHiddenInput = styled('input')({
 
 export default function SignUp() {
   const SignUpTheme = createTheme(getSignUpTheme('light'));
-  const [emailError, setEmailError] = React.useState(false);
-  const [emailErrorMessage, setEmailErrorMessage] = React.useState('');
-  const [passwordError, setPasswordError] = React.useState(false);
-  const [passwordErrorMessage, setPasswordErrorMessage] = React.useState('');
-  const [nameError, setNameError] = React.useState(false);
-  const [nameErrorMessage, setNameErrorMessage] = React.useState('');
-  const [date, setDate] = React.useState(dayjs());
-  const [pfpPreview, setPfpPreview] = React.useState("/broken-image.jpg");
+  const [emailError, setEmailError] = useState(false);
+  const [emailErrorMessage, setEmailErrorMessage] = useState('');
+  const [passwordError, setPasswordError] = useState(false);
+  const [passwordErrorMessage, setPasswordErrorMessage] = useState('');
+  const [nameError, setNameError] = useState(false);
+  const [nameErrorMessage, setNameErrorMessage] = useState('');
+  const [date, setDate] = useState(dayjs());
+  const [pfpPreview, setPfpPreview] = useState("/broken-image.jpg");
   const navigate = useNavigate();
   const notifications = useNotifications();
 
@@ -281,7 +275,7 @@ export default function SignUp() {
                   Already have an account?{' '}
                   <span>
                     <Link
-                      href="/material-ui/getting-started/templates/sign-in/"
+                      href="/login"
                       variant="body2"
                       sx={{ alignSelf: 'center' }}
                     >
@@ -294,24 +288,15 @@ export default function SignUp() {
                 <Typography sx={{ color: 'text.secondary' }}>or</Typography>
               </Divider>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <Button
-                  type="submit"
-                  fullWidth
-                  variant="outlined"
-                  onClick={() => alert('Sign up with Google')}
-                  startIcon={<GoogleIcon />}
-                >
+                <GoogleSignInButton />
+                {/*
+                <Button fullWidth variant="outlined" startIcon={<GoogleIcon />}>
                   Sign up with Google
                 </Button>
-                <Button
-                  type="submit"
-                  fullWidth
-                  variant="outlined"
-                  onClick={() => alert('Sign up with Facebook')}
-                  startIcon={<FacebookIcon />}
-                >
+                <Button fullWidth variant="outlined" startIcon={<FacebookIcon />}>
                   Sign up with Facebook
                 </Button>
+                */}
               </Box>
             </Card>
           </Stack>

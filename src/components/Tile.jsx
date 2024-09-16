@@ -7,7 +7,7 @@ import { useContext } from 'react';
 const ItemType = 'LETTER';
 
 function Tile({ tile, isStart }) {
-  const { setBoard, setBank, setPlacedLetters, setBlank, setIsLetterSelectlOpen } = useContext(GameContext)
+  const { setBoard, setBank, setPlacedLetters, setBlank, setIsLSelectOpen } = useContext(GameContext)
 
   const [{ isOver, canDrop }, drop] = useDrop({
     accept: ItemType,
@@ -56,7 +56,7 @@ function Tile({ tile, isStart }) {
     if (letter.isBlank) {
       // Trigger the modal for blank tile selection
       setBlank({ x, y, letter });
-      setIsLetterSelectlOpen(true);
+      setIsLSelectOpen(true);
     }
   };
 

@@ -3,14 +3,19 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@mui/material';
 import GoogleIcon from '@mui/icons-material/Google';
 import authService from "../services/auth.service";
+import { useContext } from 'react';
+import { AuthContext } from "../context/auth.context";
 
 function GoogleSignInButton() {
   const navigate = useNavigate();
+  const { storeToken, authenticateUser } = useContext(AuthContext);
 
   async function handleGoogleAuthSuccess(credentialResponse) {
     const idToken = credentialResponse.credential;
     try {
-        await authService.google({ idToken })
+        const response = await authService.google({ idToken })
+        storeToken(response.data.authToken);
+        authenticateUser();
         navigate('/');
     } catch (error) {
         const errorDescription = error.response.data.message;

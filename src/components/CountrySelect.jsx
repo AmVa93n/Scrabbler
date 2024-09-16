@@ -6,8 +6,8 @@ import Autocomplete from '@mui/material/Autocomplete';
 export default function CountrySelect({ value, onChange }) {
   return (
     <Autocomplete
-      value={countries.find(country => country.label === value)}
-      onChange={(event, newValue) => onChange(newValue)}
+      value={value && countries.find(country => country.label === value)}
+      onChange={onChange && ((event, newValue) => onChange(newValue))}
       id="country-select-demo"
       sx={{ width: 300 }}
       options={countries}

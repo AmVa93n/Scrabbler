@@ -11,7 +11,7 @@ function LetterReplaceModal() {
   const User = useContext(AuthContext).user;
   const { roomId, players } = useContext(RoomContext)
   const isPlaying = players.find(player => player._id === User._id)
-  const { bank, placedLetters, leftInBag, isLetterReplacelOpen, setIsLetterReplacelOpen } = useContext(GameContext)
+  const { bank, placedLetters, leftInBag, isLReplaceOpen, setIsLReplaceOpen } = useContext(GameContext)
   const [selectedLetters, setSelectedLetters] = useState([])
 
   function handleLetterClick(letterId) {
@@ -23,19 +23,19 @@ function LetterReplaceModal() {
   }
 
   async function handleReplace() {
-    setIsLetterReplacelOpen(false)
+    setIsLReplaceOpen(false)
     socket.emit('replaceLetters', roomId, selectedLetters)
     setSelectedLetters([])
   }
 
   function handleCancel() {
-    setIsLetterReplacelOpen(false)
+    setIsLReplaceOpen(false)
     setSelectedLetters([])
   }
 
   return (
     <Dialog 
-      open={isLetterReplacelOpen} 
+      open={isLReplaceOpen} 
       >
       <DialogTitle>Select Letters</DialogTitle>
       <DialogContent>

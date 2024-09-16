@@ -17,12 +17,15 @@ function GameProvider(props) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalMessage, setModalMessage] = useState('');
     const [blank, setBlank] = useState(null);
-    const [isLetterSelectlOpen, setIsLetterSelectlOpen] = useState(false);
-    const [isLetterReplacelOpen, setIsLetterReplacelOpen] = useState(false);
+    const [isLSelectOpen, setIsLSelectOpen] = useState(false);
+    const [isLReplaceOpen, setIsLReplaceOpen] = useState(false);
+    const [isPromptOpen, setIsPromptOpen] = useState(false);
     const [canClick, setCanClick] = useState(true);
     const socket = useSocket();
     const User = useContext(AuthContext).user;
     const { setIsActive, setPlayers } = useContext(RoomContext)
+    const reactionTypes = ['funny', 'wholesome', 'suspicious', 'lie', 'embarassing', 'naughty', 'boring', 'confusing']
+    const reactionEmojis = ['🤣','🥰','🧐','🤥','😳','😏','🥱','🤔']
 
     useEffect(() => {
       // Get non-DB game data when user joins (private)
@@ -151,9 +154,12 @@ function GameProvider(props) {
             isModalOpen, setIsModalOpen,
             modalMessage,
             blank, setBlank,
-            isLetterSelectlOpen, setIsLetterSelectlOpen,
-            isLetterReplacelOpen, setIsLetterReplacelOpen,
+            isLSelectOpen, setIsLSelectOpen,
+            isLReplaceOpen, setIsLReplaceOpen,
+            isPromptOpen, setIsPromptOpen,
             canClick, setCanClick,
+            reactionTypes, 
+            reactionEmojis,
         }}>
             {props.children}
         </GameContext.Provider>

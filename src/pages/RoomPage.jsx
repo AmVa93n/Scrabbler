@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { useSocket } from '../context/socket.context';
 import { AuthContext } from "../context/auth.context";
 import { RoomContext } from '../context/room.context';
@@ -6,6 +6,7 @@ import { GameContext } from '../context/game.context';
 import AlertModal from '../components/AlertModal';
 import LetterSelectionModal from '../components/LetterSelectionModal';
 import LetterReplaceModal from '../components/ReplaceLettersModal';
+import PromptModal from '../components/PromptModal';
 import GameSettings from '../components/GameSettings';
 import { Grid2, Paper, Box, Typography } from '@mui/material';
 import UserList from '../components/UserList';
@@ -21,29 +22,46 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import LoopIcon from '@mui/icons-material/Loop';
 import FastForwardIcon from '@mui/icons-material/FastForward';
+import TerminalIcon from '@mui/icons-material/Terminal';
 
 function RoomPage() {
     const socket = useSocket();
     const User = useContext(AuthContext).user;
     const { roomId, isRoomLoaded, usersInRoom, isActive, hostId } = useContext(RoomContext)
-    const { turnPlayer, placedLetters, board, leftInBag, setIsLetterReplacelOpen, canClick, setCanClick } = useContext(GameContext)
+    const { turnPlayer, placedLetters, board, leftInBag, setIsLReplaceOpen, canClick, setCanClick, 
+        setIsPromptOpen } = useContext(GameContext)
+    const [promptData, setPromptData] = useState(null)
 
     function handleEndGame() {
         socket.emit('endGame', roomId)
     }
 
     function handleSubmit() {
+        let currentPromptData = promptData;
+        if (!promptData) { // set to default in case player did not specify
+            const word = getWordForPrompt()
+            if (word) {
+                const defaultText = `${turnPlayer.name} was thinking about "${word.toLowerCase()}" because`
+                currentPromptData = {promptText: defaultText, targetReaction: 'funny'};
+                setPromptData(currentPromptData)
+            }
+        }
         const wordsWithScores = extractWordsFromBoard(placedLetters, board)
-        socket.emit('validateMove', roomId, placedLetters, board, wordsWithScores)
+        socket.emit('validateMove', roomId, placedLetters, board, wordsWithScores, currentPromptData)
         setCanClick(false)
+        setPromptData(null)
     }
 
     function handlePass() {
-        if (leftInBag > 0) setIsLetterReplacelOpen(true)
+        if (leftInBag > 0) setIsLReplaceOpen(true)
         else {
             socket.emit('passTurn', roomId)
             setCanClick(false)
         }
+    }
+
+    function handlePrompt() {
+        setIsPromptOpen(true)
     }
 
     function isLetterPlacementValid() {
@@ -265,6 +283,12 @@ function RoomPage() {
         return wordScore * wordMultiplier;
     }
 
+    function getWordForPrompt() {
+        const wordsWithScores = extractWordsFromBoard(placedLetters, board)
+        const words = wordsWithScores.map(w => w.word)
+        return words.find(w => w.length > 2)
+    }
+
     return (
         <>
         {isRoomLoaded ? (
@@ -301,6 +325,7 @@ function RoomPage() {
                 <AlertModal />
                 <LetterSelectionModal />
                 <LetterReplaceModal />
+                <PromptModal word={board && getWordForPrompt()} promptData={promptData} setPromptData={setPromptData} />
                 <Grid2 item size={2} sx={{ height: '100%', boxSizing: 'border-box' }}>
                     <Paper sx={{ padding: '10px', height: '97%', display: 'flex'}}>
                         {isActive ? (
@@ -327,8 +352,18 @@ function RoomPage() {
                                     <>
                                         <Button 
                                             variant="contained" 
-                                            color="primary" 
+                                            color="info" 
                                             sx= {{mx: 'auto', mt: 'auto', alignSelf: 'center', textTransform: 'none'}}
+                                            startIcon={<TerminalIcon />}
+                                            onClick={handlePrompt}
+                                            disabled={!canClick || !getWordForPrompt()}
+                                            >
+                                            Prompt
+                                        </Button>
+                                        <Button 
+                                            variant="contained" 
+                                            color="primary" 
+                                            sx= {{mx: 'auto', mt: 1, alignSelf: 'center', textTransform: 'none'}}
                                             startIcon={leftInBag > 0 ? <LoopIcon /> : <FastForwardIcon />}
                                             onClick={handlePass}
                                             disabled={!canClick}

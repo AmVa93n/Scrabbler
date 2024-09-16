@@ -3,10 +3,10 @@ import { IconButton, Tooltip, Box, Typography } from '@mui/material';
 import { useSocket } from '../context/socket.context';
 import { RoomContext } from '../context/room.context';
 import { AuthContext } from "../context/auth.context";
+import { GameContext } from '../context/game.context';
 
 function Reactions({ message }) {
-  const reactionTypes = ['wholesome', 'funny', 'suspicious', 'lie', 'embarassing', 'naughty', 'boring', 'confusing']
-  const emojis = ['🥰','🤣','🧐','🤥','😳','😏','🥱','🤔']
+  const { reactionTypes, reactionEmojis } = useContext(GameContext)
   const socket = useSocket();
   const User = useContext(AuthContext).user;
   const { roomId } = useContext(RoomContext)
@@ -40,7 +40,7 @@ function Reactions({ message }) {
                     sx={{color: 'black', cursor: canReact(reactionType) ? 'pointer' : 'default'}}
                     onClick={()=>handleReaction(reactionType)}
                     >
-                    <Typography variant="h6">{emojis[index]}</Typography>
+                    <Typography variant="h6">{reactionEmojis[index]}</Typography>
                     <Typography variant="body2">{` ${getReactionsNumber(reactionType)}`}</Typography>
                 </IconButton>
           </Tooltip>

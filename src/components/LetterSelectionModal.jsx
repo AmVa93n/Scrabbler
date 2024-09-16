@@ -3,7 +3,7 @@ import { Dialog, DialogTitle, DialogContent, Grid2, Paper, Typography } from '@m
 import { GameContext } from '../context/game.context';
 
 function LetterSelectionModal() {
-  const { setBoard, isLetterSelectlOpen, setIsLetterSelectlOpen, blank, setBlank } = useContext(GameContext)
+  const { setBoard, isLSelectOpen, setIsLSelectOpen, blank, setBlank } = useContext(GameContext)
   const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
   function handleLetterSelect(selectedLetter) {
@@ -16,13 +16,13 @@ function LetterSelectionModal() {
         return newBoard;
       });
       setBlank(null); // Reset after placement
-      setIsLetterSelectlOpen(false);
+      setIsLSelectOpen(false);
     }
   }
 
   return (
     <Dialog 
-      open={isLetterSelectlOpen} 
+      open={isLSelectOpen} 
       >
       <DialogTitle>Select a Letter</DialogTitle>
       <DialogContent>

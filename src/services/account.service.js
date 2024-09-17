@@ -64,9 +64,37 @@ class AccountService {
     return response.data.boards
   }
 
+  async createBoard(requestBody) {
+    const response = await this.api.post('/account/board', requestBody);
+    return response.data.board
+  }
+
+  async updateBoard(boardId, requestBody) {
+    const response = await this.api.put(`/account/board/${boardId}`, requestBody);
+    return response.data.board
+  }
+
+  async deleteBoard(boardId) {
+    return this.api.delete(`/account/board/${boardId}`);
+  }
+
   async getLetterBags() {
     const response = await this.api.get(`/account/letterbags`);
     return response.data.letterBags
+  }
+
+  async createLetterBag(requestBody) {
+    const response = await this.api.post('/account/letterbag', requestBody);
+    return response.data.letterbag
+  }
+
+  async updateLetterBag(letterbagId, requestBody) {
+    const response = await this.api.put(`/account/letterbag/${letterbagId}`, requestBody);
+    return response.data.letterbag
+  }
+
+  async deleteLetterBag(letterbagId) {
+    return this.api.delete(`/account/letterbag/${letterbagId}`);
   }
 
   ping() {

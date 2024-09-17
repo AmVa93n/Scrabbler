@@ -8,7 +8,7 @@ function HomePage() {
 
   useEffect(() => {
     if (socket && User) socket.emit('leaveRoom', 'left');
-  }, [socket]);
+  }, [socket, User]);
 
   return (
     <div>

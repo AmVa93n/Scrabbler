@@ -5,6 +5,8 @@ import ProfilePage from "./pages/ProfilePage";
 import SignupPage from "./pages/SignUpPage";
 import LoginPage from "./pages/SignInPage";
 import RoomsPage from "./pages/RoomsPage";
+import BoardEditorPage from "./pages/BoardEditorPage";
+import LetterBagEditorPage from "./pages/LetterBagEditorPage";
 import RoomPage from "./pages/RoomPage";
 import Navbar from "./components/Navbar";
 import IsPrivate from "./components/IsPrivate/IsPrivate";
@@ -37,6 +39,24 @@ function App() {
           element={
             <IsPrivate>
               <RoomsPage />
+            </IsPrivate>
+          }
+        />
+
+        <Route
+          path="/boardeditor"
+          element={
+            <IsPrivate>
+              <BoardEditorPage />
+            </IsPrivate>
+          }
+        />
+
+        <Route
+          path="/letterbageditor"
+          element={
+            <IsPrivate>
+              <LetterBagEditorPage />
             </IsPrivate>
           }
         />

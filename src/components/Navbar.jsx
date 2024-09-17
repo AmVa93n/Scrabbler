@@ -16,6 +16,11 @@ import MailIcon from '@mui/icons-material/Mail';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import Badge from '@mui/material/Badge';
 import AccountCircle from '@mui/icons-material/AccountCircle';
+import ChairIcon from '@mui/icons-material/Chair';
+import LogoutIcon from '@mui/icons-material/Logout';
+import LoginIcon from '@mui/icons-material/Login';
+import GridOnIcon from '@mui/icons-material/GridOn';
+import FontDownloadIcon from '@mui/icons-material/FontDownload';
 import { styled, alpha } from '@mui/material/styles';
 import InputBase from '@mui/material/InputBase';
 import SearchIcon from '@mui/icons-material/Search';
@@ -24,12 +29,8 @@ import { useContext } from "react";
 import { AuthContext } from "../context/auth.context";
 
 const navLinks = ['NavLink 1', 'NavLink 2', 'NavLink 3'];
-const DropdownLinks = ['Login', 'Profile', 'Rooms', 'Logout'];
 const routes = {
-    'Profile': '/profile',
-    'Rooms': '/rooms',
-    'Sign Up': '/signup',
-    'Login': '/login',
+    'nav': '/nav',
 };
 const unread_messages = []
 const unread_notifications = []
@@ -78,6 +79,15 @@ const Search = styled('div')(({ theme }) => ({
 
 function Navbar() {
   const { isLoggedIn, user, logOutUser } = useContext(AuthContext);
+  const DropdownLinks = isLoggedIn ? [
+    {text: 'Profile', route: '/profile', icon: <AccountCircle sx={{mr: 1}} />},
+    {text: 'Rooms', route: '/rooms', icon: <ChairIcon sx={{mr: 1}} />},
+    {text: 'Board Editor', route: '/boardeditor', icon: <GridOnIcon sx={{mr: 1}} />},
+    {text: 'Letter Bag Editor', route: '/letterbageditor', icon: <FontDownloadIcon sx={{mr: 1}} />},
+    {text: 'Sign out', route: '/logout', icon: <LogoutIcon sx={{mr: 1}} />},
+  ] : [
+    {text: 'Sign in', route: '/login', icon: <LoginIcon sx={{mr: 1}} />},
+  ]
 
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
@@ -258,15 +268,16 @@ function Navbar() {
               open={Boolean(anchorElUser)}
               onClose={handleCloseUserMenu}
             >
-              {DropdownLinks.map((link) => (
-                (['Profile','Rooms','Logout'].includes(link) && isLoggedIn) ||  // Show only if logged in
-                (link === 'Login' && !isLoggedIn) // Show only if logged out
-                ) && (
-                <MenuItem key={link} component={RouterLink} to={routes[link]} onClick={() => {
-                    handleCloseUserMenu();
-                    if (link === 'Logout') logOutUser()
-                }}>
-                  <Typography sx={{ textAlign: 'center' }}>{link}</Typography>
+              {DropdownLinks.map((link, index) => (
+                <MenuItem 
+                  key={DropdownLinks[index].text} 
+                  component={RouterLink} 
+                  to={DropdownLinks[index].route} 
+                  onClick={() => {handleCloseUserMenu(); if (DropdownLinks[index].text === 'Sign out') logOutUser()}}
+                  sx={{color: DropdownLinks[index].text === 'Sign out' ? 'red' : 'black'}}
+                >
+                  {DropdownLinks[index].icon}
+                  <Typography sx={{ textAlign: 'center' }}>{DropdownLinks[index].text}</Typography>
                 </MenuItem>
               ))}
             </Menu>

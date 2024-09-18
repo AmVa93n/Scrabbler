@@ -5,22 +5,27 @@ import FontDownloadIcon from '@mui/icons-material/FontDownload';
 import { Button, Select, MenuItem, Typography, Box, Grid2, Paper, TextField } from '@mui/material';
 import NumberInput from '../components/NumberInput';
 import SaveIcon from '@mui/icons-material/Save';
+import CreateIcon from '@mui/icons-material/AddCircle';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { useNotifications } from '@toolpad/core/useNotifications';
 
 function LetterBagEditorPage() {
     const socket = useSocket();
     const [letterBags, setLetterBags] = useState([])
-    const [currentBag, setCurrentBag] = useState({})
+    const [currentBag, setCurrentBag] = useState(null)
+    const notifications = useNotifications();
 
     useEffect(() => {
         if (socket) socket.emit('leaveRoom', 'left');
 
         async function init() {
             try {
-            const letterBags = await accountService.getLetterBags()
-            setLetterBags(letterBags)
+                let letterBags = await accountService.getLetterBags()
+                letterBags = letterBags.filter(bag => bag.creator)
+                setLetterBags(letterBags)
             } catch (error) {
-            const errorDescription = error.response.data.message;
-            alert(errorDescription,'error',5000)
+                const errorDescription = error.response.data.message;
+                alert(errorDescription,'error',5000)
             }
         }
         init()
@@ -56,6 +61,85 @@ function LetterBagEditorPage() {
         return a.letter.localeCompare(b.letter); // Standard alphabetical sorting
     }
 
+    function handleCreate() {
+        const NewBag = {
+            name: 'Unnamed Bag',
+            letterData: [
+                { letter: '', count: 2, points: 0 },
+                { letter: 'E', count: 12, points: 1 },
+                { letter: 'A', count: 9, points: 1 },
+                { letter: 'I', count: 9, points: 1 },
+                { letter: 'O', count: 8, points: 1 },
+                { letter: 'N', count: 6, points: 1 },
+                { letter: 'R', count: 6, points: 1 },
+                { letter: 'T', count: 6, points: 1 },
+                { letter: 'L', count: 4, points: 1 },
+                { letter: 'S', count: 4, points: 1 },
+                { letter: 'U', count: 4, points: 1 },
+                { letter: 'D', count: 4, points: 2 },
+                { letter: 'G', count: 3, points: 2 },
+                { letter: 'B', count: 2, points: 3 },
+                { letter: 'C', count: 2, points: 3 },
+                { letter: 'M', count: 2, points: 3 },
+                { letter: 'P', count: 2, points: 3 },
+                { letter: 'F', count: 2, points: 4 },
+                { letter: 'H', count: 2, points: 4 },
+                { letter: 'V', count: 2, points: 4 },
+                { letter: 'W', count: 2, points: 4 },
+                { letter: 'Y', count: 2, points: 4 },
+                { letter: 'K', count: 1, points: 5 },
+                { letter: 'J', count: 1, points: 8 },
+                { letter: 'X', count: 1, points: 8 },
+                { letter: 'Q', count: 1, points: 10 },
+                { letter: 'Z', count: 1, points: 10 }
+              ]
+        }
+        setCurrentBag(NewBag)
+    }
+
+    async function handleSave() {
+        if (currentBag.creator) { // edit existing bag
+            try {
+                const updatedBag = await accountService.updateLetterBag(currentBag)
+                setLetterBags(prev => prev.map(bag => bag === currentBag ? updatedBag : bag));
+                notify('Successfully edited bag!','success',5000)
+            } catch (error) {
+                const errorDescription = error.response.data.message;
+                notify(errorDescription,'error',5000)
+            }
+        } else { // create new bag
+            try {
+                const createdBag = await accountService.createLetterBag(currentBag)
+                setLetterBags((prev)=> [...prev, createdBag])
+                notify('Successfully created bag!','success',5000)
+            } catch (error) {
+                const errorDescription = error.response.data.message;
+                notify(errorDescription,'error',5000)
+            }
+        }
+    }
+
+    async function handleDelete() {
+        if (currentBag.creator) { // delete existing bag
+            try {
+                await accountService.deleteLetterBag(currentBag._id)
+                notify('Successfully deleted bag!','success',5000)
+                setLetterBags((prev) => prev.filter((bag) => bag._id !== currentBag._id));
+            } catch (error) {
+                const errorDescription = error.response.data.message;
+                notify(errorDescription,'error',5000)
+            }
+        }
+        setCurrentBag(null)
+    }
+
+    function notify(message, type, duration) {
+        notifications.show(message, {
+          severity: type,
+          autoHideDuration: duration,
+        });
+    }
+
     return (
     <>
         <Box sx={{display: 'flex', mx: 'auto', alignItems: 'center', width: 'fit-content', mt: 2}}>
@@ -65,7 +149,7 @@ function LetterBagEditorPage() {
 
         <Paper sx={{p: 2, width: 'fit-content', mx: 'auto', my: 2}}>
             <Select
-                sx={{ width: 200, mx: 'auto', mb: 2, display: 'block' }} size="small"
+                sx={{ width: 200, mx: 'auto', mb: 4, display: 'block' }} size="small"
                 value={currentBag?._id || ''}
                 onChange={handleChangeBag}
                 >
@@ -74,17 +158,18 @@ function LetterBagEditorPage() {
                 ))}
             </Select>
             
+            {currentBag &&
             <Box sx={{display: 'flex', alignItems: 'center', mb: 2, mx: 'auto', width: '50%', justifyContent: 'space-between'}}>
                 <TextField label="Name" size="small" value={currentBag?.name || ''} onChange={handleChange}/>
                 <Typography variant="body2" sx={{fontSize: 16}}>
                     Total Letters: {currentBag?.letterData?.reduce((acc, letter) => acc + letter.count, 0)}
                 </Typography>
-            </Box>
+            </Box>}
 
         <Grid2 container spacing={4}>
             {/* Split sorted array into two parts */}
-            {currentBag?.letterData?.sort(sortAlphabetically)
-            ?.reduce(createThreeColumns, [[], [], []]) // Initial accumulator with two empty arrays
+            {currentBag && currentBag.letterData.sort(sortAlphabetically)
+            .reduce(createThreeColumns, [[], [], []]) // Initial accumulator with two empty arrays
             .map((columnData, columnIndex) => (
                 <Grid2 item size={4} key={columnIndex}>
 
@@ -157,14 +242,34 @@ function LetterBagEditorPage() {
         </Grid2>
 
         <Box sx={{mt: 3, mx: 'auto', width: 'fit-content'}}>
+            {currentBag ?
+            <>
+                <Button 
+                    variant="contained" 
+                    sx={{textTransform: 'none', mx: 1}}
+                    startIcon={<SaveIcon />}
+                    onClick={handleSave}
+                    >
+                    Save Changes
+                </Button>
+                <Button 
+                    variant="contained" 
+                    sx={{textTransform: 'none', mx: 1}}
+                    startIcon={<DeleteIcon />}
+                    color='error'
+                    onClick={handleDelete}
+                    >
+                    Delete Bag
+                </Button> 
+            </> :
             <Button 
                 variant="contained" 
+                startIcon={<CreateIcon />} 
+                onClick={handleCreate}
                 sx={{textTransform: 'none'}}
-                startIcon={<SaveIcon />}
-                //onClick={handleSave}
                 >
-                Save Changes
-            </Button>
+                Create Bag
+            </Button>}
         </Box>
         </Paper>
     </>

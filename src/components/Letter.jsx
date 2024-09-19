@@ -8,7 +8,7 @@ const ItemType = 'LETTER';
 
 function Letter({ id, letter, isBlank, points, fixed }) {
   const User = useContext(AuthContext).user;
-  const { turnPlayer, placedLetters } = useContext(GameContext)
+  const { turnPlayer, placedLetters, board } = useContext(GameContext)
 
   const [{ isDragging, canDrag }, drag] = useDrag({
     type: ItemType,
@@ -20,12 +20,17 @@ function Letter({ id, letter, isBlank, points, fixed }) {
     }),
   });
 
+  function needsToFit() {
+    // letter needs to fit tile size because it's too small for the default 35x35
+    return board.length > 15 && (placedLetters.find(letter => letter.id === id) || fixed)
+  }
+
   return (
     <Paper
       ref={drag}
       sx={{
-        width: 35,
-        height: 35,
+        width: needsToFit() ? '97%' : 35,
+        height: needsToFit() ? '97%' : 35,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',

@@ -259,19 +259,20 @@ function RoomPage() {
           // Check if this tile was placed during this turn
           if (!tile.fixed) {
             // Apply the bonus based on tile.bonusType
-            if (tile.bonusType === 'doubleLetter') {
-              wordScore += letterScore * 2;
-            } else if (tile.bonusType === 'tripleLetter') {
-              wordScore += letterScore * 3;
-            } else if (tile.bonusType === 'doubleWord') {
-              wordScore += letterScore;
-              wordMultiplier *= 2; // Double the entire word score
-            } else if (tile.bonusType === 'tripleWord') {
-              wordScore += letterScore;
-              wordMultiplier *= 3; // Triple the entire word score
-            } else {
-              // No bonus, just add the letter score
-              wordScore += letterScore;
+            switch(tile.bonusType) {
+                case 'doubleLetter': wordScore += letterScore * 2; break
+                case 'tripleLetter': wordScore += letterScore * 3; break
+                case 'quadrupleLetter': wordScore += letterScore * 4; break
+                case 'doubleWord': 
+                    wordScore += letterScore;
+                    wordMultiplier *= 2; break // Double the entire word score
+                case 'tripleWord':
+                    wordScore += letterScore;
+                    wordMultiplier *= 3; break // Triple the entire word score
+                case 'quadrupleWord':
+                    wordScore += letterScore;
+                    wordMultiplier *= 4; break // x4 the entire word score
+                default: wordScore += letterScore; // No bonus, just add the letter score
             }
           } else {
             // No bonus for pre-existing letters, just add the letter score

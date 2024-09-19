@@ -60,18 +60,25 @@ function Tile({ tile, isStart }) {
     }
   };
 
+  function getTileColor(bonus) {
+    switch(bonus) {
+      case 'quadrupleWord': return '#CC0000'
+      case 'tripleWord': return '#FF3333'
+      case 'doubleWord': return '#FF9999'
+      case 'quadrupleLetter': return '#0066CC'
+      case 'tripleLetter': return '#3399FF'
+      case 'doubleLetter': return '#99CCFF'
+      default: return '#F5DEB3'
+    }
+  }
+
   return (
     <Box
       ref={drop}
       sx={{
         width: '100%',
         height: '100%',
-        backgroundColor: isOver && canDrop ? 'yellow' 
-                          : tile.bonusType === 'tripleWord' ? '#FF3333'
-                          : tile.bonusType === 'doubleWord' ? '#FF9999'
-                          : tile.bonusType === 'tripleLetter' ? '#3399FF'
-                          : tile.bonusType === 'doubleLetter' ? '#99CCFF'
-                          : '#F5DEB3',
+        backgroundColor: isOver && canDrop ? 'yellow' : getTileColor(tile.bonusType),
         border: 'solid 1px white',
         display: 'flex',
         justifyContent: 'center',

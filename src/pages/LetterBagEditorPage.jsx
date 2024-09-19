@@ -112,6 +112,7 @@ function LetterBagEditorPage() {
                 const createdBag = await accountService.createLetterBag(currentBag)
                 setLetterBags((prev)=> [...prev, createdBag])
                 notify('Successfully created bag!','success',5000)
+                setCurrentBag(createdBag)
             } catch (error) {
                 const errorDescription = error.response.data.message;
                 notify(errorDescription,'error',5000)
@@ -221,7 +222,7 @@ function LetterBagEditorPage() {
                                 value={letter.count}
                                 onChange={(e, val) => handleNumberInputChange(letter.originalIndex, 'count', val)}
                                 min={0} 
-                                max={15}
+                                max={25}
                                 />
                         </Grid2>
 

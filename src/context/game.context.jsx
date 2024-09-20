@@ -21,11 +21,12 @@ function GameProvider(props) {
     const [isLReplaceOpen, setIsLReplaceOpen] = useState(false);
     const [isPromptOpen, setIsPromptOpen] = useState(false);
     const [canClick, setCanClick] = useState(true);
+    const [reactionScore, setReactionScore] = useState(0);
     const socket = useSocket();
     const User = useContext(AuthContext).user;
     const { setIsActive, setPlayers } = useContext(RoomContext)
-    const reactionTypes = ['funny', 'wholesome', 'suspicious', 'lie', 'embarassing', 'naughty', 'boring', 'confusing']
-    const reactionEmojis = ['🤣','🥰','🧐','🤥','😳','😏','🥱','🤔']
+    const reactionTypes = ['funny', 'wholesome', 'sad', 'suspicious', 'lie', 'embarassing', 'naughty', 'confusing']
+    const reactionEmojis = ['🤣','🥰','😭','🧐','🤥','😳','😏','🤔']
 
     useEffect(() => {
       // Get non-DB game data when user joins (private)
@@ -87,6 +88,11 @@ function GameProvider(props) {
           setBank(letterBank) // reset player's letter bank
           setBoard(board) // reset board
           setPlacedLetters([]) // reset placed letters
+
+          setIsLReplaceOpen(false) // close all task modals
+          setIsLSelectOpen(false)
+          setIsPromptOpen(false)
+
           setModalMessage("Your turn has timed out!");
           setIsModalOpen(true);
           timer = setTimeout(() => setIsModalOpen(false), 3000); // Auto-close after 3 seconds
@@ -126,11 +132,17 @@ function GameProvider(props) {
           return () => clearTimeout(timer); // Clear the timeout if the component unmounts
       });
 
+      // Listen for when your reaction score increased (private)
+      socket.on('reactionScoreUpdated', (newScore) => {
+        setReactionScore(newScore)
+    });
+
       // Clean up listeners on component unmount
       return () => {
           socket.off('refreshGame');
           socket.off('gameUpdated');
           socket.off('letterBankUpdated');
+          socket.off('turnPassed');
           socket.off('turnStarted');
           socket.off('turnEnded');
           socket.off('turnTimedOut');
@@ -138,6 +150,7 @@ function GameProvider(props) {
           socket.off('gameStarted');
           socket.off('gameEnded');
           socket.off('moveRejected');
+          socket.off('reactionScoreUpdated');
           clearTimeout(timer);
       };
   }, [socket, User._id]);
@@ -160,6 +173,7 @@ function GameProvider(props) {
             canClick, setCanClick,
             reactionTypes, 
             reactionEmojis,
+            reactionScore
         }}>
             {props.children}
         </GameContext.Provider>

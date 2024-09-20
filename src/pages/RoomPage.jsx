@@ -41,7 +41,7 @@ function RoomPage() {
         if (!promptData) { // set to default in case player did not specify
             const word = getWordForPrompt()
             if (word) {
-                const defaultText = `${turnPlayer.name} was thinking about "${word.toLowerCase()}" because`
+                const defaultText = `${turnPlayer.name} was thinking about ${word.toLowerCase()} because`
                 currentPromptData = {promptText: defaultText, targetReaction: 'funny'};
                 setPromptData(currentPromptData)
             }
@@ -52,7 +52,7 @@ function RoomPage() {
         setPromptData(null)
     }
 
-    function handlePass() {
+    function handleSwapOrPass() {
         if (leftInBag > 0) setIsLReplaceOpen(true)
         else {
             socket.emit('passTurn', roomId)
@@ -341,6 +341,7 @@ function RoomPage() {
                                             justifyContent: 'center',
                                             alignItems: 'center',
                                             width: '50%',
+                                            minWidth: 60,
                                             height: '31%',
                                             mr: 1
                                             }}>
@@ -366,10 +367,10 @@ function RoomPage() {
                                             color="primary" 
                                             sx= {{mx: 'auto', mt: 1, alignSelf: 'center', textTransform: 'none'}}
                                             startIcon={leftInBag > 0 ? <LoopIcon /> : <FastForwardIcon />}
-                                            onClick={handlePass}
+                                            onClick={handleSwapOrPass}
                                             disabled={!canClick}
                                             >
-                                            {leftInBag > 0 ? 'Replace' : 'Pass'}
+                                            {leftInBag > 0 ? 'Swap' : 'Pass'}
                                         </Button>
                                         <Button 
                                             variant="contained" 

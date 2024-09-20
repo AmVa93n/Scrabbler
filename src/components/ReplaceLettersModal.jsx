@@ -22,9 +22,9 @@ function LetterReplaceModal() {
     }
   }
 
-  async function handleReplace() {
+  async function handleSwap() {
     setIsLReplaceOpen(false)
-    socket.emit('replaceLetters', roomId, selectedLetters)
+    socket.emit('swapLetters', roomId, selectedLetters)
     setSelectedLetters([])
   }
 
@@ -73,13 +73,13 @@ function LetterReplaceModal() {
 
       <DialogActions>
         <Button 
-            onClick={handleReplace} 
+            onClick={handleSwap} 
             sx={{ textTransform: 'none' }} 
             variant="contained"
             startIcon={<LoopIcon />}
             disabled={selectedLetters.length < 1 || selectedLetters.length > leftInBag}
             >
-                    Replace
+                    Swap
                 </Button>
         <Button 
             onClick={handleCancel} 

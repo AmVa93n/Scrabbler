@@ -18,16 +18,17 @@ import Timer from '../components/Timer';
 import '@fontsource/roboto/700.css';
 import { useSocket } from '../context/socket.context';
 import { keyframes } from '@mui/system';
+import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
 
 const shine = keyframes`
   from {background-position: 100% 0;}
   to {background-position: -100% 0;}
-}`
+`
 
 export default function UserList() {
     const User = useContext(AuthContext).user;
     const { roomId, hostId, usersInRoom, isActive, players } = useContext(RoomContext)
-    const { turnPlayer, turnEndTime } = useContext(GameContext)
+    const { turnPlayer, turnEndTime, reactionScore } = useContext(GameContext)
     const userList = isActive ? players : usersInRoom
     const socket = useSocket();
 
@@ -70,12 +71,12 @@ export default function UserList() {
               </IconButton>
             }
             {
-                (isActive && User._id === hostId && User._id !== user._id) && 
-                <IconButton edge="end" aria-label="skip" disabled={!user.inactive || user.skipped} onClick={() => handleSkip(user._id)}>
-                    <Tooltip title="Skip">
-                        <FastForwardIcon />
-                    </Tooltip>
-                </IconButton>
+              (isActive && User._id === hostId && User._id !== user._id) && 
+              <IconButton edge="end" aria-label="skip" disabled={!user.inactive || user.skipped} onClick={() => handleSkip(user._id)}>
+                  <Tooltip title="Skip">
+                      <FastForwardIcon />
+                  </Tooltip>
+              </IconButton>
             }
             {(isActive && turnPlayer && user._id === turnPlayer._id) &&
                 <Chip icon={<TimerIcon />} label={
@@ -85,6 +86,9 @@ export default function UserList() {
                     />
                 } 
                 />
+            }
+            {(isActive && user._id === User._id) &&
+                <Chip icon={<EmojiEmotionsIcon />} label={reactionScore} />
             }
             {isActive &&
                 <Chip label={`${user.score || 0} points`} 

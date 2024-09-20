@@ -6,7 +6,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 function PromptModal({ word, promptData, setPromptData }) {
   const { isPromptOpen, setIsPromptOpen, turnPlayer, reactionTypes, reactionEmojis } = useContext(GameContext)
-  const defaultText = `${turnPlayer ? turnPlayer.name : '<player>'} was thinking about "${word ? word.toLowerCase() : '<word>'}" because`
+  const defaultText = `${turnPlayer ? turnPlayer.name : '<player>'} was thinking about ${word ? word?.toLowerCase() : '<word>'} because`
   const [text, setText] = useState('')
 
   function handleInputChange(event) {
@@ -39,6 +39,14 @@ function PromptModal({ word, promptData, setPromptData }) {
     setText('')
   }
 
+  function isPromptTextValid() {
+    if (text.trim() === word.toLowerCase()) return false // the prompt must include other words too
+    if (text.includes(` ${word.toLowerCase()} `)) return true
+    if (text.startsWith(`${word.toLowerCase()} `)) return true
+    if (text.endsWith(` ${word.toLowerCase()}`)) return true
+    return false
+  }
+
   return (
     <Dialog 
       open={isPromptOpen} 
@@ -52,7 +60,8 @@ function PromptModal({ word, promptData, setPromptData }) {
         }}>
 
         <FormControl>
-            <FormLabel htmlFor="promptText">Choose a prompt for the GPT to complete</FormLabel>
+            <FormLabel htmlFor="promptText">{`Write a short prompt for the GPT to complete 
+            \n(the word "${word?.toLowerCase()}" has to be included in the prompt)`}</FormLabel>
             <TextField
                 name="promptText"
                 required
@@ -94,6 +103,7 @@ function PromptModal({ word, promptData, setPromptData }) {
             sx={{ textTransform: 'none' }} 
             variant="contained"
             startIcon={<CheckCircleIcon />}
+            disabled={word && !isPromptTextValid()}
             >
                     Confirm
                 </Button>

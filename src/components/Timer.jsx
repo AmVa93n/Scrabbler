@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import TimerIcon from '@mui/icons-material/Timer';
+import Chip from '@mui/material/Chip';
 
 function Timer({ duration, onTimeout }) {
     const [timeLeft, setTimeLeft] = useState(duration);
@@ -27,9 +29,17 @@ function Timer({ duration, onTimeout }) {
     const seconds = Math.floor(timeLeft);  // Round down to the nearest whole second
 
     return (
-        <div>
-            <span>{seconds}</span>
-        </div>
+        <Chip icon={<TimerIcon />} label={seconds}
+            sx={{
+                backgroundColor: seconds <= 30 ? 'red' : 'default',
+                animation: seconds <= 30 ? 'flashing 1s infinite' : 'none',
+                '@keyframes flashing': {
+                    '0%': { backgroundColor: 'red' },
+                    '50%': { backgroundColor: '#ffcccc' },
+                    '100%': { backgroundColor: 'red' },
+                },
+            }}
+        />
     );
 }
 

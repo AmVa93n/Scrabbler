@@ -124,8 +124,8 @@ function GameProvider(props) {
       });
 
       // Listen for when a move was rejected (private)
-      socket.on('moveRejected', () => {
-          setModalMessage("Some of your words are not valid!");
+      socket.on('moveRejected', (invalidWords) => {
+          setModalMessage(`Some of your words are not valid: ${invalidWords.join(', ')}`);
           setIsModalOpen(true);
           setCanClick(true)
           timer = setTimeout(() => setIsModalOpen(false), 3000); // Auto-close after 3 seconds

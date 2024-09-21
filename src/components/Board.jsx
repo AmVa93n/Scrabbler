@@ -26,7 +26,6 @@ function Board() {
       {board.map((row, rowIndex) =>
         row.map((tile, colIndex) => (
                 <Grid2 
-                    item
                     key={`${rowIndex}-${colIndex}`}
                     sx={{
                         width: `calc(100% / ${boardSize})`, // Set width based on number of columns

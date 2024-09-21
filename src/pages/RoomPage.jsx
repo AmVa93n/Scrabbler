@@ -8,14 +8,13 @@ import LetterSelectionModal from '../components/LetterSelectionModal';
 import LetterReplaceModal from '../components/ReplaceLettersModal';
 import PromptModal from '../components/PromptModal';
 import GameSettings from '../components/GameSettings';
-import { Grid2, Paper, Box, Typography } from '@mui/material';
+import { Grid2, Paper, Box, Typography, Snackbar, Button } from '@mui/material';
 import UserList from '../components/UserList';
 import RoomChat from '../components/RoomChat';
 import Loading from '../components/Loading/Loading';
 import ChatInput from '../components/ChatInput';
 import Board from '../components/Board';
 import LetterBank from '../components/LetterBank';
-import Button from '@mui/material/Button';
 import ChatIcon from '@mui/icons-material/Chat';
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -23,17 +22,26 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import LoopIcon from '@mui/icons-material/Loop';
 import FastForwardIcon from '@mui/icons-material/FastForward';
 import TerminalIcon from '@mui/icons-material/Terminal';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import UndoIcon from '@mui/icons-material/Undo';
 
 function RoomPage() {
     const socket = useSocket();
     const User = useContext(AuthContext).user;
     const { roomId, isRoomLoaded, usersInRoom, isActive, hostId } = useContext(RoomContext)
-    const { turnPlayer, placedLetters, board, leftInBag, setIsLReplaceOpen, canClick, setCanClick, 
+    const { turnPlayer, placedLetters, board, leftInBag, setIsLReplaceOpen, canClick, setCanClick, setBank, setBoard, setPlacedLetters,
         setIsPromptOpen } = useContext(GameContext)
     const [promptData, setPromptData] = useState(null)
+    const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
 
     function handleEndGame() {
         socket.emit('endGame', roomId)
+    }
+
+    async function handleCopyLink() {
+        const currentUrl = window.location.href;
+        await navigator.clipboard.writeText(currentUrl)
+        setIsSnackbarOpen(true)
     }
 
     function handleSubmit() {
@@ -58,6 +66,17 @@ function RoomPage() {
             socket.emit('passTurn', roomId)
             setCanClick(false)
         }
+    }
+
+    function handleClear() {
+        const clearedBoard = [...board] 
+        for (let letter of placedLetters) {
+            clearedBoard[letter.y][letter.x].content = null;
+            clearedBoard[letter.y][letter.x].occupied = false;
+        }
+        setBank(prevBank => [...prevBank, ...placedLetters]);
+        setBoard(clearedBoard)
+        setPlacedLetters([]);
     }
 
     function handlePrompt() {
@@ -303,18 +322,28 @@ function RoomPage() {
                     boxSizing: 'border-box',
                 }}>
                 {/* Left Panel - Player List & Turn Data */}
-                <Grid2 item size={1} sx={{ height: '100%', boxSizing: 'border-box'}}>
+                <Snackbar open={isSnackbarOpen} autoHideDuration={3000} onClose={()=>{setIsSnackbarOpen(false)}}
+                    message="Room link copied to clipboard!"/>
+                <Grid2 size={1} sx={{ height: '100%', boxSizing: 'border-box'}}>
                     <Paper sx={{ padding: '10px', height: '97%', display: 'flex', flexDirection: 'column' }}>
                         <Box sx={{display: 'flex', mb: 'auto', alignItems: 'center', mx: 'auto'}}>
                             <PeopleAltIcon sx={{mr: 1}} />
                             <Typography variant="h5">{isActive ? 'Players' : `${usersInRoom.length} Users in room`}</Typography>
                         </Box>
                         <UserList />
+                        {(User._id === hostId) && <Button 
+                                variant="contained" 
+                                startIcon={<ContentCopyIcon />}
+                                sx= {{mx: 'auto', mt: 'auto', alignSelf: 'center', textTransform: 'none', bgcolor: 'grey'}}
+                                onClick={handleCopyLink}
+                                >
+                                    Copy Room Link
+                            </Button>}
                         {(User._id === hostId && isActive) && <Button 
                                 variant="contained" 
                                 color="error" 
                                 startIcon={<CancelIcon />}
-                                sx= {{mx: 'auto', mt: 'auto', alignSelf: 'center', textTransform: 'none'}}
+                                sx= {{mx: 'auto', mt: 1, alignSelf: 'center', textTransform: 'none'}}
                                 onClick={handleEndGame}
                                 >
                                     End Game
@@ -327,7 +356,7 @@ function RoomPage() {
                 <LetterSelectionModal />
                 <LetterReplaceModal />
                 <PromptModal word={board && getWordForPrompt()} promptData={promptData} setPromptData={setPromptData} />
-                <Grid2 item size={2} sx={{ height: '100%', boxSizing: 'border-box' }}>
+                <Grid2 size={2} sx={{ height: '100%', boxSizing: 'border-box' }}>
                     <Paper sx={{ padding: '10px', height: '97%', display: 'flex'}}>
                         {isActive ? (
                             <>
@@ -354,13 +383,13 @@ function RoomPage() {
                                     <>
                                         <Button 
                                             variant="contained" 
-                                            color="info" 
+                                            color="primary" 
                                             sx= {{mx: 'auto', mt: 'auto', alignSelf: 'center', textTransform: 'none'}}
-                                            startIcon={<TerminalIcon />}
-                                            onClick={handlePrompt}
-                                            disabled={!canClick || !getWordForPrompt()}
+                                            startIcon={<UndoIcon />}
+                                            onClick={handleClear}
+                                            disabled={!canClick || placedLetters.length === 0}
                                             >
-                                            Prompt
+                                            Clear
                                         </Button>
                                         <Button 
                                             variant="contained" 
@@ -371,6 +400,16 @@ function RoomPage() {
                                             disabled={!canClick}
                                             >
                                             {leftInBag > 0 ? 'Swap' : 'Pass'}
+                                        </Button>
+                                        <Button 
+                                            variant="contained" 
+                                            color="info" 
+                                            sx= {{mx: 'auto', mt: 1, alignSelf: 'center', textTransform: 'none'}}
+                                            startIcon={<TerminalIcon />}
+                                            onClick={handlePrompt}
+                                            disabled={!canClick || !getWordForPrompt()}
+                                            >
+                                            Prompt
                                         </Button>
                                         <Button 
                                             variant="contained" 
@@ -394,7 +433,7 @@ function RoomPage() {
                 </Grid2>
 
                 {/* Right Panel - Live Chat */}
-                <Grid2 item size={1} sx={{ height: '100%', boxSizing: 'border-box'}}>
+                <Grid2 size={1} sx={{ height: '100%', boxSizing: 'border-box'}}>
                     <Paper sx={{ padding: '10px', height: '97%', display: 'flex', flexDirection: 'column' }}>
                         <Box sx={{display: 'flex', mb: 'auto', alignItems: 'center', mx: 'auto'}}>
                             <ChatIcon sx={{mr: 1}} />

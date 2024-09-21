@@ -18,6 +18,7 @@ function Reactions({ message }) {
   function handleReaction(reactionType) {
     if (!canReact(reactionType)) return
     socket.emit('reaction', roomId, message._id, User._id, reactionType)
+    closeReactionPanel()
   };
 
   function canReact(reactionType) {
@@ -27,7 +28,7 @@ function Reactions({ message }) {
   }
 
   function alreadyReacted(reactionType) {
-    return message.reactions.some((reaction) => reaction.user === User._id && reaction.type === reactionType);
+    return message.reactions.some((reaction) => reaction.user._id === User._id && reaction.type === reactionType);
   }
 
   function getReactionsNumber(reactionType) {
@@ -54,16 +55,19 @@ function Reactions({ message }) {
   return (
     <Box sx={{width: 'fit-content', mx: 'auto', display: 'flex'}}>
         {reactionTypes.map((reactionType, index) => (
-            <Tooltip title={getReactors(reactionType)} key={`${message._id}-${reactionType}`}>
-                {getReactionsNumber(reactionType) > 0 &&
-                  <IconButton 
-                    size='small'
-                    sx={{color: 'black', cursor: canReact(reactionType) ? 'pointer' : 'default'}}
-                    onClick={()=>handleReaction(reactionType)}
-                    >
-                    <Typography variant="h6">{reactionEmojis[index]}</Typography>
-                    <Typography variant="body2">{` ${getReactionsNumber(reactionType)}`}</Typography>
-                </IconButton>}
+          getReactionsNumber(reactionType) > 0 &&
+            <Tooltip 
+              title={<Typography variant='inherit' sx={{whiteSpace: 'pre-line'}}>{getReactors(reactionType)}</Typography>} 
+              key={`${message._id}-${reactionType}`}
+              >
+              <IconButton 
+                size='small'
+                sx={{color: 'black', cursor: canReact(reactionType) ? 'pointer' : 'default'}}
+                onClick={()=>handleReaction(reactionType)}
+                >
+                <Typography variant="h6">{reactionEmojis[index]}</Typography>
+                <Typography variant="body2">{` ${getReactionsNumber(reactionType)}`}</Typography>
+            </IconButton>
           </Tooltip>
         ))}
 

@@ -69,8 +69,8 @@ class AccountService {
     return response.data.board
   }
 
-  async updateBoard(boardId, requestBody) {
-    const response = await this.api.put(`/account/board/${boardId}`, requestBody);
+  async updateBoard(requestBody) {
+    const response = await this.api.put(`/account/board`, requestBody);
     return response.data.board
   }
 
@@ -88,8 +88,8 @@ class AccountService {
     return response.data.letterbag
   }
 
-  async updateLetterBag(letterbagId, requestBody) {
-    const response = await this.api.put(`/account/letterbag/${letterbagId}`, requestBody);
+  async updateLetterBag(requestBody) {
+    const response = await this.api.put(`/account/letterbag`, requestBody);
     return response.data.letterbag
   }
 

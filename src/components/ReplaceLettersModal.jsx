@@ -41,7 +41,7 @@ function LetterReplaceModal() {
       <DialogContent>
         <Grid2 container spacing={1}>
           {isPlaying && [...bank, ...placedLetters].map((letter) => (
-            <Grid2 item xs={3} key={letter.id}>
+            <Grid2 xs={3} key={letter.id}>
               <Paper
                 onClick={() => handleLetterClick(letter.id)}
                 sx={{

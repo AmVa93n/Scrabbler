@@ -8,7 +8,7 @@ const GameContext = createContext();
 
 function GameProvider(props) {
     const [board, setBoard] = useState(null);
-    const [bank, setBank] = useState([]);
+    const [rack, setRack] = useState([]);
     const [placedLetters, setPlacedLetters] = useState([]);
     const [leftInBag, setLeftInBag] = useState('');
     const [turnPlayer, setTurnPlayer] = useState(null);
@@ -35,7 +35,7 @@ function GameProvider(props) {
           setBoard(sessionData.board);
           setLeftInBag(sessionData.leftInBag)
           setPlayers(sessionData.players)
-          setBank(sessionData.letterBank) 
+          setRack(sessionData.rack) 
           setReactionScore(sessionData.reactionScore)
           setTurnPlayer(sessionData.turnPlayer);
           setTurnEndTime(new Date(sessionData.turnEndTime).getTime());
@@ -49,15 +49,15 @@ function GameProvider(props) {
           setPlayers(sessionData.players)
       });
 
-      // Listen for letter bank updates (private)
-      socket.on('letterBankUpdated', (letterBank) => {
-          setBank(letterBank)
+      // Listen for rack updates (private)
+      socket.on('rackUpdated', (rack) => {
+          setRack(rack)
           setPlacedLetters([]) // reset placed letters
       });
 
       // Listen for turn pass (private)
-      socket.on('turnPassed', (letterBank, board) => {
-        setBank(letterBank) // reset player's letter bank
+      socket.on('turnPassed', (rack, board) => {
+        setRack(rack) // reset player's rack
         setBoard(board) // reset board
         setPlacedLetters([]) // reset placed letters
       });
@@ -95,7 +95,7 @@ function GameProvider(props) {
             }
             setBoard(clearedBoard)
           }
-          setBank(prevBank => [...prevBank, ...placedLetters]);
+          setRack(prev => [...prev, ...placedLetters]);
           setPlacedLetters([]);
 
           setIsLReplaceOpen(false) // close all task modals
@@ -124,7 +124,7 @@ function GameProvider(props) {
           setTurnPlayer(null); 
           setTurnEndTime(null); 
           setturnNumber(null);
-          setBank([])
+          setRack([])
           setBoard(null)
           setPlacedLetters([])
           setLeftInBag('')
@@ -149,7 +149,7 @@ function GameProvider(props) {
       return () => {
           socket.off('refreshGame');
           socket.off('gameUpdated');
-          socket.off('letterBankUpdated');
+          socket.off('rackUpdated');
           socket.off('turnPassed');
           socket.off('turnStarted');
           socket.off('turnEnded');
@@ -165,7 +165,7 @@ function GameProvider(props) {
     return (
         <GameContext.Provider value={{
             board, setBoard,
-            bank, setBank,
+            rack, setRack,
             placedLetters, setPlacedLetters,
             leftInBag,
             turnPlayer,

@@ -16,7 +16,7 @@ import RoomChat from '../components/RoomChat';
 import Loading from '../components/Loading/Loading';
 import ChatInput from '../components/ChatInput';
 import Board from '../components/Board';
-import LetterBank from '../components/LetterBank';
+import Rack from '../components/Rack';
 import ChatIcon from '@mui/icons-material/Chat';
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -30,7 +30,7 @@ function RoomPage() {
     const socket = useSocket();
     const User = useContext(AuthContext).user;
     const { roomId, isRoomLoaded, usersInRoom, isActive, hostId } = useContext(RoomContext)
-    const { turnPlayer, placedLetters, board, leftInBag, setIsLReplaceOpen, canClick, setCanClick, setBank, setBoard, setPlacedLetters,
+    const { turnPlayer, placedLetters, board, leftInBag, setIsLReplaceOpen, canClick, setCanClick, setRack, setBoard, setPlacedLetters,
         setIsPromptOpen } = useContext(GameContext)
     const [promptData, setPromptData] = useState(null)
     
@@ -49,7 +49,7 @@ function RoomPage() {
                 setPromptData(currentPromptData)
             }
         }
-        const wordsWithScores = extractWordsFromBoard(placedLetters, board)
+        const wordsWithScores = getWordsWithScores()
         socket.emit('validateMove', roomId, placedLetters, board, wordsWithScores, currentPromptData)
         setCanClick(false)
         setPromptData(null)
@@ -69,7 +69,7 @@ function RoomPage() {
             clearedBoard[letter.y][letter.x].content = null;
             clearedBoard[letter.y][letter.x].occupied = false;
         }
-        setBank(prevBank => [...prevBank, ...placedLetters]);
+        setRack(prev => [...prev, ...placedLetters]);
         setBoard(clearedBoard)
         setPlacedLetters([]);
     }
@@ -80,7 +80,7 @@ function RoomPage() {
 
     function isLetterPlacementValid() {
         // If there's only one letter placed and it's the only letter on the board
-        const allLettersOnBoard = board.flat().filter(tile => tile.occupied);
+        const allLettersOnBoard = board.flat().filter(square => square.occupied);
         const isFirstWord = placedLetters.length === allLettersOnBoard.length
         if (isFirstWord) {
             if (placedLetters.length === 1) return false; // Only one letter on the board for the first word
@@ -96,7 +96,7 @@ function RoomPage() {
         // Check if any of the new letters connects to existing letters
         if (!isFirstWord) {
             const existingLetters = new Set(
-                board.flat().filter(tile => tile.fixed).map(tile => `${tile.x},${tile.y}`)
+                board.flat().filter(square => square.fixed).map(square => `${square.x},${square.y}`)
             );
             
             const anyNewLettersConnected = placedLetters.some(letter => {
@@ -130,10 +130,10 @@ function RoomPage() {
             // Collect all relevant letters within the determined range
             const combinedLetters = [];
             for (let x = minX; x <= maxX; x++) {
-                const tile = board[row][x];
-                if (tile.occupied) {
+                const square = board[row][x];
+                if (square.occupied) {
                     combinedLetters.push({
-                        letter: tile.content.letter,
+                        letter: square.content.letter,
                         x: x,
                         y: row,
                     });
@@ -167,10 +167,10 @@ function RoomPage() {
             // Collect all relevant letters within the determined range
             const combinedLetters = [];
             for (let y = minY; y <= maxY; y++) {
-                const tile = board[y][col];
-                if (tile.occupied) {
+                const square = board[y][col];
+                if (square.occupied) {
                     combinedLetters.push({
-                        letter: tile.content.letter,
+                        letter: square.content.letter,
                         x: col,
                         y: y,
                     });
@@ -191,7 +191,7 @@ function RoomPage() {
     }
 
     function getScorePrediction() {
-        const wordsWithScores = extractWordsFromBoard(placedLetters, board)
+        const wordsWithScores = getWordsWithScores()
         const wordScoreList = wordsWithScores.map(w => `${w.word} (${w.score})`).join('\n');
         const totalScore = wordsWithScores.reduce((sum, w) => sum + w.score, 0);
         if (totalScore > 0 && isLetterPlacementValid()) {
@@ -205,57 +205,57 @@ function RoomPage() {
         return '';
     }
 
-    function extractWordsFromBoard(newlyPlacedLetters, updatedBoard) {
+    function getWordsWithScores() {
         const wordsWithScores = [];
         
         // Helper function to check if a word contains a new letter
-        function letterPlacedThisTurn(tileSeq) {
-          const newlyPlacedLetterIds = newlyPlacedLetters.map(letter => letter.id);
-          return tileSeq.some(tile => tile.content && newlyPlacedLetterIds.includes(tile.content.id));
+        function isNewWord(sequence) {
+          const newlyPlacedLetterIds = placedLetters.map(letter => letter.id);
+          return sequence.some(square => square.content && newlyPlacedLetterIds.includes(square.content.id));
         }
         
         // Horizontal words
-        for (let row = 0; row < updatedBoard.length; row++) {
-          let tileSeq = [];
-          for (let col = 0; col < updatedBoard[row].length; col++) {
-            const tile = updatedBoard[row][col];
-            if (tile.content) {
-              tileSeq.push(tile); // Collect the tiles that form a word
+        for (let row = 0; row < board.length; row++) {
+          let sequence = [];
+          for (let col = 0; col < board[row].length; col++) {
+            const square = board[row][col];
+            if (square.content) {
+              sequence.push(square); // Collect the squares that form a word
             } else {
-              if (tileSeq.length > 1 && letterPlacedThisTurn(tileSeq)) {
-                const word = tileSeq.map(tile => tile.content.letter).join('');
-                const score = calculateWordScore(tileSeq);
+              if (sequence.length > 1 && isNewWord(sequence)) {
+                const word = sequence.map(square => square.content.letter).join('');
+                const score = calculateWordScore(sequence);
                 wordsWithScores.push({ word, score });
               }
-              tileSeq = []; // Reset
+              sequence = []; // Reset
             }
           }
-          if (tileSeq.length > 1 && letterPlacedThisTurn(tileSeq)) {
-            const word = tileSeq.map(tile => tile.content.letter).join('');
-            const score = calculateWordScore(tileSeq);
+          if (sequence.length > 1 && isNewWord(sequence)) {
+            const word = sequence.map(square => square.content.letter).join('');
+            const score = calculateWordScore(sequence);
             wordsWithScores.push({ word, score });
           }
         }
       
         // Vertical words
-        for (let col = 0; col < updatedBoard[0].length; col++) {
-          let tileSeq = [];
-          for (let row = 0; row < updatedBoard.length; row++) {
-            const tile = updatedBoard[row][col];
-            if (tile.content) {
-              tileSeq.push(tile); // Collect the tiles that form a word
+        for (let col = 0; col < board[0].length; col++) {
+          let sequence = [];
+          for (let row = 0; row < board.length; row++) {
+            const square = board[row][col];
+            if (square.content) {
+              sequence.push(square); // Collect the squares that form a word
             } else {
-              if (tileSeq.length > 1 && letterPlacedThisTurn(tileSeq)) {
-                const word = tileSeq.map(tile => tile.content.letter).join('');
-                const score = calculateWordScore(tileSeq);
+              if (sequence.length > 1 && isNewWord(sequence)) {
+                const word = sequence.map(square => square.content.letter).join('');
+                const score = calculateWordScore(sequence);
                 wordsWithScores.push({ word, score });
               }
-              tileSeq = []; // Reset
+              sequence = []; // Reset
             }
           }
-          if (tileSeq.length > 1 && letterPlacedThisTurn(tileSeq)) {
-            const word = tileSeq.map(tile => tile.content.letter).join('');
-            const score = calculateWordScore(tileSeq);
+          if (sequence.length > 1 && isNewWord(sequence)) {
+            const word = sequence.map(square => square.content.letter).join('');
+            const score = calculateWordScore(sequence);
             wordsWithScores.push({ word, score });
           }
         }
@@ -263,17 +263,17 @@ function RoomPage() {
         return wordsWithScores;
     }
 
-    function calculateWordScore(tileSeq) {
+    function calculateWordScore(sequence) {
         let wordScore = 0;
         let wordMultiplier = 1;
   
-        tileSeq.forEach(tile => {
-          const letterScore = tile.content.points;
+        sequence.forEach(square => {
+          const letterScore = square.content.points;
           
-          // Check if this tile was placed during this turn
-          if (!tile.fixed) {
-            // Apply the bonus based on tile.bonusType
-            switch(tile.bonusType) {
+          // Check if a letter was placed on this square during this turn
+          if (!square.fixed) {
+            // Apply the bonus
+            switch(square.bonusType) {
                 case 'doubleLetter': wordScore += letterScore * 2; break
                 case 'tripleLetter': wordScore += letterScore * 3; break
                 case 'quadrupleLetter': wordScore += letterScore * 4; break
@@ -299,7 +299,7 @@ function RoomPage() {
     }
 
     function getWordForPrompt() {
-        const wordsWithScores = extractWordsFromBoard(placedLetters, board)
+        const wordsWithScores = getWordsWithScores()
         const words = wordsWithScores.map(w => w.word)
         return words.find(w => w.length > 2)
     }
@@ -351,7 +351,7 @@ function RoomPage() {
                                 <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', flexGrow: 1}}>
                                     <Box sx={{display: 'flex'}}>
                                         <Box sx={{
-                                            backgroundImage: `url('/letterbag.png')`, 
+                                            backgroundImage: `url('/tilebag.png')`, 
                                             backgroundSize: '100%', 
                                             backgroundRepeat: 'no-repeat',
                                             display: 'flex',
@@ -364,7 +364,7 @@ function RoomPage() {
                                             }}>
                                             <Typography color='beige' variant="h6" sx={{mt: 2}}>{leftInBag}</Typography>
                                         </Box>
-                                        <LetterBank />
+                                        <Rack />
                                     </Box>
                                     {board && getScorePrediction()}
                                     {(turnPlayer && User._id === turnPlayer._id) && 

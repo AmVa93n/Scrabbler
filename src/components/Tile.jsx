@@ -1,102 +1,55 @@
-import { Box, Typography } from '@mui/material';
-import { useDrop } from 'react-dnd';
-import Letter from '../components/Letter';
-import { GameContext } from '../context/game.context';
 import { useContext } from 'react';
+import { useDrag } from 'react-dnd';
+import { Paper, Typography } from '@mui/material';
+import { AuthContext } from "../context/auth.context";
+import { GameContext } from '../context/game.context';
 
 const ItemType = 'LETTER';
 
-function Tile({ tile, isStart }) {
-  const { setBoard, setBank, setPlacedLetters, setBlank, setIsLSelectOpen } = useContext(GameContext)
+function Tile({ id, letter, isBlank, points, fixed }) {
+  const User = useContext(AuthContext).user;
+  const { turnPlayer, placedLetters, board } = useContext(GameContext)
 
-  const [{ isOver, canDrop }, drop] = useDrop({
-    accept: ItemType,
-    canDrop: () => !tile.occupied,
-    drop: (letter) => handleDrop(tile.x, tile.y, letter),
+  const [{ isDragging, canDrag }, drag] = useDrag({
+    type: ItemType,
+    item: { id, letter, isBlank, points, fixed },
+    canDrag: () => !fixed && turnPlayer && User._id === turnPlayer._id,
     collect: (monitor) => ({
-      isOver: monitor.isOver(),
-      canDrop: monitor.canDrop(),
+      isDragging: monitor.isDragging(),
+      canDrag: monitor.canDrag(),
     }),
   });
 
-  function handleDrop(x, y, letter) {
-    setBoard((prevBoard) => {
-      const newBoard = [...prevBoard];
-      // Find the previous position of the letter
-      for (let row of newBoard) {
-        for (let tile of row) {
-          if (tile.content && tile.content.id === letter.id) {
-            tile.content = null; // Remove the letter from the previous tile
-            tile.occupied = false
-          }
-        }
-      }
-      // Place the letter in the new tile
-      newBoard[y][x].content = letter;
-      newBoard[y][x].occupied = true;
-      return newBoard;
-    });
-
-    // remove letter from bank
-    setBank((prevBank) => prevBank.filter(letterInBank => letterInBank.id !== letter.id));
-    
-    setPlacedLetters((prevPlacedLetters) => {
-      // Check if the letter is already on the board
-      const letterIndex = prevPlacedLetters.findIndex(placedLetter => placedLetter.id === letter.id);
-      if (letterIndex !== -1) { // If the letter is already on the board, update its coordinates
-        const updatedLetters = [...prevPlacedLetters];
-        updatedLetters[letterIndex] = { ...letter, x, y }; // Update with new coordinates
-        return updatedLetters;
-      } else {
-        // If the letter is not in placedLetters, add it
-        return [...prevPlacedLetters, { ...letter, x, y }];
-      }
-    });
-
-    if (letter.isBlank) {
-      // Trigger the modal for blank tile selection
-      setBlank({ x, y, letter });
-      setIsLSelectOpen(true);
-    }
-  };
-
-  function getTileColor(bonus) {
-    switch(bonus) {
-      case 'quadrupleWord': return '#CC0000'
-      case 'tripleWord': return '#FF3333'
-      case 'doubleWord': return '#FF9999'
-      case 'quadrupleLetter': return '#0066CC'
-      case 'tripleLetter': return '#3399FF'
-      case 'doubleLetter': return '#99CCFF'
-      default: return '#F5DEB3'
-    }
+  function needsToFit() {
+    // letter needs to fit square size because it's too small for the default 35x35
+    return board.length > 15 && (placedLetters.find(letter => letter.id === id) || fixed)
   }
 
   return (
-    <Box
-      ref={drop}
+    <Paper
+      ref={drag}
       sx={{
-        width: '100%',
-        height: '100%',
-        backgroundColor: isOver && canDrop ? 'yellow' : getTileColor(tile.bonusType),
-        border: 'solid 1px white',
+        width: needsToFit() ? '97%' : 35,
+        height: needsToFit() ? '97%' : 35,
         display: 'flex',
-        justifyContent: 'center',
         alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: isDragging ? 'lightgrey' : placedLetters.find(letter => letter.id === id) ? 'lightgreen' : 'beige',
+        cursor: canDrag ? 'move' : 'default',
+        position: 'relative'
       }}
     >
-      {tile.content ? ( // Conditionally render the letter
-        <Letter 
-            id={tile.content.id} 
-            letter={tile.content.letter} 
-            isBlank={tile.content.isBlank} 
-            points={tile.content.points}
-            fixed={tile.fixed} 
-          /> 
-      ) : (
-        isStart && (<Typography variant="h4">★</Typography>)
-      )}
-    </Box>
+      <Typography 
+        variant="body2"
+        sx={{fontWeight: 400, fontSize: 20, color: isBlank ? 'red' : 'black'}}
+        >
+          {letter}</Typography>
+      <Typography 
+        variant="body2"
+        sx={{position: 'absolute', right: 1, bottom: 1, fontSize: 10}}
+        >
+          {points}</Typography>
+    </Paper>
   );
 }
 

@@ -9,9 +9,9 @@ import CreateIcon from '@mui/icons-material/AddCircle';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useNotifications } from '@toolpad/core/useNotifications';
 
-function LetterBagEditorPage() {
+function TileBagEditorPage() {
     const socket = useSocket();
-    const [letterBags, setLetterBags] = useState([])
+    const [tileBags, setTileBags] = useState([])
     const [currentBag, setCurrentBag] = useState(null)
     const notifications = useNotifications();
 
@@ -20,9 +20,9 @@ function LetterBagEditorPage() {
 
         async function init() {
             try {
-                let letterBags = await accountService.getLetterBags()
-                letterBags = letterBags.filter(bag => bag.creator)
-                setLetterBags(letterBags)
+                let tileBags = await accountService.getTileBags()
+                tileBags = tileBags.filter(bag => bag.creator)
+                setTileBags(tileBags)
             } catch (error) {
                 const errorDescription = error.response.data.message;
                 alert(errorDescription,'error',5000)
@@ -32,7 +32,7 @@ function LetterBagEditorPage() {
     }, [socket]);
 
     function handleChangeBag(e) {
-        const selectedBag = letterBags.find(bag => bag._id === e.target.value)
+        const selectedBag = tileBags.find(bag => bag._id === e.target.value)
         setCurrentBag(selectedBag)
     };
 
@@ -100,8 +100,8 @@ function LetterBagEditorPage() {
     async function handleSave() {
         if (currentBag.creator) { // edit existing bag
             try {
-                const updatedBag = await accountService.updateLetterBag(currentBag)
-                setLetterBags(prev => prev.map(bag => bag === currentBag ? updatedBag : bag));
+                const updatedBag = await accountService.updateTileBag(currentBag)
+                setTileBags(prev => prev.map(bag => bag === currentBag ? updatedBag : bag));
                 notify('Successfully edited bag!','success',5000)
             } catch (error) {
                 const errorDescription = error.response.data.message;
@@ -109,8 +109,8 @@ function LetterBagEditorPage() {
             }
         } else { // create new bag
             try {
-                const createdBag = await accountService.createLetterBag(currentBag)
-                setLetterBags((prev)=> [...prev, createdBag])
+                const createdBag = await accountService.createTileBag(currentBag)
+                setTileBags((prev)=> [...prev, createdBag])
                 notify('Successfully created bag!','success',5000)
                 setCurrentBag(createdBag)
             } catch (error) {
@@ -123,9 +123,9 @@ function LetterBagEditorPage() {
     async function handleDelete() {
         if (currentBag.creator) { // delete existing bag
             try {
-                await accountService.deleteLetterBag(currentBag._id)
+                await accountService.deleteTileBag(currentBag._id)
                 notify('Successfully deleted bag!','success',5000)
-                setLetterBags((prev) => prev.filter((bag) => bag._id !== currentBag._id));
+                setTileBags((prev) => prev.filter((bag) => bag._id !== currentBag._id));
             } catch (error) {
                 const errorDescription = error.response.data.message;
                 notify(errorDescription,'error',5000)
@@ -145,7 +145,7 @@ function LetterBagEditorPage() {
     <>
         <Box sx={{display: 'flex', mx: 'auto', alignItems: 'center', width: 'fit-content', mt: 2}}>
             <FontDownloadIcon sx={{mr: 1}} />
-            <Typography variant="h5">Letter Bag Editor</Typography>
+            <Typography variant="h5">Tile Bag Editor</Typography>
         </Box>
 
         <Paper sx={{p: 2, width: 'fit-content', mx: 'auto', my: 2}}>
@@ -154,8 +154,8 @@ function LetterBagEditorPage() {
                 value={currentBag?._id || ''}
                 onChange={handleChangeBag}
                 >
-                {letterBags.map(letterBag => (
-                    <MenuItem key={letterBag._id} value={letterBag._id}>{letterBag.name}</MenuItem>
+                {tileBags.map(tileBag => (
+                    <MenuItem key={tileBag._id} value={tileBag._id}>{tileBag.name}</MenuItem>
                 ))}
             </Select>
             
@@ -277,4 +277,4 @@ function LetterBagEditorPage() {
     );
 }
 
-export default LetterBagEditorPage;
+export default TileBagEditorPage;

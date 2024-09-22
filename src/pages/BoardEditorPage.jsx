@@ -16,7 +16,7 @@ function BoardEditorPage() {
   const [boards, setBoards] = useState([])
   const [currentBoard, setCurrentBoard] = useState(null)
   const notifications = useNotifications();
-  const [currentTileDraw, setCurrentBonusDraw] = useState(null);
+  const [currentBonusDraw, setCurrentBonusDraw] = useState(null);
 
   useEffect(() => {
     if (socket) socket.emit('leaveRoom', 'left');
@@ -48,7 +48,7 @@ function BoardEditorPage() {
     const NewBoard = {
         name: 'Unnamed Board',
         size: 15,
-        bonusTiles: []
+        bonusSquares: []
     }
     setCurrentBoard(NewBoard)
   }
@@ -98,18 +98,18 @@ function BoardEditorPage() {
   }
 
   function createBoard() {
-    const { size, bonusTiles } = currentBoard
+    const { size, bonusSquares } = currentBoard
     const boardDisplay = Array.from({ length: size }, (_, row) =>
       Array.from({ length: size }, (_, col) => ({
           x: col,
           y: row,
-          bonusType: bonusTiles.find(bonusTile => bonusTile.x === col && bonusTile.y === row)?.bonusType
+          bonusType: bonusSquares.find(square => square.x === col && square.y === row)?.bonusType
       }))
     )
     return boardDisplay
   }
 
-  function getTileColor(bonus) {
+  function getSquareColor(bonus) {
     switch(bonus) {
       case 'quadrupleWord': return '#CC0000'
       case 'tripleWord': return '#FF3333'
@@ -121,7 +121,7 @@ function BoardEditorPage() {
     }
   }
 
-  const tileTypes = [
+  const squareTypes = [
     { value: '', name: 'No Bonus' },
     { value: 'doubleLetter', name: 'Double Letter' },
     { value: 'tripleLetter', name: 'Triple Letter' },
@@ -132,31 +132,31 @@ function BoardEditorPage() {
   ];
 
   function handlePickBonus(value) {
-    const color = getTileColor(value);
+    const color = getSquareColor(value);
     setCurrentBonusDraw({ value, color });
   };
 
-  function handleDrawTile(x, y) {
-    if (!currentTileDraw) return
+  function handleDrawSquare(x, y) {
+    if (!currentBonusDraw) return
     setCurrentBoard(prev => {
-      // Create the new bonusTile object with the x, y coordinates and the bonusType from currentBonusDraw
-      const newBonusTile = { x, y, bonusType: currentTileDraw.value };
+      // Create the new BonusSquare object with the x, y coordinates and the bonusType from currentBonusDraw
+      const newBonusSquare = { x, y, bonusType: currentBonusDraw.value };
 
-      // Check if the tile already exists in the bonusTiles array
-      const updatedBonusTiles = prev.bonusTiles.map(tile => 
-        tile.x === x && tile.y === y 
-          ? { ...tile, bonusType: currentTileDraw.value } // Update existing tile
-          : tile // Keep existing tile
+      // Check if the square already exists in the array
+      const updatedBonusSquares = prev.bonusSquares.map(square => 
+        square.x === x && square.y === y 
+          ? { ...square, bonusType: currentBonusDraw.value } // Update existing square
+          : square // Keep existing square
       );
 
-      // If the tile was not updated, add the newBonusTile
-      const isExistingTile = prev.bonusTiles.some(tile => tile.x === x && tile.y === y);
-      if (!isExistingTile) {
-        updatedBonusTiles.push(newBonusTile);
+      // If the square was not updated, add the newBonusSquare
+      const isExistingSquare = prev.bonusSquares.some(square => square.x === x && square.y === y);
+      if (!isExistingSquare) {
+        updatedBonusSquares.push(newBonusSquare);
       }
 
-      // Return the updated state with the new bonusTiles array
-      return { ...prev, bonusTiles: updatedBonusTiles };
+      // Return the updated state with the new array
+      return { ...prev, bonusSquares: updatedBonusSquares };
     });
   }
 
@@ -357,7 +357,7 @@ function BoardEditorPage() {
       { x: 17, y: 20, bonusType: 'doubleLetter' },
   ]
     const layout = currentBoard.size === 15 ? default15x15 : default21x21
-    setCurrentBoard(prev=> ({...prev, bonusTiles: layout}))
+    setCurrentBoard(prev=> ({...prev, bonusSquares: layout}))
   }
 
   return (
@@ -401,23 +401,23 @@ function BoardEditorPage() {
             
             <Stack direction='row'>
               <Stack direction='column' sx={{mr: 1}}>
-              <Typography variant="body2" sx={{mb: 1}}>Choose a tile to draw:</Typography>
+              <Typography variant="body2" sx={{mb: 1}}>Choose a square type to draw:</Typography>
               <Box display="flex" flexDirection="column" sx={{border: 'solid 1px', width: 'fit-content'}}>
-                {tileTypes.map((bonus) => (
+                {squareTypes.map((bonus) => (
                   <Box
                     key={bonus.value}
                     width={145}
                     height={30}
                     display="flex"
                     alignItems="center"
-                    bgcolor={getTileColor(bonus.value)}
+                    bgcolor={getSquareColor(bonus.value)}
                     onClick={() => handlePickBonus(bonus.value)}
                     sx={{ cursor: 'pointer' }}
                   >
                     <Typography variant="body2" sx={{pl: 1}}>
                       {bonus.name}
                     </Typography>
-                    {currentTileDraw?.value === bonus.value && <BrushIcon sx={{ml: 'auto'}} />}
+                    {currentBonusDraw?.value === bonus.value && <BrushIcon sx={{ml: 'auto'}} />}
                   </Box>
                 ))}
               </Box>
@@ -425,7 +425,7 @@ function BoardEditorPage() {
                 sx={{textTransform: 'none', backgroundColor: 'grey', mt: 3}}
                 variant="contained" 
                 startIcon={<CancelIcon />} 
-                onClick={()=> setCurrentBoard(prev=> ({...prev, bonusTiles: []}))}
+                onClick={()=> setCurrentBoard(prev=> ({...prev, bonusSquares: []}))}
               >
                 Clear Board
               </Button>
@@ -453,7 +453,7 @@ function BoardEditorPage() {
                   }}
                   >
                 {createBoard().map((row, rowIndex) =>
-                  row.map((tile, colIndex) => (
+                  row.map((square, colIndex) => (
                           <Grid2 
                               item
                               key={`${rowIndex}-${colIndex}`}
@@ -463,16 +463,16 @@ function BoardEditorPage() {
                               }}
                               >
                                   <Box
-                                    onClick={()=> handleDrawTile(colIndex, rowIndex)}
+                                    onClick={()=> handleDrawSquare(colIndex, rowIndex)}
                                     sx={{
                                       width: '100%',
                                       height: '100%',
-                                      backgroundColor: getTileColor(tile.bonusType),
+                                      backgroundColor: getSquareColor(square.bonusType),
                                       border: 'solid 1px white',
                                       display: 'flex',
                                       justifyContent: 'center',
                                       alignItems: 'center',
-                                      cursor: currentTileDraw ? 'pointer' : 'default'
+                                      cursor: currentBonusDraw ? 'pointer' : 'default'
                                     }}
                                   >
                                     {(rowIndex === currentBoard.size/2-0.5 && colIndex === currentBoard.size/2-0.5) && 

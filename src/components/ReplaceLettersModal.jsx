@@ -11,7 +11,7 @@ function LetterReplaceModal() {
   const User = useContext(AuthContext).user;
   const { roomId, players } = useContext(RoomContext)
   const isPlaying = players.find(player => player._id === User._id)
-  const { bank, placedLetters, leftInBag, isLReplaceOpen, setIsLReplaceOpen } = useContext(GameContext)
+  const { rack, placedLetters, leftInBag, isLReplaceOpen, setIsLReplaceOpen } = useContext(GameContext)
   const [selectedLetters, setSelectedLetters] = useState([])
 
   function handleLetterClick(letterId) {
@@ -40,17 +40,17 @@ function LetterReplaceModal() {
       <DialogTitle>Select Letters</DialogTitle>
       <DialogContent>
         <Grid2 container spacing={1}>
-          {isPlaying && [...bank, ...placedLetters].map((letter) => (
-            <Grid2 xs={3} key={letter.id}>
+          {isPlaying && [...rack, ...placedLetters].map((tile) => (
+            <Grid2 xs={3} key={tile.id}>
               <Paper
-                onClick={() => handleLetterClick(letter.id)}
+                onClick={() => handleLetterClick(tile.id)}
                 sx={{
                   width: 35,
                   height: 35,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  backgroundColor: selectedLetters.includes(letter.id) ? 'lightgreen' : 'beige',
+                  backgroundColor: selectedLetters.includes(tile.id) ? 'lightgreen' : 'beige',
                   cursor: 'pointer',
                   position: 'relative'
                 }}
@@ -59,12 +59,12 @@ function LetterReplaceModal() {
                   variant="body2" 
                   sx={{fontWeight: 400, fontSize: 20}}
                   >
-                  {letter.letter}</Typography>
+                  {tile.letter}</Typography>
                 <Typography 
                   variant="body2"
                   sx={{position: 'absolute', right: 1, bottom: 1, fontSize: 10}}
                   >
-                  {letter.points}</Typography>
+                  {tile.points}</Typography>
               </Paper>
             </Grid2>
           ))}

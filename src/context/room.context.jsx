@@ -14,7 +14,7 @@ function RoomProvider(props) {
     const [roomName, setRoomName] = useState('')
     const [isActive, setIsActive] = useState(false)
     const [players, setPlayers] = useState([])
-    const [bankSize, setBankSize] = useState(null)
+    const [rackSize, setRackSize] = useState(null)
     const [messages, setMessages] = useState([])
     const [usersInRoom, setUsersInRoom] = useState([])
     const [isRulesOpen, setIsRulesOpen] = useState(false)
@@ -35,7 +35,7 @@ function RoomProvider(props) {
                 setMessages(messages)
                 setIsActive(!!gameSession)
                 if (gameSession) {
-                    setBankSize(gameSession.settings.bankSize)
+                    setRackSize(gameSession.settings.rackSize)
                 } 
                 setIsRoomLoaded(true)
                 socket.emit('joinRoom', roomId);
@@ -100,7 +100,7 @@ function RoomProvider(props) {
             messages,
             isActive, setIsActive,
             players, setPlayers,
-            bankSize, setBankSize,
+            rackSize, setRackSize,
             isRulesOpen, setIsRulesOpen,
             hostId,
             isRoomLoaded

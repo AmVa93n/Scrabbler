@@ -6,7 +6,7 @@ import SignupPage from "./pages/SignUpPage";
 import LoginPage from "./pages/SignInPage";
 import RoomsPage from "./pages/RoomsPage";
 import BoardEditorPage from "./pages/BoardEditorPage";
-import LetterBagEditorPage from "./pages/LetterBagEditorPage";
+import TileBagEditorPage from "./pages/TileBagEditorPage";
 import RoomPage from "./pages/RoomPage";
 import Navbar from "./components/Navbar";
 import IsPrivate from "./components/IsPrivate/IsPrivate";
@@ -46,9 +46,9 @@ function App() {
             </IsPrivate>
           }/>
 
-        <Route path="/letterbageditor" element={
+        <Route path="/tilebageditor" element={
             <IsPrivate>
-              <LetterBagEditorPage />
+              <TileBagEditorPage />
             </IsPrivate>
           }/>
 

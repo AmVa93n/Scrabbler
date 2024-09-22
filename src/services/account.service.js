@@ -78,23 +78,23 @@ class AccountService {
     return this.api.delete(`/account/board/${boardId}`);
   }
 
-  async getLetterBags() {
-    const response = await this.api.get(`/account/letterbags`);
-    return response.data.letterBags
+  async getTileBags() {
+    const response = await this.api.get(`/account/tilebags`);
+    return response.data.tileBags
   }
 
-  async createLetterBag(requestBody) {
-    const response = await this.api.post('/account/letterbag', requestBody);
-    return response.data.letterbag
+  async createTileBag(requestBody) {
+    const response = await this.api.post('/account/tilebag', requestBody);
+    return response.data.tilebag
   }
 
-  async updateLetterBag(requestBody) {
-    const response = await this.api.put(`/account/letterbag`, requestBody);
-    return response.data.letterbag
+  async updateTileBag(requestBody) {
+    const response = await this.api.put(`/account/tilebag`, requestBody);
+    return response.data.tilebag
   }
 
-  async deleteLetterBag(letterbagId) {
-    return this.api.delete(`/account/letterbag/${letterbagId}`);
+  async deleteTileBag(tilebagId) {
+    return this.api.delete(`/account/tilebag/${tilebagId}`);
   }
 
   ping() {

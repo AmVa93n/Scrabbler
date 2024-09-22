@@ -9,28 +9,28 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import PlayCircleIcon from '@mui/icons-material/PlayCircle';
 
 function GameSettings() {
-    const { roomId, usersInRoom, hostId, setBankSize } = useContext(RoomContext)
+    const { roomId, usersInRoom, hostId, setRackSize } = useContext(RoomContext)
     const { canClick, setCanClick } = useContext(GameContext)
     const socket = useSocket();
     const [settings, setSettings] = useState({ 
         board: '', 
-        letterBag: '',
+        tileBag: '',
         gameEnd: 'classic',
         turnDuration: 180,
         turnsUntilSkip: 3,
-        bankSize: 7
+        rackSize: 7
     })
     const [boards, setBoards] = useState([])
-    const [letterBags, setLetterBags] = useState([])
+    const [tileBags, setTileBags] = useState([])
 
     useEffect(() => {
         async function init() {
           try {
             const boards = await accountService.getBoards()
             setBoards(boards)
-            const letterBags = await accountService.getLetterBags()
-            setLetterBags(letterBags)
-            setSettings((prev) => ({ ...prev, board: boards[0]._id, letterBag: letterBags[0]._id }));
+            const tileBags = await accountService.getTileBags()
+            setTileBags(tileBags)
+            setSettings((prev) => ({ ...prev, board: boards[0]._id, tileBag: tileBags[0]._id }));
           } catch (error) {
             const errorDescription = error.response.data.message;
             alert(errorDescription)
@@ -46,14 +46,14 @@ function GameSettings() {
 
     async function handleStartGame() { 
         const board = boards.find(board => board._id === settings.board)
-        const letterBag = letterBags.find(bag => bag._id === settings.letterBag)
-        const gameSettings = { ...settings, board, letterBag}
+        const tileBag = tileBags.find(bag => bag._id === settings.tileBag)
+        const gameSettings = { ...settings, board, tileBag}
         const gameSession = {players: [...usersInRoom], settings: gameSettings}
         const response = await accountService.ping()
         if (response) {
             socket.emit('startGame', roomId, hostId, gameSession)
             setCanClick(false)
-            setBankSize(settings.bankSize)
+            setRackSize(settings.rackSize)
         } else {
             alert('The server is down. Refresh the page and try again')
         }
@@ -88,15 +88,15 @@ function GameSettings() {
                     </Select>
                 </FormControl>
                 <FormControl sx={{ m: 1, minWidth: 200 }} size="small">
-                    <InputLabel id="letterBag">Tile Bag</InputLabel>
+                    <InputLabel id="tileBag">Tile Bag</InputLabel>
                     <Select
-                        labelId="letterBag"
+                        labelId="tileBag"
                         label="Tile Bag"
-                        value={settings?.letterBag}
-                        onChange={(e) => handleChange(e,"letterBag")}
+                        value={settings?.tileBag}
+                        onChange={(e) => handleChange(e,"tileBag")}
                         >
-                        {letterBags.map(letterBag => (
-                            <MenuItem key={letterBag._id} value={letterBag._id}>{letterBag.name}</MenuItem>
+                        {tileBags.map(tileBag => (
+                            <MenuItem key={tileBag._id} value={tileBag._id}>{tileBag.name}</MenuItem>
                         ))}
                     </Select>
                 </FormControl>
@@ -119,8 +119,8 @@ function GameSettings() {
                     Rack Size
                 </Typography>
                 <Slider
-                    value={settings?.bankSize}
-                    onChange={(e) => handleChange(e,"bankSize")}
+                    value={settings?.rackSize}
+                    onChange={(e) => handleChange(e,"rackSize")}
                     step={1}
                     min={5}
                     max={10}

@@ -1,5 +1,5 @@
 import Grid2 from '@mui/material/Grid2';
-import Tile from '../components/Tile';
+import Square from '../components/Square';
 import { GameContext } from '../context/game.context';
 import { useContext } from 'react';
 
@@ -24,7 +24,7 @@ function Board() {
         }}
         >
       {board.map((row, rowIndex) =>
-        row.map((tile, colIndex) => (
+        row.map((square, colIndex) => (
                 <Grid2 
                     key={`${rowIndex}-${colIndex}`}
                     sx={{
@@ -32,7 +32,7 @@ function Board() {
                         height: `calc(100% / ${boardSize})`, // Set height based on number of rows
                     }}
                     >
-                        <Tile tile={tile} isStart={rowIndex === boardSize/2-0.5 && colIndex === boardSize/2-0.5}/>
+                        <Square square={square} isStart={rowIndex === boardSize/2-0.5 && colIndex === boardSize/2-0.5}/>
                 </Grid2>
             )
         )

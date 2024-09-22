@@ -22,7 +22,6 @@ import Tooltip from '@mui/material/Tooltip';
 import Paper from '@mui/material/Paper';
 import CountrySelect from '../components/CountrySelect';
 import accountService from "../services/account.service";
-import { useSocket } from '../context/socket.context';
 import { useNotifications } from '@toolpad/core/useNotifications';
 import { blue } from '@mui/material/colors';
 
@@ -36,7 +35,6 @@ function ProfilePage() {
   const [inputValues, setInputValues] = useState({});
   const fields = ['name', 'email', 'gender', 'birthdate', 'country']
   const icons = [<NameIcon />,<EmailIcon />,<GenderIcon />,<BirthdateIcon />,<CountryIcon />,]
-  const socket = useSocket();
   const notifications = useNotifications();
   const [pfpPreview, setPfpPreview] = useState(null);
   const fileInputRef = useRef(null);
@@ -54,10 +52,6 @@ function ProfilePage() {
     }
     init()
   }, [])
-
-  useEffect(() => {
-    socket.emit('leaveRoom', 'left');
-  }, [socket]);
 
   function handleEdit(field) {
     setEditMode((prev) => ({ ...prev, [field]: true })); // Turn on edit mode

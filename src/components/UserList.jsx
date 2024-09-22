@@ -9,7 +9,6 @@ import { RoomContext } from '../context/room.context';
 import { GameContext } from '../context/game.context';
 import { AuthContext } from "../context/auth.context";
 import BlockIcon from '@mui/icons-material/Block';
-import FastForwardIcon from '@mui/icons-material/FastForward';
 import Tooltip from '@mui/material/Tooltip';
 import Badge from '@mui/material/Badge';
 import Chip from '@mui/material/Chip';
@@ -31,10 +30,6 @@ export default function UserList() {
     const { turnPlayer, turnEndTime, reactionScore } = useContext(GameContext)
     const userList = isActive ? players : usersInRoom
     const socket = useSocket();
-
-    function handleSkip(userId) {
-      socket.emit('skipPlayer', roomId, userId)
-    }
 
     function handleKick(user) {
       socket.emit('kickUser', roomId, user)
@@ -67,14 +62,6 @@ export default function UserList() {
               <Tooltip title="Kick">
                 <IconButton edge="end" onClick={() => handleKick(user)}>
                   <BlockIcon />
-                </IconButton>
-              </Tooltip>
-            }
-            {
-              (isActive && User._id === hostId && User._id !== user._id && user.inactive && !user.skipped) && 
-              <Tooltip title="Skip">
-                <IconButton edge="end" onClick={() => handleSkip(user._id)}>
-                  <FastForwardIcon />
                 </IconButton>
               </Tooltip>
             }

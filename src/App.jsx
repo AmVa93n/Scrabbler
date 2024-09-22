@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 
 import HomePage from "./pages/HomePage";
 import ProfilePage from "./pages/ProfilePage";
@@ -18,52 +18,41 @@ import { RoomProvider } from "./context/room.context";
 import { GameProvider } from './context/game.context';
 
 function App() {
+  const location = useLocation();
+  const isInRoom = /\/rooms\/[a-zA-Z0-9]+/.test(location.pathname);
+
   return (
     <div className="App" style={{height: '100%', backgroundColor: 'lightblue'}}>
-      <Navbar />
+      {!isInRoom && <Navbar />}
 
       <Routes>
         <Route path="/" element={<HomePage />} />
 
-        <Route
-          path="/profile"
-          element={
+        <Route path="/profile" element={
             <IsPrivate>
               <ProfilePage />
             </IsPrivate>
-          }
-        />
+          }/>
 
-        <Route
-          path="/rooms"
-          element={
+        <Route path="/rooms" element={
             <IsPrivate>
               <RoomsPage />
             </IsPrivate>
-          }
-        />
+          }/>
 
-        <Route
-          path="/boardeditor"
-          element={
+        <Route path="/boardeditor" element={
             <IsPrivate>
               <BoardEditorPage />
             </IsPrivate>
-          }
-        />
+          }/>
 
-        <Route
-          path="/letterbageditor"
-          element={
+        <Route path="/letterbageditor" element={
             <IsPrivate>
               <LetterBagEditorPage />
             </IsPrivate>
-          }
-        />
+          }/>
 
-        <Route
-          path="/rooms/:roomId"
-          element={
+        <Route path="/rooms/:roomId" element={
             <IsPrivate>
               <RoomProvider>
                 <GameProvider>
@@ -71,25 +60,19 @@ function App() {
                 </GameProvider>
               </RoomProvider>
             </IsPrivate>
-          }
-        />
+          }/>
 
-        <Route
-          path="/signup"
-          element={
+        <Route path="/signup" element={
             <IsAnon>
               <SignupPage />
             </IsAnon>
-          }
-        />
-        <Route
-          path="/login"
-          element={
+          }/>
+
+        <Route path="/login" element={
             <IsAnon>
               <LoginPage />
             </IsAnon>
-          }
-        />
+          }/>
       </Routes>
     </div>
   );

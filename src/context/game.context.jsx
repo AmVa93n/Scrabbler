@@ -20,6 +20,7 @@ function GameProvider(props) {
     const [isLSelectOpen, setIsLSelectOpen] = useState(false);
     const [isLReplaceOpen, setIsLReplaceOpen] = useState(false);
     const [isPromptOpen, setIsPromptOpen] = useState(false);
+    const [isInactiveOpen, setIsInactiveOpen] = useState(false);
     const [canClick, setCanClick] = useState(true);
     const [reactionScore, setReactionScore] = useState(0);
     const socket = useSocket();
@@ -35,6 +36,7 @@ function GameProvider(props) {
           setLeftInBag(sessionData.leftInBag)
           setPlayers(sessionData.players)
           setBank(sessionData.letterBank) 
+          setReactionScore(sessionData.reactionScore)
           setTurnPlayer(sessionData.turnPlayer);
           setTurnEndTime(new Date(sessionData.turnEndTime).getTime());
           setturnNumber(sessionData.turnNumber)
@@ -84,28 +86,34 @@ function GameProvider(props) {
       });
       
       // Listen for turn timeout (private)
-      socket.on('turnTimedOut', (letterBank, board) => {
-          setBank(letterBank) // reset player's letter bank
-          setBoard(board) // reset board
-          setPlacedLetters([]) // reset placed letters
+      socket.on('turnTimedOut', (hasBecomeInactive) => {
+          if (board) {
+            const clearedBoard = [...board] // reset any placed tiles
+            for (let letter of placedLetters) {
+                clearedBoard[letter.y][letter.x].content = null;
+                clearedBoard[letter.y][letter.x].occupied = false;
+            }
+            setBoard(clearedBoard)
+          }
+          setBank(prevBank => [...prevBank, ...placedLetters]);
+          setPlacedLetters([]);
 
           setIsLReplaceOpen(false) // close all task modals
           setIsLSelectOpen(false)
           setIsPromptOpen(false)
 
-          setModalMessage("Your turn has timed out!");
-          setIsModalOpen(true);
-          timer = setTimeout(() => setIsModalOpen(false), 3000); // Auto-close after 3 seconds
-          return () => clearTimeout(timer); // Clear the timeout if the component unmounts
-      });
-
-      // Listen for when player can be skipped (private for host)
-      socket.on('playerCanBeSkipped', (players) => {
-          setPlayers(players)
+          if (hasBecomeInactive) {
+            setIsInactiveOpen(true)
+          } else {
+            setModalMessage("Your turn has timed out!");
+            setIsModalOpen(true);
+            timer = setTimeout(() => setIsModalOpen(false), 3000); // Auto-close after 3 seconds
+            return () => clearTimeout(timer); // Clear the timeout if the component unmounts
+          }
       });
 
       // Listen for when a new game starts (public)
-      socket.on('gameStarted', (players) => {
+      socket.on('gameStarted', () => {
           setIsActive(true)
       });
 
@@ -146,7 +154,6 @@ function GameProvider(props) {
           socket.off('turnStarted');
           socket.off('turnEnded');
           socket.off('turnTimedOut');
-          socket.off('playerCanBeSkipped');
           socket.off('gameStarted');
           socket.off('gameEnded');
           socket.off('moveRejected');
@@ -170,6 +177,7 @@ function GameProvider(props) {
             isLSelectOpen, setIsLSelectOpen,
             isLReplaceOpen, setIsLReplaceOpen,
             isPromptOpen, setIsPromptOpen,
+            isInactiveOpen, setIsInactiveOpen,
             canClick, setCanClick,
             reactionTypes, 
             reactionEmojis,

@@ -4,11 +4,13 @@ import { AuthContext } from "../context/auth.context";
 import { RoomContext } from '../context/room.context';
 import { GameContext } from '../context/game.context';
 import AlertModal from '../components/AlertModal';
+import InactiveModal from '../components/InactiveModal';
 import LetterSelectionModal from '../components/LetterSelectionModal';
 import LetterReplaceModal from '../components/ReplaceLettersModal';
 import PromptModal from '../components/PromptModal';
 import GameSettings from '../components/GameSettings';
-import { Grid2, Paper, Box, Typography, Snackbar, Button } from '@mui/material';
+import { Grid2, Paper, Box, Typography, Button } from '@mui/material';
+import RoomBar from '../components/RoomBar';
 import UserList from '../components/UserList';
 import RoomChat from '../components/RoomChat';
 import Loading from '../components/Loading/Loading';
@@ -22,7 +24,6 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import LoopIcon from '@mui/icons-material/Loop';
 import FastForwardIcon from '@mui/icons-material/FastForward';
 import TerminalIcon from '@mui/icons-material/Terminal';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import UndoIcon from '@mui/icons-material/Undo';
 
 function RoomPage() {
@@ -32,16 +33,10 @@ function RoomPage() {
     const { turnPlayer, placedLetters, board, leftInBag, setIsLReplaceOpen, canClick, setCanClick, setBank, setBoard, setPlacedLetters,
         setIsPromptOpen } = useContext(GameContext)
     const [promptData, setPromptData] = useState(null)
-    const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
+    
 
     function handleEndGame() {
         socket.emit('endGame', roomId)
-    }
-
-    async function handleCopyLink() {
-        const currentUrl = window.location.href;
-        await navigator.clipboard.writeText(currentUrl)
-        setIsSnackbarOpen(true)
     }
 
     function handleSubmit() {
@@ -311,6 +306,7 @@ function RoomPage() {
 
     return (
         <>
+        <RoomBar />
         {isRoomLoaded ? (
             <Grid2 
                 container 
@@ -322,8 +318,7 @@ function RoomPage() {
                     boxSizing: 'border-box',
                 }}>
                 {/* Left Panel - Player List & Turn Data */}
-                <Snackbar open={isSnackbarOpen} autoHideDuration={3000} onClose={()=>{setIsSnackbarOpen(false)}}
-                    message="Room link copied to clipboard!"/>
+                
                 <Grid2 size={1} sx={{ height: '100%', boxSizing: 'border-box'}}>
                     <Paper sx={{ padding: '10px', height: '97%', display: 'flex', flexDirection: 'column' }}>
                         <Box sx={{display: 'flex', mb: 'auto', alignItems: 'center', mx: 'auto'}}>
@@ -331,14 +326,6 @@ function RoomPage() {
                             <Typography variant="h5">{isActive ? 'Players' : `${usersInRoom.length} Users in room`}</Typography>
                         </Box>
                         <UserList />
-                        {(User._id === hostId) && <Button 
-                                variant="contained" 
-                                startIcon={<ContentCopyIcon />}
-                                sx= {{mx: 'auto', mt: 'auto', alignSelf: 'center', textTransform: 'none', bgcolor: 'grey'}}
-                                onClick={handleCopyLink}
-                                >
-                                    Copy Room Link
-                            </Button>}
                         {(User._id === hostId && isActive) && <Button 
                                 variant="contained" 
                                 color="error" 
@@ -353,6 +340,7 @@ function RoomPage() {
 
                 {/* Middle Panel - Game Board */}
                 <AlertModal />
+                <InactiveModal />
                 <LetterSelectionModal />
                 <LetterReplaceModal />
                 <PromptModal word={board && getWordForPrompt()} promptData={promptData} setPromptData={setPromptData} />

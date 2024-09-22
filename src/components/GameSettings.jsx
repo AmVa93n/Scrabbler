@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
-import { Button, InputLabel, Select, MenuItem, FormControl, Typography, Slider, Box } from '@mui/material';
+import { Button, InputLabel, Select, MenuItem, FormControl, Typography, Slider, Box, RadioGroup, FormControlLabel, 
+    Radio, Stack} from '@mui/material';
 import { RoomContext } from '../context/room.context';
 import { GameContext } from '../context/game.context';
 import { useSocket } from '../context/socket.context';
@@ -14,6 +15,7 @@ function GameSettings() {
     const [settings, setSettings] = useState({ 
         board: '', 
         letterBag: '',
+        gameEnd: 'classic',
         turnDuration: 180,
         turnsUntilSkip: 3,
         bankSize: 7
@@ -31,7 +33,7 @@ function GameSettings() {
             setSettings((prev) => ({ ...prev, board: boards[0]._id, letterBag: letterBags[0]._id }));
           } catch (error) {
             const errorDescription = error.response.data.message;
-            alert(errorDescription,'error',5000)
+            alert(errorDescription)
           }
         }
         init()
@@ -47,10 +49,14 @@ function GameSettings() {
         const letterBag = letterBags.find(bag => bag._id === settings.letterBag)
         const gameSettings = { ...settings, board, letterBag}
         const gameSession = {players: [...usersInRoom], settings: gameSettings}
-        await accountService.ping()
-        socket.emit('startGame', roomId, hostId, gameSession)
-        setCanClick(false)
-        setBankSize(settings.bankSize)
+        const response = await accountService.ping()
+        if (response) {
+            socket.emit('startGame', roomId, hostId, gameSession)
+            setCanClick(false)
+            setBankSize(settings.bankSize)
+        } else {
+            alert('The server is down. Refresh the page and try again')
+        }
     }
 
     return (
@@ -66,36 +72,51 @@ function GameSettings() {
                 <SettingsIcon sx={{mr: 1}} />
                 <Typography variant="h5">Game Settings</Typography>
             </Box>
-            <FormControl sx={{ m: 1, minWidth: 200 }} size="small">
-                <InputLabel id="board">Board</InputLabel>
-                <Select
-                    labelId="board"
-                    label="Board"
-                    value={settings?.board}
-                    onChange={(e) => handleChange(e,"board")}
-                    >
-                    {boards.map(board => (
-                        <MenuItem key={board._id} value={board._id}>{board.name}</MenuItem>
-                    ))}
-                </Select>
-            </FormControl>
-            <FormControl sx={{ m: 1, minWidth: 200 }} size="small">
-                <InputLabel id="letterBag">Letter Bag</InputLabel>
-                <Select
-                    labelId="letterBag"
-                    label="Letter Bag"
-                    value={settings?.letterBag}
-                    onChange={(e) => handleChange(e,"letterBag")}
-                    >
-                    {letterBags.map(letterBag => (
-                        <MenuItem key={letterBag._id} value={letterBag._id}>{letterBag.name}</MenuItem>
-                    ))}
-                </Select>
+
+            <Stack direction={'row'} sx={{mb: 3}}>
+                <FormControl sx={{ m: 1, minWidth: 200 }} size="small">
+                    <InputLabel id="board">Board</InputLabel>
+                    <Select
+                        labelId="board"
+                        label="Board"
+                        value={settings?.board}
+                        onChange={(e) => handleChange(e,"board")}
+                        >
+                        {boards.map(board => (
+                            <MenuItem key={board._id} value={board._id}>{board.name}</MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+                <FormControl sx={{ m: 1, minWidth: 200 }} size="small">
+                    <InputLabel id="letterBag">Tile Bag</InputLabel>
+                    <Select
+                        labelId="letterBag"
+                        label="Tile Bag"
+                        value={settings?.letterBag}
+                        onChange={(e) => handleChange(e,"letterBag")}
+                        >
+                        {letterBags.map(letterBag => (
+                            <MenuItem key={letterBag._id} value={letterBag._id}>{letterBag.name}</MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+            </Stack>
+
+            <FormControl>
+                <Typography gutterBottom>End of Game</Typography>
+                <RadioGroup
+                value={settings?.gameEnd}
+                onChange={(e) => handleChange(e,"gameEnd")}
+                row
+                >
+                <FormControlLabel value="classic" control={<Radio />} label="Classic" />
+                <FormControlLabel value="alternative" control={<Radio />} label="Alternative" />
+                </RadioGroup>
             </FormControl>
 
             <Box sx={{m: 1, minWidth: 500}}>
                 <Typography id="input-slider" gutterBottom>
-                    Letter Bank Size
+                    Rack Size
                 </Typography>
                 <Slider
                     value={settings?.bankSize}
@@ -137,7 +158,7 @@ function GameSettings() {
 
             <Box sx={{m: 1, minWidth: 500}}>
                 <Typography id="input-slider" gutterBottom>
-                    Number of consecutive missed turns until a player may be skipped
+                    Number of consecutive missed turns until a player is skipped
                 </Typography>
                 <Slider
                     value={settings?.turnsUntilSkip}

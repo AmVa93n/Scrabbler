@@ -11,11 +11,13 @@ function RoomProvider(props) {
     const socket = useSocket();
     const User = useContext(AuthContext).user;
     const [hostId, setHostId] = useState('')
+    const [roomName, setRoomName] = useState('')
     const [isActive, setIsActive] = useState(false)
     const [players, setPlayers] = useState([])
     const [bankSize, setBankSize] = useState(null)
     const [messages, setMessages] = useState([])
     const [usersInRoom, setUsersInRoom] = useState([])
+    const [isRulesOpen, setIsRulesOpen] = useState(false)
     const [isRoomLoaded, setIsRoomLoaded] = useState(false)
     const navigate = useNavigate();
 
@@ -23,11 +25,12 @@ function RoomProvider(props) {
         async function init() {
             try { // Get DB room data when user joins
                 const roomData = await accountService.getRoom(roomId)
-                const { kickedUsers, creator, messages, gameSession } = roomData
+                const { kickedUsers, creator, messages, gameSession, name } = roomData
                 if (kickedUsers.includes(User._id)) { // redirect to home if user was kicked before
                     navigate('/')
                     return
                 }
+                setRoomName(name)
                 setHostId(creator)
                 setMessages(messages)
                 setIsActive(!!gameSession)
@@ -93,10 +96,12 @@ function RoomProvider(props) {
         <RoomContext.Provider value={{
             usersInRoom,
             roomId,
+            roomName,
             messages,
             isActive, setIsActive,
             players, setPlayers,
             bankSize, setBankSize,
+            isRulesOpen, setIsRulesOpen,
             hostId,
             isRoomLoaded
         }}>

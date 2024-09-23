@@ -9,9 +9,9 @@ import LoopIcon from '@mui/icons-material/Loop';
 function LetterReplaceModal() {
   const socket = useSocket();
   const User = useContext(AuthContext).user;
-  const { roomId, players } = useContext(RoomContext)
+  const { roomId } = useContext(RoomContext)
+  const { rack, placedLetters, leftInBag, isLReplaceOpen, setIsLReplaceOpen, resetTurnActions, players } = useContext(GameContext)
   const isPlaying = players.find(player => player._id === User._id)
-  const { rack, placedLetters, leftInBag, isLReplaceOpen, setIsLReplaceOpen } = useContext(GameContext)
   const [selectedLetters, setSelectedLetters] = useState([])
 
   function handleLetterClick(letterId) {
@@ -26,6 +26,7 @@ function LetterReplaceModal() {
     setIsLReplaceOpen(false)
     socket.emit('swapLetters', roomId, selectedLetters)
     setSelectedLetters([])
+    resetTurnActions()
   }
 
   function handleCancel() {

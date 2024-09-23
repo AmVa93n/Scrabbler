@@ -26,8 +26,8 @@ const shine = keyframes`
 
 export default function UserList() {
     const User = useContext(AuthContext).user;
-    const { roomId, hostId, usersInRoom, isActive, players } = useContext(RoomContext)
-    const { turnPlayer, turnEndTime, reactionScore } = useContext(GameContext)
+    const { roomId, hostId, usersInRoom, isActive } = useContext(RoomContext)
+    const { turnPlayer, turnEndTime, reactionScore, players } = useContext(GameContext)
     const userList = isActive ? players : usersInRoom
     const socket = useSocket();
 

@@ -13,8 +13,8 @@ function RoomProvider(props) {
     const [hostId, setHostId] = useState('')
     const [roomName, setRoomName] = useState('')
     const [isActive, setIsActive] = useState(false)
-    const [players, setPlayers] = useState([])
     const [rackSize, setRackSize] = useState(null)
+    const [gameMode, setGameMode] = useState('')
     const [messages, setMessages] = useState([])
     const [usersInRoom, setUsersInRoom] = useState([])
     const [isRulesOpen, setIsRulesOpen] = useState(false)
@@ -36,6 +36,7 @@ function RoomProvider(props) {
                 setIsActive(!!gameSession)
                 if (gameSession) {
                     setRackSize(gameSession.settings.rackSize)
+                    setGameMode(gameSession.settings.gameEnd)
                 } 
                 setIsRoomLoaded(true)
                 socket.emit('joinRoom', roomId);
@@ -52,12 +53,12 @@ function RoomProvider(props) {
             setUsersInRoom(usersInRoom);
         });
 
-        // Listen for players joining the room (public)
+        // Listen for users joining the room (public)
         socket.on('userJoined', (user) => {
             setUsersInRoom(prevUsers => prevUsers.some(u => u._id === user._id) ? prevUsers : [...prevUsers, user]);
         });
 
-        // Listen for players leaving the room (public)
+        // Listen for users leaving the room (public)
         socket.on('userLeft', (user) => {
             setUsersInRoom((prevUsers) => prevUsers.filter(u => u._id !== user._id));
         });
@@ -99,8 +100,8 @@ function RoomProvider(props) {
             roomName,
             messages,
             isActive, setIsActive,
-            players, setPlayers,
             rackSize, setRackSize,
+            gameMode, setGameMode,
             isRulesOpen, setIsRulesOpen,
             hostId,
             isRoomLoaded

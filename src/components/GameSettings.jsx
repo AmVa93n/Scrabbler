@@ -9,7 +9,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import PlayCircleIcon from '@mui/icons-material/PlayCircle';
 
 function GameSettings() {
-    const { roomId, usersInRoom, hostId, setRackSize } = useContext(RoomContext)
+    const { roomId, usersInRoom, hostId } = useContext(RoomContext)
     const { canClick, setCanClick } = useContext(GameContext)
     const socket = useSocket();
     const [settings, setSettings] = useState({ 
@@ -53,7 +53,6 @@ function GameSettings() {
         if (response) {
             socket.emit('startGame', roomId, hostId, gameSession)
             setCanClick(false)
-            setRackSize(settings.rackSize)
         } else {
             alert('The server is down. Refresh the page and try again')
         }

@@ -9,8 +9,8 @@ import { useDrop } from 'react-dnd';
 const ItemType = 'LETTER';
 
 function Rack() {
-    const { rack, setBoard, setRack, setPlacedLetters } = useContext(GameContext)
-    const { rackSize, players } = useContext(RoomContext)
+    const { rack, setBoard, setRack, setPlacedLetters, players } = useContext(GameContext)
+    const { rackSize } = useContext(RoomContext)
     const User = useContext(AuthContext).user;
     const isPlaying = players.find(player => player._id === User._id)
 

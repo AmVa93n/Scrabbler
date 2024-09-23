@@ -4,8 +4,8 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Button, FormControl,
 import { GameContext } from '../context/game.context';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
-function PromptModal({ word, promptData, setPromptData }) {
-  const { isPromptOpen, setIsPromptOpen, turnPlayer, reactionTypes, reactionEmojis } = useContext(GameContext)
+function PromptModal({ word }) {
+  const { promptData, setPromptData, isPromptOpen, setIsPromptOpen, turnPlayer, reactionTypes, reactionEmojis } = useContext(GameContext)
   const defaultText = `${turnPlayer ? turnPlayer.name : '<player>'} was thinking about ${word ? word?.toLowerCase() : '<word>'} because`
   const [text, setText] = useState('')
 

@@ -3,16 +3,16 @@ import { Dialog, DialogContent, Typography } from '@mui/material';
 import { GameContext } from '../context/game.context';
 
 function AlertModal() {
-    const { isModalOpen, setIsModalOpen, modalMessage } = useContext(GameContext)
+    const { isAlertOpen, setIsAlertOpen, alertMessage } = useContext(GameContext)
 
     return (
         <Dialog
-            open={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
+            open={isAlertOpen}
+            onClose={() => setIsAlertOpen(false)}
         >
             <DialogContent>
                 <Typography id="modal-title" variant="h6" component="h2">
-                    {modalMessage}
+                    {alertMessage}
                 </Typography>
             </DialogContent>
         </Dialog>

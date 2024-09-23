@@ -4,8 +4,8 @@ import { AuthContext } from "../context/auth.context";
 import { RoomContext } from '../context/room.context';
 import { GameContext } from '../context/game.context';
 import { Button, Stack, Typography, Box } from '@mui/material';
-import LetterSelectionModal from './LetterSelectionModal';
-import LetterReplaceModal from './ReplaceLettersModal';
+import BlankModal from './BlankModal';
+import SwapModal from './SwapModal';
 import PromptModal from './PromptModal';
 import AlertModal from '../components/AlertModal';
 import InactiveModal from '../components/InactiveModal';
@@ -340,8 +340,8 @@ function GameActions() {
             </Stack>
             }
 
-            <LetterSelectionModal />
-            <LetterReplaceModal />
+            <BlankModal />
+            <SwapModal />
             <PromptModal word={board && getWordForPrompt()} />
             <AlertModal />
             <InactiveModal />

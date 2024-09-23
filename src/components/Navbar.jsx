@@ -1,19 +1,8 @@
 import * as React from 'react';
-import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
-import Toolbar from '@mui/material/Toolbar';
-import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
-import Menu from '@mui/material/Menu';
+import { AppBar, Box, Toolbar, IconButton, Typography, Menu, Avatar, Button, Tooltip, MenuItem, Container, Badge } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import Container from '@mui/material/Container';
-import Avatar from '@mui/material/Avatar';
-import Button from '@mui/material/Button';
-import Tooltip from '@mui/material/Tooltip';
-import MenuItem from '@mui/material/MenuItem';
 import MailIcon from '@mui/icons-material/Mail';
 import NotificationsIcon from '@mui/icons-material/Notifications';
-import Badge from '@mui/material/Badge';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import ChairIcon from '@mui/icons-material/Chair';
 import LogoutIcon from '@mui/icons-material/Logout';
@@ -27,7 +16,7 @@ import { Link as RouterLink } from 'react-router-dom';
 import { useContext } from "react";
 import { AuthContext } from "../context/auth.context";
 
-const navLinks = ['NavLink 1', 'NavLink 2', 'NavLink 3'];
+const navLinks = ['Rules', 'Dictionary'];
 const routes = {
     'nav': '/nav',
 };
@@ -107,7 +96,7 @@ function Navbar() {
   };
 
   return (
-    <AppBar position="static">
+    <AppBar position="static" sx={{bgcolor: '#175c36'}}>
       <Container maxWidth="xl">
         <Toolbar disableGutters>
           <Typography
@@ -115,16 +104,9 @@ function Navbar() {
             noWrap
             component={RouterLink}
             to="/"
-            sx={{
-              mr: 2,
-              display: { xs: 'none', md: 'flex' },
-              fontFamily: 'monospace',
-              fontWeight: 700,
-              color: 'inherit',
-              textDecoration: 'none',
-            }}
+            sx={{mr: 2, display: { xs: 'none', md: 'flex' } }}
           >
-            Scrabbler
+            <img alt='logo' src='logo.png' width={200}></img>
           </Typography>
 
           <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
@@ -156,7 +138,7 @@ function Navbar() {
             >
               {navLinks.map((link) => (
                 <MenuItem key={link} component={RouterLink} to={routes[link]} onClick={handleCloseNavMenu}>
-                  <Typography sx={{ textAlign: 'center' }}>{link}</Typography>
+                  <Typography sx={{ textAlign: 'center', textTransform: 'none' }}>{link}</Typography>
                 </MenuItem>
               ))}
             </Menu>
@@ -170,13 +152,9 @@ function Navbar() {
               mr: 2,
               display: { xs: 'flex', md: 'none' },
               flexGrow: 1,
-              fontFamily: 'monospace',
-              fontWeight: 700,
-              color: 'inherit',
-              textDecoration: 'none',
             }}
           >
-            Scrabbler
+            <img alt='logo' src='logo.png' width={200}></img>
           </Typography>
 
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
@@ -186,7 +164,7 @@ function Navbar() {
                 component={RouterLink}
                 to={routes[link]}
                 onClick={handleCloseNavMenu}
-                sx={{ my: 2, color: 'white', display: 'block' }}
+                sx={{ my: 2, color: 'white', display: 'block', textTransform: 'none' }}
               >
                 {link}
               </Button>

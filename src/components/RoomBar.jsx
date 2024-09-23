@@ -7,6 +7,7 @@ import HelpIcon from '@mui/icons-material/Help';
 import DoorBackIcon from '@mui/icons-material/DoorBack';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import RulesModal from './RulesModal'
+import ChairIcon from '@mui/icons-material/Chair';
 
 function RoomBar() {
     const { roomName, setIsRulesOpen } = useContext(RoomContext)
@@ -25,24 +26,14 @@ function RoomBar() {
 
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="static">
+      <AppBar position="static" sx={{bgcolor: '#175c36'}}>
         <Toolbar>
 
-          <Typography
-            variant="h6"
-            noWrap
-            sx={{
-              mr: 2,
-              display: { xs: 'none', md: 'flex' },
-              fontFamily: 'monospace',
-              fontWeight: 700,
-              color: 'inherit',
-              textDecoration: 'none',
-            }}
-          >
-            Scrabbler
+          <Typography sx={{ mr: 2, display: { xs: 'none', md: 'flex' } }} variant="h6" noWrap>
+            <img alt='logo' src='/logo.png' width={200}></img>
           </Typography>
           
+          <ChairIcon sx={{mr: 1}} />
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             {roomName}
           </Typography>

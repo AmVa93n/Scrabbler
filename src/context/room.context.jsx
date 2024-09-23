@@ -88,8 +88,9 @@ function RoomProvider(props) {
             socket.off('refreshRoom');
             socket.off('userJoined');
             socket.off('userLeft');
-            socket.off('chatUpdated');
             socket.off('userKicked');
+            socket.off('chatUpdated');
+            socket.off('reactionsUpdated');
         };
     }, [roomId, socket, User._id]);
 

@@ -9,8 +9,8 @@ import BoardEditorPage from "./pages/BoardEditorPage";
 import TileBagEditorPage from "./pages/TileBagEditorPage";
 import RoomPage from "./pages/RoomPage";
 import Navbar from "./components/Navbar";
-import IsPrivate from "./components/IsPrivate/IsPrivate";
-import IsAnon from "./components/IsAnon/IsAnon";
+import IsPrivate from "./components/IsPrivate";
+import IsAnon from "./components/IsAnon";
 import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
@@ -22,7 +22,7 @@ function App() {
   const isInRoom = /\/rooms\/[a-zA-Z0-9]+/.test(location.pathname);
 
   return (
-    <div className="App" style={{height: '100%', backgroundColor: 'lightblue'}}>
+    <div className="App">
       {!isInRoom && <Navbar />}
 
       <Routes>

@@ -8,10 +8,13 @@ import { useNotifications } from '@toolpad/core/useNotifications';
 import { useNavigate } from "react-router-dom";
 import { Box, Card, CardActions, CardContent, CardMedia, Typography, Button } from '@mui/material';
 import CreateRoom from "../components/CreateRoom";
+import EditRoom from "../components/EditRoom";
 
 function RoomsPage() {
   const [rooms, setRooms] = useState([])
   const [creating, setCreating] = useState(false)
+  const [editing, setEditing] = useState(false)
+  const [currentRoom, setCurrentRoom] = useState(null)
   const navigate = useNavigate();
   const notifications = useNotifications();
 
@@ -41,21 +44,20 @@ function RoomsPage() {
     }
   }
 
-  async function handleJoin(event) {
-    event.preventDefault();
+  function handleJoin(event) {
     const roomId = event.target.id
-    try {
-        await accountService.getRoom(roomId)
-        navigate(`/rooms/${roomId}`);
-        
-    } catch (error) {
-        const errorDescription = error.response.data.message;
-        notify(errorDescription,'error',5000)
-    }
+    navigate(`/rooms/${roomId}`);
   }
 
   function handleCreate() {
     setCreating(true)
+  }
+
+  function handleEdit(event) {
+    const roomId = event.target.id
+    const roomToEdit = rooms.find(room => room._id === roomId)
+    setCurrentRoom(roomToEdit)
+    setEditing(true)
   }
 
   function notify(message, type, duration) {
@@ -69,12 +71,13 @@ function RoomsPage() {
     <>
       <Box sx={{mx: 'auto', mt: 2, width: 'fit-content', maxWidth: '80%', display: 'flex'}}>
           {rooms.map(room => (
-              <Card sx={{ maxWidth: 345, mx: 1 }} key={room._id}>
+              <Card sx={{ width: 300, mx: 1, display: 'flex', flexDirection: 'column' }} key={room._id}>
                 <CardMedia
                   sx={{ height: 140 }}
-                  image="/room-default.jpg"
+                  image={room.image || "/room-default.jpg"}
                 />
-                <CardContent>
+
+                <CardContent sx={{ flexGrow: 1 }}>
                   <Typography gutterBottom variant="h5" component="div">
                     {room.name}
                   </Typography>
@@ -82,7 +85,8 @@ function RoomsPage() {
                     {room.description}
                   </Typography>
                 </CardContent>
-                <CardActions>
+
+                <CardActions sx={{mx: 'auto'}}>
                     <Button 
                       size='small' 
                       variant="contained" 
@@ -97,7 +101,8 @@ function RoomsPage() {
                       size='small' 
                       variant="contained" 
                       startIcon={<EditIcon />}  
-                      to="/rooms/edit"
+                      onClick={handleEdit} 
+                      id={room._id}
                       sx={{textTransform: 'none'}}
                       >
                         Edit
@@ -130,6 +135,7 @@ function RoomsPage() {
           </Button>
         </Box>
         <CreateRoom creating={creating} setCreating={setCreating} setRooms={setRooms}/>
+        <EditRoom editing={editing} setEditing={setEditing} setRooms={setRooms} room={currentRoom}/>
     </>
   );
 }

@@ -372,6 +372,7 @@ function BoardEditorPage() {
                 sx={{ width: 200, mx: 'auto', mb: 4, display: 'block' }} size="small"
                 value={currentBoard?._id || ''}
                 onChange={handleChangeBoard}
+                MenuProps={{disableScrollLock: true}}
                 >
                 {boards.map(board => (
                     <MenuItem key={board._id} value={board._id}>{board.name}</MenuItem>
@@ -390,6 +391,7 @@ function BoardEditorPage() {
                     sx={{ width: 200 }} 
                     value={currentBoard?.size || ''}
                     onChange={handleChange}
+                    MenuProps={{disableScrollLock: true}}
                     >
                       <MenuItem value={15}>15x15</MenuItem>
                       <MenuItem value={17}>17x17</MenuItem>

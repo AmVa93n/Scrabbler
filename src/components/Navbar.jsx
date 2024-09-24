@@ -198,6 +198,7 @@ function Navbar() {
               }}
               open={Boolean(anchorElUser)}
               onClose={handleCloseUserMenu}
+              disableScrollLock
             >
               {dropdownLinks.map((link) => (
                 <MenuItem 

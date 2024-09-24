@@ -1,10 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
-import { styled } from '@mui/material/styles';
-import { TextField, IconButton, ListItem, ListItemAvatar, ListItemText, Avatar, RadioGroup, Radio, Badge,  
+import { TextField, IconButton, ListItem, ListItemAvatar, ListItemText, Avatar, RadioGroup, Radio, Badge, Box, List, Tooltip, Paper,
           FormControlLabel  } from '@mui/material';
-import Box from '@mui/material/Box';
-import List from '@mui/material/List';
-import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers';
@@ -18,16 +14,10 @@ import BirthdateIcon from '@mui/icons-material/Event';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
-import Tooltip from '@mui/material/Tooltip';
-import Paper from '@mui/material/Paper';
 import CountrySelect from '../components/CountrySelect';
 import accountService from "../services/account.service";
 import { useNotifications } from '@toolpad/core/useNotifications';
 import { blue } from '@mui/material/colors';
-
-const Demo = styled('div')(({ theme }) => ({
-  backgroundColor: theme.palette.background.paper,
-}));
 
 function ProfilePage() {
   const [fieldValues, setFieldValues] = useState(null)
@@ -112,7 +102,7 @@ function ProfilePage() {
   }
 
   return (
-    <Paper elevation={3} sx={{ width: '50dvw', height: 'fit-content', mx: 'auto'}}>
+    <Paper elevation={3} sx={{ width: 'fit-content', px: 3, height: 'fit-content', mx: 'auto'}}>
       <Typography sx={{ mt: 4, mb: 2, mx: 'auto', width: 'fit-content', pt: 2 }} variant="h5" component="div">
           My Profile
       </Typography>
@@ -141,9 +131,8 @@ function ProfilePage() {
         >
         <Avatar src={pfpPreview} sx={{mx: "auto", width: '12rem', height: '12rem', mb: '1rem'}} />
       </Badge>
-    <Box sx={{ maxWidth: '30dvw', mx: 'auto' }}>
-        <Grid item xs={12} md={6}>
-          <Demo>
+    <Box sx={{ mx: 'auto' }}>
+        
             <List dense={false}>
               {fields.map(field =>
                 <ListItem
@@ -214,8 +203,7 @@ function ProfilePage() {
                 </ListItem>,
               )}
             </List>
-          </Demo>
-        </Grid>
+          
     </Box>
     </Paper >
   );

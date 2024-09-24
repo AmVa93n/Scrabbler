@@ -153,6 +153,7 @@ function TileBagEditorPage() {
                 sx={{ width: 200, mx: 'auto', mb: 4, display: 'block' }} size="small"
                 value={currentBag?._id || ''}
                 onChange={handleChangeBag}
+                MenuProps={{disableScrollLock: true}}
                 >
                 {tileBags.map(tileBag => (
                     <MenuItem key={tileBag._id} value={tileBag._id}>{tileBag.name}</MenuItem>

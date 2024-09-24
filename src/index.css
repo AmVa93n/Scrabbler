@@ -1,5 +1,6 @@
 html, body {
   margin: 0;
   background-image: url('../public/background.jpg');
-  background-size: cover;
+  background-size: 100% auto;
+  background-repeat: no-repeat;
 }

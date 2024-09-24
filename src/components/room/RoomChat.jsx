@@ -6,9 +6,9 @@ import ListItemText from '@mui/material/ListItemText';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import Avatar from '@mui/material/Avatar';
 import Typography from '@mui/material/Typography';
-import { RoomContext } from '../context/room.context';
+import { RoomContext } from '../../context/room.context';
 import { Box } from '@mui/material';
-import Reactions from '../components/Reactions';
+import Reactions from './Reactions';
 
 export default function RoomChat() {
     const { messages } = useContext(RoomContext)

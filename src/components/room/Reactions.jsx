@@ -1,9 +1,9 @@
 import { useContext, useState } from 'react';
 import { IconButton, Tooltip, Box, Typography, Popover, Grow } from '@mui/material';
-import { useSocket } from '../context/socket.context';
-import { RoomContext } from '../context/room.context';
-import { AuthContext } from "../context/auth.context";
-import { GameContext } from '../context/game.context';
+import { useSocket } from '../../context/socket.context';
+import { RoomContext } from '../../context/room.context';
+import { AuthContext } from "../../context/auth.context";
+import { GameContext } from '../../context/game.context';
 import AddReactionIcon from '@mui/icons-material/AddReaction';
 
 function Reactions({ message }) {

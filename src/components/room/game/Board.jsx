@@ -1,6 +1,6 @@
 import Grid2 from '@mui/material/Grid2';
-import Square from '../components/Square';
-import { GameContext } from '../context/game.context';
+import Square from './Square';
+import { GameContext } from '../../../context/game.context';
 import { useContext } from 'react';
 
 function Board() {

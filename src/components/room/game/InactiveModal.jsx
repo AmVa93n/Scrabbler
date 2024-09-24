@@ -1,9 +1,9 @@
 import { useContext } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Typography, Button } from '@mui/material';
-import { GameContext } from '../context/game.context';
-import { RoomContext } from '../context/room.context';
-import { AuthContext } from "../context/auth.context";
-import { useSocket } from '../context/socket.context';
+import { GameContext } from '../../../context/game.context';
+import { RoomContext } from '../../../context/room.context';
+import { AuthContext } from "../../../context/auth.context";
+import { useSocket } from '../../../context/socket.context';
 
 function InactiveModal() {
     const { isInactiveOpen, setIsInactiveOpen } = useContext(GameContext)

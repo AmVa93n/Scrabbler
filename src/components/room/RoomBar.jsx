@@ -1,7 +1,7 @@
 import { useContext, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useSocket } from '../context/socket.context';
-import { RoomContext } from '../context/room.context';
+import { useSocket } from '../../context/socket.context';
+import { RoomContext } from '../../context/room.context';
 import { AppBar, Box, Toolbar, Typography, Button, Snackbar } from '@mui/material';
 import HelpIcon from '@mui/icons-material/Help';
 import DoorBackIcon from '@mui/icons-material/DoorBack';

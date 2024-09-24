@@ -1,9 +1,9 @@
 import { useContext, useState } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Grid2, Paper, Typography } from '@mui/material';
-import { RoomContext } from '../context/room.context';
-import { GameContext } from '../context/game.context';
-import { AuthContext } from "../context/auth.context";
-import { useSocket } from '../context/socket.context';
+import { RoomContext } from '../../../context/room.context';
+import { GameContext } from '../../../context/game.context';
+import { AuthContext } from "../../../context/auth.context";
+import { useSocket } from '../../../context/socket.context';
 import LoopIcon from '@mui/icons-material/Loop';
 
 function SwapModal() {

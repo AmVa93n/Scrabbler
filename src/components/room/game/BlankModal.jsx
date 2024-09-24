@@ -1,6 +1,6 @@
 import { useContext } from 'react';
 import { Dialog, DialogTitle, DialogContent, Grid2, Paper, Typography } from '@mui/material';
-import { GameContext } from '../context/game.context';
+import { GameContext } from '../../../context/game.context';
 
 function BlankModal() {
   const { setBoard, isLSelectOpen, setIsLSelectOpen, blank, setBlank } = useContext(GameContext)

@@ -1,6 +1,6 @@
 import { useContext } from 'react';
 import { Dialog, DialogContent, Typography } from '@mui/material';
-import { GameContext } from '../context/game.context';
+import { GameContext } from '../../../context/game.context';
 
 function AlertModal() {
     const { isAlertOpen, setIsAlertOpen, alertMessage } = useContext(GameContext)

@@ -1,8 +1,8 @@
 import { useState, useContext } from 'react';
 import { TextField, Button, Box } from '@mui/material';
-import { useSocket } from '../context/socket.context';
-import { RoomContext } from '../context/room.context';
-import { AuthContext } from "../context/auth.context";
+import { useSocket } from '../../context/socket.context';
+import { RoomContext } from '../../context/room.context';
+import { AuthContext } from "../../context/auth.context";
 
 function ChatInput() {
     const [message, setMessage] = useState('');

@@ -1,7 +1,7 @@
 import { useContext, useState } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, FormControl, FormLabel, 
     TextField, ToggleButtonGroup, ToggleButton, Typography, Tooltip } from '@mui/material';
-import { GameContext } from '../context/game.context';
+import { GameContext } from '../../../context/game.context';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 function PromptModal({ word }) {

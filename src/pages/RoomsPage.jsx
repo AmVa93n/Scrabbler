@@ -7,8 +7,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { useNotifications } from '@toolpad/core/useNotifications';
 import { useNavigate } from "react-router-dom";
 import { Box, Card, CardActions, CardContent, CardMedia, Typography, Button } from '@mui/material';
-import CreateRoom from "../components/CreateRoom";
-import EditRoom from "../components/EditRoom";
+import CreateRoom from "../components/room/CreateRoom";
+import EditRoom from "../components/room/EditRoom";
 
 function RoomsPage() {
   const [rooms, setRooms] = useState([])
@@ -69,9 +69,9 @@ function RoomsPage() {
 
   return (
     <>
-      <Box sx={{mx: 'auto', mt: 2, width: 'fit-content', maxWidth: '80%', display: 'flex'}}>
+      <Box sx={{mx: 'auto', mt: 2, width: 'fit-content', maxWidth: '85%', display: 'flex', flexWrap: 'wrap'}}>
           {rooms.map(room => (
-              <Card sx={{ width: 300, mx: 1, display: 'flex', flexDirection: 'column' }} key={room._id}>
+              <Card sx={{ width: 300, m: 1, display: 'flex', flexDirection: 'column' }} key={room._id}>
                 <CardMedia
                   sx={{ height: 140 }}
                   image={room.image || "/room-default.jpg"}
@@ -124,7 +124,7 @@ function RoomsPage() {
           }
         </Box>
 
-        <Box sx={{mt: 3, mx: 'auto', width: 'fit-content'}}>
+        <Box sx={{mb: 1, mx: 'auto', width: 'fit-content'}}>
           <Button 
             variant="contained" 
             startIcon={<CreateIcon />} 

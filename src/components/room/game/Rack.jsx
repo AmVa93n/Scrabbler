@@ -1,8 +1,8 @@
 import Tile from './Tile';
 import { Paper } from '@mui/material';
-import { GameContext } from '../context/game.context';
-import { RoomContext } from '../context/room.context';
-import { AuthContext } from "../context/auth.context";
+import { GameContext } from '../../../context/game.context';
+import { RoomContext } from '../../../context/room.context';
+import { AuthContext } from "../../../context/auth.context";
 import { useContext } from 'react';
 import { useDrop } from 'react-dnd';
 

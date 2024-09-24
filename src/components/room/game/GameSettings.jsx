@@ -1,10 +1,10 @@
 import { useContext, useEffect, useState } from 'react';
 import { Button, InputLabel, Select, MenuItem, FormControl, Typography, Slider, Box, RadioGroup, FormControlLabel, 
     Radio, Stack} from '@mui/material';
-import { RoomContext } from '../context/room.context';
-import { GameContext } from '../context/game.context';
-import { useSocket } from '../context/socket.context';
-import accountService from "../services/account.service";
+import { RoomContext } from '../../../context/room.context';
+import { GameContext } from '../../../context/game.context';
+import { useSocket } from '../../../context/socket.context';
+import accountService from "../../../services/account.service";
 import SettingsIcon from '@mui/icons-material/Settings';
 import PlayCircleIcon from '@mui/icons-material/PlayCircle';
 

@@ -1,8 +1,8 @@
 import { useContext } from 'react';
 import { useDrag } from 'react-dnd';
 import { Paper, Typography } from '@mui/material';
-import { AuthContext } from "../context/auth.context";
-import { GameContext } from '../context/game.context';
+import { AuthContext } from "../../../context/auth.context";
+import { GameContext } from '../../../context/game.context';
 
 const ItemType = 'LETTER';
 

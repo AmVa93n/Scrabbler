@@ -1,7 +1,7 @@
 import { Box, Typography } from '@mui/material';
 import { useDrop } from 'react-dnd';
 import Tile from './Tile';
-import { GameContext } from '../context/game.context';
+import { GameContext } from '../../../context/game.context';
 import { useContext } from 'react';
 
 const ItemType = 'LETTER';

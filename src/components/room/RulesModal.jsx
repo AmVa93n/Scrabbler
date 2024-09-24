@@ -1,7 +1,7 @@
 import { useContext } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Accordion, AccordionDetails, 
           AccordionSummary } from '@mui/material';
-import { RoomContext } from '../context/room.context';
+import { RoomContext } from '../../context/room.context';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import InfoIcon from '@mui/icons-material/Info';
 import LoopIcon from '@mui/icons-material/Loop';

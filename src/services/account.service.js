@@ -96,10 +96,6 @@ class AccountService {
   async deleteTileBag(tilebagId) {
     return this.api.delete(`/account/tilebag/${tilebagId}`);
   }
-
-  ping() {
-    return this.api.get(`/account/ping`); // this is just to keep the server from spinning down
-  }
 }
 
 // Create one instance of the service

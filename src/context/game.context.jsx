@@ -2,7 +2,7 @@ import { createContext, useState, useEffect, useContext } from 'react';
 import { useSocket } from '../context/socket.context';
 import { AuthContext } from "../context/auth.context";
 import { RoomContext } from '../context/room.context';
-import accountService from "../services/account.service";
+import appService from "../services/app.service";
 
 const GameContext = createContext();
 
@@ -81,7 +81,7 @@ function GameProvider(props) {
               setAlertMessage("It's your turn!");
               setIsAlertOpen(true);
               setCanClick(true)
-              await accountService.ping()
+              await appService.ping()
           }
           timer = setTimeout(() => setIsAlertOpen(false), autoClose);
           return () => clearTimeout(timer); // Clear the timeout if the component unmounts

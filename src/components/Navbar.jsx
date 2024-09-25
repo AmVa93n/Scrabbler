@@ -56,6 +56,7 @@ function Navbar() {
     <AppBar position="static" sx={{bgcolor: '#175c36'}}>
       <Container maxWidth="xl">
         <Toolbar disableGutters>
+          
           <Typography
             variant="h6"
             noWrap
@@ -106,6 +107,7 @@ function Navbar() {
               ))}
             </Menu>
           </Box>
+
           <Typography
             variant="h5"
             noWrap
@@ -117,7 +119,7 @@ function Navbar() {
               flexGrow: 1,
             }}
           >
-            <img alt='logo' src='logo.png' width={200}></img>
+            <img alt='logo' src='logo.png' width={175}></img>
           </Typography>
 
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>

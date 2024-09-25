@@ -5,6 +5,7 @@ import { RoomContext } from '../../../context/room.context';
 import { GameContext } from '../../../context/game.context';
 import { useSocket } from '../../../context/socket.context';
 import accountService from "../../../services/account.service";
+import appService from "../../../services/app.service";
 import SettingsIcon from '@mui/icons-material/Settings';
 import PlayCircleIcon from '@mui/icons-material/PlayCircle';
 
@@ -49,7 +50,7 @@ function GameSettings() {
         const tileBag = tileBags.find(bag => bag._id === settings.tileBag)
         const gameSettings = { ...settings, board, tileBag}
         const gameSession = {players: [...usersInRoom], settings: gameSettings}
-        const response = await accountService.ping()
+        const response = await appService.ping()
         if (response) {
             socket.emit('startGame', roomId, hostId, gameSession)
             setCanClick(false)

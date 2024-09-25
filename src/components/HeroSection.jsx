@@ -1,12 +1,14 @@
 import React from 'react';
 import { Box, Typography, Button, Container } from '@mui/material';
+import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
+import { Link } from 'react-router-dom';
 
 function HeroSection() {
   return (
     <Box
       sx={{
         height: '100vh',
-        backgroundImage: 'url(/your-background-image.jpg)', // Replace with your image
+        backgroundImage: 'url(/hero-background.webp)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         display: 'flex',
@@ -19,16 +21,19 @@ function HeroSection() {
     >
       <Container>
         <Typography variant="h2" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
-          Welcome to Our Platform
+          Welcome to Scrabbler
         </Typography>
         <Typography variant="h5" gutterBottom>
-          Your one-stop solution for all your needs.
+          Can't get enough of Scrabble? Looking to play friends online for free? This is the place for you!
         </Typography>
         <Button
           variant="contained"
           color="primary"
           size="large"
-          sx={{ mt: 3 }}
+          startIcon={<RocketLaunchIcon />}
+          sx={{ mt: 3, textTransform: 'none', borderRadius: 10 }}
+          component={Link}
+          to="/rooms"
         >
           Get Started
         </Button>

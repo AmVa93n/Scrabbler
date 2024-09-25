@@ -1,6 +1,7 @@
 import { Routes, Route, useLocation } from "react-router-dom";
 
 import HomePage from "./pages/HomePage";
+import DictionaryPage from "./pages/DictionaryPage";
 import ProfilePage from "./pages/ProfilePage";
 import SignupPage from "./pages/SignUpPage";
 import LoginPage from "./pages/SignInPage";
@@ -27,6 +28,8 @@ function App() {
 
       <Routes>
         <Route path="/" element={<HomePage />} />
+
+        <Route path="/dictionary" element={<DictionaryPage />} />
 
         <Route path="/profile" element={
             <IsPrivate>

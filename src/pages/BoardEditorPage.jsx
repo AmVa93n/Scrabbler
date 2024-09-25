@@ -457,7 +457,6 @@ function BoardEditorPage() {
                 {createBoard().map((row, rowIndex) =>
                   row.map((square, colIndex) => (
                           <Grid2 
-                              item
                               key={`${rowIndex}-${colIndex}`}
                               sx={{
                                   width: `calc(100% / ${currentBoard.size})`, // Set width based on number of columns

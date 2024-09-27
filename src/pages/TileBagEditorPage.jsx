@@ -142,13 +142,12 @@ function TileBagEditorPage() {
     }
 
     return (
-    <>
-        <Box sx={{display: 'flex', mx: 'auto', alignItems: 'center', width: 'fit-content', mt: 2}}>
-            <FontDownloadIcon sx={{mr: 1}} />
-            <Typography variant="h5">Tile Bag Editor</Typography>
-        </Box>
-
         <Paper sx={{p: 2, width: 'fit-content', mx: 'auto', my: 2}}>
+            <Box sx={{display: 'flex', mx: 'auto', alignItems: 'center', width: 'fit-content', pb: 2}}>
+                <FontDownloadIcon sx={{mr: 1}} />
+                <Typography variant="h5">Tile Bag Editor</Typography>
+            </Box>
+
             <Select
                 sx={{ width: 200, mx: 'auto', mb: 4, display: 'block' }} size="small"
                 value={currentBag?._id || ''}
@@ -168,113 +167,112 @@ function TileBagEditorPage() {
                 </Typography>
             </Box>}
 
-        <Grid2 container spacing={4}>
-            {/* Split sorted array into two parts */}
-            {currentBag && currentBag.letterData.sort(sortAlphabetically)
-            .reduce(createThreeColumns, [[], [], []]) // Initial accumulator with two empty arrays
-            .map((columnData, columnIndex) => (
-                <Grid2 item size={4} key={columnIndex}>
+            <Grid2 container spacing={4}>
+                {/* Split sorted array into two parts */}
+                {currentBag && currentBag.letterData.sort(sortAlphabetically)
+                .reduce(createThreeColumns, [[], [], []]) // Initial accumulator with two empty arrays
+                .map((columnData, columnIndex) => (
+                    <Grid2 item size={4} key={columnIndex}>
 
-                    {/* Header Row */}
-                    <Grid2 container item spacing={2}>
-                        <Grid2 item size={4}>
-                            <Typography variant="body2" sx={{ textAlign: 'center' }}>
-                                Letter
-                            </Typography>
-                        </Grid2>
-                        <Grid2 item size={4}>
-                            <Typography variant="body2" sx={{ textAlign: 'center', minWidth: 105 }}>
-                                Count
-                            </Typography>
-                        </Grid2>
-                        <Grid2 item size={4}>
-                            <Typography variant="body2" sx={{ textAlign: 'center', minWidth: 105 }}>
-                                Score
-                            </Typography>
-                        </Grid2>
-                    </Grid2>
-                
-                    {columnData.map((letter) => (
-                    <Grid2 container item columnSpacing={2} rowSpacing={2} key={letter.letter} 
-                        sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
-                        <Grid2 item size={4}>
-                            <Paper
-                                sx={{
-                                width: 35,
-                                height: 35,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                backgroundColor: 'beige',
-                                }}
-                            >
-                                <Typography
-                                variant="body2"
-                                sx={{ fontWeight: 400, fontSize: 20 }}
-                                >
-                                {letter.letter}
+                        {/* Header Row */}
+                        <Grid2 container item spacing={2}>
+                            <Grid2 item size={4}>
+                                <Typography variant="body2" sx={{ textAlign: 'center' }}>
+                                    Letter
                                 </Typography>
-                            </Paper>
+                            </Grid2>
+                            <Grid2 item size={4}>
+                                <Typography variant="body2" sx={{ textAlign: 'center', minWidth: 105 }}>
+                                    Count
+                                </Typography>
+                            </Grid2>
+                            <Grid2 item size={4}>
+                                <Typography variant="body2" sx={{ textAlign: 'center', minWidth: 105 }}>
+                                    Score
+                                </Typography>
+                            </Grid2>
                         </Grid2>
+                    
+                        {columnData.map((letter) => (
+                        <Grid2 container item columnSpacing={2} rowSpacing={2} key={letter.letter} 
+                            sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+                            <Grid2 item size={4}>
+                                <Paper
+                                    sx={{
+                                    width: 35,
+                                    height: 35,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    backgroundColor: 'beige',
+                                    }}
+                                >
+                                    <Typography
+                                    variant="body2"
+                                    sx={{ fontWeight: 400, fontSize: 20 }}
+                                    >
+                                    {letter.letter}
+                                    </Typography>
+                                </Paper>
+                            </Grid2>
 
-                        <Grid2 item size={4}>
-                            <NumberInput
-                                placeholder="Count"
-                                value={letter.count}
-                                onChange={(e, val) => handleNumberInputChange(letter.originalIndex, 'count', val)}
-                                min={0} 
-                                max={25}
-                                />
+                            <Grid2 item size={4}>
+                                <NumberInput
+                                    placeholder="Count"
+                                    value={letter.count}
+                                    onChange={(e, val) => handleNumberInputChange(letter.originalIndex, 'count', val)}
+                                    min={0} 
+                                    max={25}
+                                    />
+                            </Grid2>
+
+                            <Grid2 item size={4}>
+                                <NumberInput
+                                    placeholder="Score"
+                                    value={letter.points}
+                                    onChange={(e, val) => handleNumberInputChange(letter.originalIndex, 'points', val)}
+                                    min={0} 
+                                    max={10}
+                                    />
+                            </Grid2>
+
                         </Grid2>
-
-                        <Grid2 item size={4}>
-                            <NumberInput
-                                placeholder="Score"
-                                value={letter.points}
-                                onChange={(e, val) => handleNumberInputChange(letter.originalIndex, 'points', val)}
-                                min={0} 
-                                max={10}
-                                />
-                        </Grid2>
-
+                        ))}
                     </Grid2>
                     ))}
-                </Grid2>
-                ))}
-        </Grid2>
+            </Grid2>
 
-        <Box sx={{mt: 3, mx: 'auto', width: 'fit-content'}}>
-            {currentBag ?
-            <>
+            <Box sx={{mt: 3, mx: 'auto', width: 'fit-content'}}>
+                {currentBag ?
+                <>
+                    <Button 
+                        variant="contained" 
+                        sx={{textTransform: 'none', mx: 1}}
+                        startIcon={<SaveIcon />}
+                        onClick={handleSave}
+                        >
+                        Save Changes
+                    </Button>
+                    <Button 
+                        variant="contained" 
+                        sx={{textTransform: 'none', mx: 1}}
+                        startIcon={<DeleteIcon />}
+                        color='error'
+                        onClick={handleDelete}
+                        >
+                        Delete Bag
+                    </Button> 
+                </> :
                 <Button 
                     variant="contained" 
-                    sx={{textTransform: 'none', mx: 1}}
-                    startIcon={<SaveIcon />}
-                    onClick={handleSave}
+                    startIcon={<CreateIcon />} 
+                    onClick={handleCreate}
+                    sx={{textTransform: 'none'}}
                     >
-                    Save Changes
-                </Button>
-                <Button 
-                    variant="contained" 
-                    sx={{textTransform: 'none', mx: 1}}
-                    startIcon={<DeleteIcon />}
-                    color='error'
-                    onClick={handleDelete}
-                    >
-                    Delete Bag
-                </Button> 
-            </> :
-            <Button 
-                variant="contained" 
-                startIcon={<CreateIcon />} 
-                onClick={handleCreate}
-                sx={{textTransform: 'none'}}
-                >
-                Create Bag
-            </Button>}
-        </Box>
+                    Create Bag
+                </Button>}
+            </Box>
         </Paper>
-    </>
     );
 }
 

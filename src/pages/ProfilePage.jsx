@@ -102,8 +102,8 @@ function ProfilePage() {
   }
 
   return (
-    <Paper elevation={3} sx={{ width: 'fit-content', px: 3, height: 'fit-content', mx: 'auto'}}>
-      <Typography sx={{ mt: 4, mb: 2, mx: 'auto', width: 'fit-content', pt: 2 }} variant="h5" component="div">
+    <Paper elevation={3} sx={{ width: 'fit-content', px: 3, mx: 'auto', mt: 2}}>
+      <Typography sx={{pb: 2, mx: 'auto', width: 'fit-content', pt: 2 }} variant="h5" component="div">
           My Profile
       </Typography>
       <Badge

@@ -361,13 +361,12 @@ function BoardEditorPage() {
   }
 
   return (
-    <>
-      <Box sx={{display: 'flex', mx: 'auto', alignItems: 'center', width: 'fit-content', mt: 2}}>
-        <GridOnIcon sx={{mr: 1}} />
-        <Typography variant="h5">Board Editor</Typography>
-      </Box>
-
-      <Paper sx={{p: 2, width: 'fit-content', mx: 'auto', my: 2}}>
+    <Paper sx={{p: 2, width: 'fit-content', mx: 'auto', my: 2}}>
+        <Box sx={{display: 'flex', mx: 'auto', alignItems: 'center', width: 'fit-content', pb: 2}}>
+          <GridOnIcon sx={{mr: 1}} />
+          <Typography variant="h5">Board Editor</Typography>
+        </Box>
+        
             <Select
                 sx={{ width: 200, mx: 'auto', mb: 4, display: 'block' }} size="small"
                 value={currentBoard?._id || ''}
@@ -381,7 +380,7 @@ function BoardEditorPage() {
             
             {currentBoard &&
             <>
-            <Box sx={{display: 'flex', alignItems: 'center', mb: 2, mx: 'auto', width: '50%', justifyContent: 'space-between'}}>
+            <Box sx={{display: 'flex', alignItems: 'center', mb: 2, mx: 'auto', width: '55%', justifyContent: 'space-between'}}>
                 <TextField name="name" label="Name" size="small" value={currentBoard?.name || ''} onChange={handleChange}/>
                 <FormControl size="small">
                   <InputLabel id="size">Size</InputLabel>
@@ -517,8 +516,7 @@ function BoardEditorPage() {
                 Create Board
             </Button>}
         </Box>
-        </Paper>
-    </>
+    </Paper>
   );
 }
 

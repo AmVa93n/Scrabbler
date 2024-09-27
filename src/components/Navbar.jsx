@@ -136,34 +136,29 @@ function Navbar() {
             ))}
           </Box>
 
-          {/*<SearchBar />*/}
-
           <Box sx={{ flexGrow: 1 }} />
 
           <Box sx={{ flexGrow: 0 }}>
-            {isLoggedIn && (
+
+            {/*isLoggedIn && (
               <Tooltip title="Messages">
-                <IconButton size="large" aria-label="show new mails" color="inherit">
+                <IconButton size="large" color="inherit">
                     <Badge badgeContent={unread_messages.length} color="error">
                         <MailIcon />
                     </Badge>
                 </IconButton>
               </Tooltip>
-            )}
+            )*/}
 
-            {isLoggedIn && (
+            {/*isLoggedIn && (
               <Tooltip title="Notifications">
-                <IconButton
-                    size="large"
-                    aria-label="show new notifications"
-                    color="inherit"
-                    >
+                <IconButton size="large" color="inherit">
                     <Badge badgeContent={unread_notifications.length} color="error">
                         <NotificationsIcon />
                     </Badge>
                 </IconButton>
               </Tooltip>
-            )}
+            )*/}
             
             <Tooltip title={isLoggedIn ? user.name: "Guest"}>
             {isLoggedIn ? (

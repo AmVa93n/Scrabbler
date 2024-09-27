@@ -1,7 +1,4 @@
-import { useContext } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Accordion, AccordionDetails, 
-          AccordionSummary } from '@mui/material';
-import { RoomContext } from '../../context/room.context';
+import { Paper, Box, Typography, Accordion, AccordionDetails, AccordionSummary } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import InfoIcon from '@mui/icons-material/Info';
 import LoopIcon from '@mui/icons-material/Loop';
@@ -12,16 +9,12 @@ import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
 import TuneIcon from '@mui/icons-material/Tune';
 import SmartToyOutlinedIcon from '@mui/icons-material/SmartToyOutlined';
 
-function RulesModal() {
-  const { isRulesOpen, setIsRulesOpen } = useContext(RoomContext)
-
+function RulesPage() {
   return (
-    <Dialog 
-      open={isRulesOpen}
-      onClose={()=>setIsRulesOpen(false)}
-      >
-      <DialogTitle>How to play Scrabble?</DialogTitle>
-      <DialogContent>
+    <Paper sx={{my: 2, mx: {md: 'auto', xs: 2}, maxWidth: 700}}>
+      <Typography variant='h5' sx={{textAlign: 'center', pt: 2}}>How to play Scrabble?</Typography>
+
+      <Box sx={{p: 2}}>
         <Accordion>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <InfoIcon sx={{mr: 1}}/>
@@ -136,19 +129,10 @@ function RulesModal() {
             </Typography>
           </AccordionDetails>
         </Accordion>
-      </DialogContent>
+      </Box>
 
-      <DialogActions>
-        <Button 
-            onClick={()=>setIsRulesOpen(false)} 
-            sx={{ textTransform: 'none' }} 
-            >
-              Close
-        </Button>
-      </DialogActions>
-        
-    </Dialog>
+    </Paper>
   );
 }
 
-export default RulesModal;
+export default RulesPage;

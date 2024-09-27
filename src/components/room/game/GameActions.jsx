@@ -23,17 +23,8 @@ function GameActions() {
         setPromptData, resetTurnActions } = useContext(GameContext)
 
     function handleSubmit() {
-        let currentPromptData = promptData;
-        if (!promptData) { // set to default in case player did not specify
-            const word = getWordForPrompt()
-            if (word) {
-                const defaultText = `${turnPlayer.name} was thinking about ${word.toLowerCase()} because`
-                currentPromptData = {promptText: defaultText, targetReaction: 'funny'};
-                setPromptData(currentPromptData)
-            }
-        }
         const wordsWithScores = getWordsWithScores()
-        socket.emit('validateMove', roomId, placedLetters, board, wordsWithScores, currentPromptData)
+        socket.emit('validateMove', roomId, placedLetters, board, wordsWithScores, promptData)
         setCanClick(false)
         setPromptData(null)
     }

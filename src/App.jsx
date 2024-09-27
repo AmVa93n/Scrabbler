@@ -7,6 +7,7 @@ import ProfilePage from "./pages/ProfilePage";
 import SignupPage from "./pages/SignUpPage";
 import LoginPage from "./pages/SignInPage";
 import RoomsPage from "./pages/RoomsPage";
+import GameHistoryPage from "./pages/GameHistoryPage";
 import BoardEditorPage from "./pages/BoardEditorPage";
 import TileBagEditorPage from "./pages/TileBagEditorPage";
 import RoomPage from "./pages/RoomPage";
@@ -42,6 +43,12 @@ function App() {
         <Route path="/rooms" element={
             <IsPrivate>
               <RoomsPage />
+            </IsPrivate>
+          }/>
+
+        <Route path="/games" element={
+            <IsPrivate>
+              <GameHistoryPage />
             </IsPrivate>
           }/>
 

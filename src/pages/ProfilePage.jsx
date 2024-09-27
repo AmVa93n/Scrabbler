@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { TextField, IconButton, ListItem, ListItemAvatar, ListItemText, Avatar, RadioGroup, Radio, Badge, Box, List, Tooltip, Paper,
-          FormControlLabel  } from '@mui/material';
+          FormControlLabel} from '@mui/material';
 import Typography from '@mui/material/Typography';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers';
@@ -37,7 +37,7 @@ function ProfilePage() {
         setPfpPreview(profile.profilePic)
       } catch (error) {
         const errorDescription = error.response.data.message;
-        notify(errorDescription,'error',5000)
+        alert(errorDescription)
       }
     }
     init()
@@ -82,7 +82,7 @@ function ProfilePage() {
 
   function handleCancel(field) {
     setInputValues((prev) => ({ ...prev, [field]: fieldValues[field] })); // Revert to the original value
-    setEditMode(false);          // Exit edit mode
+    setEditMode((prev) => ({ ...prev, [field]: false }));          // Turn off edit mode
   };
 
   function notify(message, type, duration) {
@@ -102,10 +102,11 @@ function ProfilePage() {
   }
 
   return (
-    <Paper elevation={3} sx={{ width: 'fit-content', px: 3, mx: 'auto', mt: 2}}>
+    <Paper elevation={3} sx={{ width: 'fit-content', px: 1, mx: 'auto', mt: 2}}>
       <Typography sx={{pb: 2, mx: 'auto', width: 'fit-content', pt: 2 }} variant="h5" component="div">
           My Profile
       </Typography>
+
       <Badge
         overlap="circular"
         anchorOrigin={{
@@ -131,80 +132,80 @@ function ProfilePage() {
         >
         <Avatar src={pfpPreview} sx={{mx: "auto", width: '12rem', height: '12rem', mb: '1rem'}} />
       </Badge>
-    <Box sx={{ mx: 'auto' }}>
-        
-            <List dense={false}>
-              {fields.map(field =>
-                <ListItem
-                  key={field}
-                  secondaryAction={
-                    <Tooltip title={editMode[field] ? "Save" : "Edit"}>
-                      <IconButton edge="end" aria-label="edit" onClick={() => editMode[field] ? handleSave(field) : handleEdit(field)}>
-                          {editMode[field] ? <SaveIcon /> : <EditIcon />}
-                      </IconButton>
-                    </Tooltip>
-                  }
+
+      <List dense={false}>
+        {fields.map(field =>
+          <ListItem key={field}>
+
+            <ListItemAvatar>
+              <Avatar sx={{ bgcolor: blue[500] }}>
+                {icons[fields.indexOf(field)]}
+              </Avatar>
+            </ListItemAvatar>
+
+            {editMode[field] ? (
+              field === 'gender' ? (
+                <RadioGroup
+                  defaultValue={inputValues[field]}
+                  name="gender"
+                  row
+                  onChange={(e) => handleInputChange(field, e.target.value)}
                 >
-                  <ListItemAvatar>
-                    <Avatar sx={{ bgcolor: blue[500] }}>
-                      {icons[fields.indexOf(field)]}
-                    </Avatar>
-                  </ListItemAvatar>
-                  {editMode[field] ? (
-                    field === 'gender' ? (
-                      <RadioGroup
-                        aria-labelledby="radio-buttons-group-label"
-                        defaultValue={inputValues[field]}
-                        name="gender"
-                        row
-                        onChange={(e) => handleInputChange(field, e.target.value)}
-                      >
-                        <FormControlLabel value="male" control={<Radio />} label="Male" />
-                        <FormControlLabel value="female" control={<Radio />} label="Female" />
-                        <FormControlLabel value="other" control={<Radio />} label="Other" />
-                      </RadioGroup>
-                    ) : field === 'birthdate' ? (
-                      <LocalizationProvider dateAdapter={AdapterDayjs}>
-                        <DatePicker
-                          value={dayjs(inputValues[field])}
-                          onChange={(newValue) => handleInputChange(field, newValue)}
-                        />
-                      </LocalizationProvider>
-                    ) : field === 'country' ? (
-                      <CountrySelect
-                        value={inputValues[field]}
-                        onChange={(newValue) => handleInputChange(field, newValue)}
-                       />
-                    ) : (
-                    <TextField
-                      fullWidth
-                      value={inputValues[field]}
-                      onChange={(e) => handleInputChange(field, e.target.value)}
-                      variant="outlined"
-                      slotProps= {{
-                        input: {
-                          endAdornment: (
-                            <Tooltip title="Cancel">
-                              <IconButton edge="end" aria-label="edit" onClick={() => handleCancel(field)}>
-                                  <CancelIcon />
-                              </IconButton>
-                            </Tooltip>
-                          ),
-                        }
-                      }}
-                    />
-                    )
-                  ) : (
-                  <ListItemText
-                    primary={fieldValues ? fieldValues[field] : ''}
-                    secondary={null}
+                  <FormControlLabel value="male" control={<Radio />} label="Male" />
+                  <FormControlLabel value="female" control={<Radio />} label="Female" />
+                  <FormControlLabel value="other" control={<Radio />} label="Other" />
+                </RadioGroup>
+              ) : field === 'birthdate' ? (
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <DatePicker
+                    value={dayjs(inputValues[field])}
+                    onChange={(newValue) => handleInputChange(field, newValue)}
                   />
-                  )}
-                </ListItem>,
+                </LocalizationProvider>
+              ) : field === 'country' ? (
+                <CountrySelect
+                  value={inputValues[field]}
+                  onChange={(newValue) => handleInputChange(field, newValue)}
+                  />
+              ) : (
+              <TextField
+                fullWidth
+                value={inputValues[field]}
+                onChange={(e) => handleInputChange(field, e.target.value)}
+                variant="outlined"
+              />
+              )
+              
+            ) : (
+            <ListItemText
+              primary={fieldValues ? fieldValues[field] : ''}
+              secondary={null}
+              sx={{minWidth: 250}}
+            />
+            )}
+
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, ml: 'auto' }}>
+              <Tooltip title={editMode[field] ? "Save" : "Edit"}>
+                <IconButton
+                  edge="end"
+                  onClick={() => (editMode[field] ? handleSave(field) : handleEdit(field))}
+                >
+                  {editMode[field] ? <SaveIcon /> : <EditIcon />}
+                </IconButton>
+              </Tooltip>
+
+              {editMode[field] && (
+                <Tooltip title="Cancel">
+                  <IconButton edge="end" onClick={() => handleCancel(field)}>
+                    <CancelIcon />
+                  </IconButton>
+                </Tooltip>
               )}
-            </List>
+            </Box>
+          </ListItem>,
+        )}
+      </List>
           
-    </Box>
     </Paper >
   );
 }

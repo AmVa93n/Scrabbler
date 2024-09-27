@@ -11,6 +11,7 @@ import GridOnIcon from '@mui/icons-material/GridOn';
 import FontDownloadIcon from '@mui/icons-material/FontDownload';
 import HelpIcon from '@mui/icons-material/Help';
 import AutoStoriesIcon from '@mui/icons-material/AutoStories';
+import HistoryIcon from '@mui/icons-material/History';
 import { Link as RouterLink } from 'react-router-dom';
 import { useContext } from "react";
 import { AuthContext } from "../context/auth.context";
@@ -23,6 +24,7 @@ function Navbar() {
   const dropdownLinks = isLoggedIn ? [
     {text: 'Profile', route: '/profile', icon: <AccountCircle sx={{mr: 1}} />},
     {text: 'Rooms', route: '/rooms', icon: <ChairIcon sx={{mr: 1}} />},
+    {text: 'Game History', route: '/games', icon: <HistoryIcon sx={{mr: 1}} />},
     {text: 'Board Editor', route: '/boardeditor', icon: <GridOnIcon sx={{mr: 1}} />},
     {text: 'Tile Bag Editor', route: '/tilebageditor', icon: <FontDownloadIcon sx={{mr: 1}} />},
     {text: 'Sign out', route: '/logout', icon: <LogoutIcon sx={{mr: 1}} />},

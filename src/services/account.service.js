@@ -96,6 +96,11 @@ class AccountService {
   async deleteTileBag(tilebagId) {
     return this.api.delete(`/account/tilebag/${tilebagId}`);
   }
+
+  async getGames() {
+    const response = await this.api.get(`/account/games`);
+    return response.data.games
+  }
 }
 
 // Create one instance of the service

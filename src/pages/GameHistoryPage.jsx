@@ -25,7 +25,7 @@ function getComparator(order, orderBy) {
 
 export default function GameHistoryPage() {
   const [order, setOrder] = useState('asc');
-  const [orderBy, setOrderBy] = useState('calories');
+  const [orderBy, setOrderBy] = useState('Date');
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [games, setGames] = useState([]);
@@ -124,15 +124,15 @@ export default function GameHistoryPage() {
               key={headCell}
               align={'left'}
               padding={'normal'}
-              sortDirection={orderBy === headCell.id ? order : false}
+              sortDirection={orderBy === headCell ? order : false}
             >
               <TableSortLabel
-                active={orderBy === headCell.id}
-                direction={orderBy === headCell.id ? order : 'asc'}
-                onClick={createSortHandler(headCell.id)}
+                active={orderBy === headCell}
+                direction={orderBy === headCell ? order : 'asc'}
+                onClick={createSortHandler(headCell)}
               >
                 {headCell}
-                {orderBy === headCell.id ? (
+                {orderBy === headCell ? (
                   <Box component="span" sx={visuallyHidden}>
                     {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
                   </Box>

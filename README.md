@@ -22,7 +22,6 @@ This is an app that was developed as the third and final project of Ironhack's W
 
 ## Backlog
 
-- Dictionary search bar
 - Managing room banlist
 - Sharing created content
 - Public rooms

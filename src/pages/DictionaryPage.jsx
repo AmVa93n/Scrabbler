@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import appService from "../services/app.service";
 import { Box, Typography, Grid, Container, Paper, ToggleButtonGroup, ToggleButton } from '@mui/material';
 import Loading from '../components/Loading/Loading';
+import SearchBar from '../components/SearchBar';
 
 const alphabet = Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i));
 
@@ -12,6 +13,7 @@ function DictionaryPage() {
   const [currentLetter, setCurrentLetter] = useState('A');
   const [currentSecondLetter, setCurrentSecondLetter] = useState('A');
   const [secondLetterOptions, setSecondLetterOptions] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     async function init() {
@@ -30,9 +32,13 @@ function DictionaryPage() {
   // Trigger filtering when the dictionary is loaded or when letters change
   useEffect(() => {
     if (isDictionaryLoaded) {
-      filterByLetter(currentLetter, currentSecondLetter);
+      if (searchTerm) {
+        filterBySearchTerm(searchTerm);
+      } else {
+        filterByLetter(currentLetter, currentSecondLetter);
+      }
     }
-  }, [isDictionaryLoaded, currentLetter, currentSecondLetter]);
+  }, [isDictionaryLoaded, currentLetter, currentSecondLetter, searchTerm]);
 
   // Filter words based on selected first and second letter
   function filterByLetter(firstLetter, secondLetter) {
@@ -103,9 +109,26 @@ function DictionaryPage() {
     );
   }
 
+  // Filter words based on the search term
+  function filterBySearchTerm(term) {
+    const filtered = dictionary.filter((word) =>
+      word.toLowerCase().includes(term.toLowerCase())
+    ).slice(0, 100);
+    setFilteredWords(filtered);
+  }
+
+  // Handle search input from the search bar
+  function handleSearch(term) {
+    setSearchTerm(term);
+  }
+
   return (
     <Container>
       <Paper elevation={3} sx={{ p: 4, my: 4 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 4 }}>
+          <SearchBar onSearch={handleSearch} />
+        </Box>
+
         {/* Alphabet Navigation (First Letter) */}
         <AlphabetNavigation
           currentLetter={currentLetter}
@@ -139,8 +162,9 @@ function DictionaryPage() {
               </Grid>
             ) : (
               <Typography variant="body1" sx={{ textAlign: 'center', mt: 2 }}>
-                No words found for {currentLetter}
-                {currentSecondLetter !== '' && currentSecondLetter}
+                {searchTerm ? (`No words found for "${searchTerm}"`) : (
+                    `No words found for ${currentLetter}${currentSecondLetter !== '' ? currentSecondLetter : ''}`
+                  )}
               </Typography>
             )
           ) : (<Loading />)}

@@ -36,23 +36,28 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
       paddingLeft: `calc(1em + ${theme.spacing(4)})`,
       transition: theme.transitions.create('width'),
       [theme.breakpoints.up('sm')]: {
-        width: '12ch',
+        width: '30ch',
         '&:focus': {
-          width: '20ch',
+          width: '30ch',
         },
       },
     },
 }));
 
-function SearchBar() {
+function SearchBar({ onSearch }) {
     return (
         <Search>
             <SearchIconWrapper>
                 <SearchIcon />
             </SearchIconWrapper>
             <StyledInputBase
-                placeholder="Search…"
+                placeholder="Search a word…"
                 inputProps={{ 'aria-label': 'search' }}
+                sx={{
+                  border: 'solid 1px lightgrey', 
+                  borderRadius: 25,
+                }}
+                onChange={(e) => onSearch(e.target.value)}
             />
         </Search>
     )

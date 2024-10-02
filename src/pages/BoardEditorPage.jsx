@@ -17,6 +17,7 @@ function BoardEditorPage() {
   const [currentBoard, setCurrentBoard] = useState(null)
   const notifications = useNotifications();
   const [currentBonusDraw, setCurrentBonusDraw] = useState(null);
+  const [isMouseDown, setIsMouseDown] = useState(false);
 
   useEffect(() => {
     if (socket) socket.emit('leaveRoom', 'left');
@@ -33,6 +34,19 @@ function BoardEditorPage() {
       }
       init()
   }, [socket]);
+
+  useEffect(() => {
+    // Add global mouse down and mouse up event listeners
+    const handleMouseDown = () => setIsMouseDown(true);
+    const handleMouseUp = () => setIsMouseDown(false);
+    window.addEventListener('mousedown', handleMouseDown);
+    window.addEventListener('mouseup', handleMouseUp);
+    // Cleanup listeners on unmount
+    return () => {
+      window.removeEventListener('mousedown', handleMouseDown);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, []);
 
   function handleChangeBoard(e) {
     const selectedBoard = boards.find(board => board._id === e.target.value)
@@ -136,8 +150,9 @@ function BoardEditorPage() {
     setCurrentBonusDraw({ value, color });
   };
 
-  function handleDrawSquare(x, y) {
+  function handleDrawSquare(e, x, y) {
     if (!currentBonusDraw) return
+    e.preventDefault()
     setCurrentBoard(prev => {
       // Create the new BonusSquare object with the x, y coordinates and the bonusType from currentBonusDraw
       const newBonusSquare = { x, y, bonusType: currentBonusDraw.value };
@@ -463,7 +478,8 @@ function BoardEditorPage() {
                               }}
                               >
                                   <Box
-                                    onClick={()=> handleDrawSquare(colIndex, rowIndex)}
+                                    onClick={(e)=> handleDrawSquare(e, colIndex, rowIndex)}
+                                    onMouseOver={(e) => isMouseDown && handleDrawSquare(e, colIndex, rowIndex)}
                                     sx={{
                                       width: '100%',
                                       height: '100%',
@@ -472,7 +488,8 @@ function BoardEditorPage() {
                                       display: 'flex',
                                       justifyContent: 'center',
                                       alignItems: 'center',
-                                      cursor: currentBonusDraw ? 'pointer' : 'default'
+                                      cursor: currentBonusDraw ? 'pointer' : 'default',
+                                      userSelect: isMouseDown ? 'none' : 'default'
                                     }}
                                   >
                                     {(rowIndex === currentBoard.size/2-0.5 && colIndex === currentBoard.size/2-0.5) && 

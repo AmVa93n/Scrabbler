@@ -28,7 +28,7 @@ export default function UserList() {
     const User = useContext(AuthContext).user;
     const { roomId, hostId, usersInRoom, isActive } = useContext(RoomContext)
     const { turnPlayer, turnEndTime, reactionScore, players } = useContext(GameContext)
-    const userList = isActive ? players : usersInRoom
+    const userList = isActive ? players.sort((a,b)=> b.score - a.score) : usersInRoom
     const socket = useSocket();
 
     function handleKick(user) {

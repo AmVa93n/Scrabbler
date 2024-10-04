@@ -43,16 +43,13 @@ export default function RoomChat() {
                         <ListItemText
                             primary={message.sender ? message.sender.name : message.title}
                             secondary={
-                                <>
                                 <Typography
                                     component="span"
                                     variant="body2"
-                                    sx={{ color: 'text.primary', display: 'inline' }}
+                                    sx={{ color: 'grey', display: 'inline' }}
                                 >
-                                    {''}
+                                    {message.text}
                                 </Typography>
-                                {message.text}
-                                </>
                             }
                             sx={{whiteSpace: 'pre-line'}}
                         />

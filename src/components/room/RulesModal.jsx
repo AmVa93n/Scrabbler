@@ -1,7 +1,6 @@
 import { useContext } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Accordion, AccordionDetails, 
           AccordionSummary } from '@mui/material';
-import { RoomContext } from '../../context/room.context';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import InfoIcon from '@mui/icons-material/Info';
 import LoopIcon from '@mui/icons-material/Loop';
@@ -11,9 +10,10 @@ import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
 import TuneIcon from '@mui/icons-material/Tune';
 import SmartToyOutlinedIcon from '@mui/icons-material/SmartToyOutlined';
+import { RulesContext } from '../../context/modal.context';
 
 function RulesModal() {
-  const { isRulesOpen, setIsRulesOpen } = useContext(RoomContext)
+  const { isRulesOpen, setIsRulesOpen } = useContext(RulesContext)
 
   return (
     <Dialog 

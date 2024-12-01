@@ -184,6 +184,20 @@ function InactiveProvider(props) {
     );
 };
 
+const RulesContext = createContext();
+
+function RulesProvider(props) {
+    const [isRulesOpen, setIsRulesOpen] = useState(false)
+
+    return (
+        <RulesContext.Provider value={{
+            isRulesOpen, setIsRulesOpen,
+        }}>
+            {props.children}
+        </RulesContext.Provider>
+    );
+};
+
 function ModalsWrapper({ children }) {
     return (
         <AlertProvider>
@@ -191,7 +205,9 @@ function ModalsWrapper({ children }) {
                 <SwapProvider>
                     <PromptProvider>
                         <InactiveProvider>
-                            {children}
+                            <RulesProvider>
+                                {children}
+                            </RulesProvider>
                         </InactiveProvider>
                     </PromptProvider>
                 </SwapProvider>
@@ -200,4 +216,4 @@ function ModalsWrapper({ children }) {
     )
 }
 
-export { ModalsWrapper, AlertContext, BlankContext, SwapContext, PromptContext, InactiveContext };
+export { ModalsWrapper, AlertContext, BlankContext, SwapContext, PromptContext, InactiveContext, RulesContext };

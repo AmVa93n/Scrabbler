@@ -17,7 +17,6 @@ function RoomProvider(props) {
     const [gameMode, setGameMode] = useState('')
     const [messages, setMessages] = useState([])
     const [usersInRoom, setUsersInRoom] = useState([])
-    const [isRulesOpen, setIsRulesOpen] = useState(false)
     const [isRoomLoaded, setIsRoomLoaded] = useState(false)
     const navigate = useNavigate();
 
@@ -103,7 +102,6 @@ function RoomProvider(props) {
             isActive, setIsActive,
             rackSize, setRackSize,
             gameMode, setGameMode,
-            isRulesOpen, setIsRulesOpen,
             hostId,
             isRoomLoaded
         }}>

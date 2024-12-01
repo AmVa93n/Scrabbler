@@ -1,9 +1,11 @@
 import { useContext } from 'react';
 import { Dialog, DialogTitle, DialogContent, Grid2, Paper, Typography } from '@mui/material';
 import { GameContext } from '../../../context/game.context';
+import { BlankContext } from '../../../context/modal.context';
 
 function BlankModal() {
-  const { setBoard, isLSelectOpen, setIsLSelectOpen, blank, setBlank } = useContext(GameContext)
+  const { setBoard } = useContext(GameContext)
+  const { isLSelectOpen, setIsLSelectOpen, blank, setBlank } = useContext(BlankContext)
   const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
   function handleLetterSelect(selectedLetter) {

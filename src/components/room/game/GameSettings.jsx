@@ -2,16 +2,16 @@ import { useContext, useEffect, useState } from 'react';
 import { Button, InputLabel, Select, MenuItem, FormControl, Typography, Slider, Box, RadioGroup, FormControlLabel, 
     Radio, Stack} from '@mui/material';
 import { RoomContext } from '../../../context/room.context';
-import { GameContext } from '../../../context/game.context';
 import { useSocket } from '../../../context/socket.context';
 import accountService from "../../../services/account.service";
 import appService from "../../../services/app.service";
 import SettingsIcon from '@mui/icons-material/Settings';
 import PlayCircleIcon from '@mui/icons-material/PlayCircle';
+import { AntiSpamContext } from '../../../context/antispam';
 
 function GameSettings() {
     const { roomId, usersInRoom, hostId } = useContext(RoomContext)
-    const { canClick, setCanClick } = useContext(GameContext)
+    const { canClick, setCanClick } = useContext(AntiSpamContext)
     const socket = useSocket();
     const [settings, setSettings] = useState({ 
         board: '', 

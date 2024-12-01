@@ -1,11 +1,15 @@
 import { useContext, useState } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, FormControl, FormLabel, 
     TextField, ToggleButtonGroup, ToggleButton, Typography, Tooltip } from '@mui/material';
-import { GameContext } from '../../../context/game.context';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { ReactionContext } from '../../../context/reaction.context';
+import { TurnContext } from '../../../context/turn.context';
+import { PromptContext } from '../../../context/modal.context';
 
 function PromptModal({ word }) {
-  const { promptData, setPromptData, isPromptOpen, setIsPromptOpen, turnPlayer, reactionTypes, reactionEmojis } = useContext(GameContext)
+  const { reactionTypes, reactionEmojis } = useContext(ReactionContext)
+  const { promptData, setPromptData, isPromptOpen, setIsPromptOpen } = useContext(PromptContext)
+  const { turnPlayer } = useContext(TurnContext)
   const defaultText = `${turnPlayer ? turnPlayer.name : '<player>'} was thinking about ${word ? word?.toLowerCase() : '<word>'} because`
   const [text, setText] = useState('')
 

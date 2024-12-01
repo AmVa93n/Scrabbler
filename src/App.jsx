@@ -19,6 +19,10 @@ import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import { RoomProvider } from "./context/room.context";
 import { GameProvider } from './context/game.context';
+import { ReactionProvider } from "./context/reaction.context";
+import { TurnProvider } from "./context/turn.context";
+import { ModalsWrapper } from "./context/modal.context";
+import { AntiSpamWrapper } from "./context/antispam";
 
 function App() {
   const location = useLocation();
@@ -68,7 +72,15 @@ function App() {
             <IsPrivate>
               <RoomProvider>
                 <GameProvider>
-                  <RoomPage />
+                  <TurnProvider>
+                    <ReactionProvider>
+                      <ModalsWrapper>
+                        <AntiSpamWrapper>
+                          <RoomPage />
+                        </AntiSpamWrapper>
+                      </ModalsWrapper>
+                    </ReactionProvider>
+                  </TurnProvider>
                 </GameProvider>
               </RoomProvider>
             </IsPrivate>

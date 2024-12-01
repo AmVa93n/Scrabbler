@@ -18,6 +18,7 @@ import { useSocket } from '../../context/socket.context';
 import { keyframes } from '@mui/system';
 import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
 import StarIcon from '@mui/icons-material/Star';
+import { TurnContext } from '../../context/turn.context';
 
 const shine = keyframes`
   from {background-position: 100% 0;}
@@ -27,7 +28,8 @@ const shine = keyframes`
 export default function UserList() {
     const User = useContext(AuthContext).user;
     const { roomId, hostId, usersInRoom, isActive } = useContext(RoomContext)
-    const { turnPlayer, turnEndTime, reactionScore, players } = useContext(GameContext)
+    const { reactionScore, players } = useContext(GameContext)
+    const { turnPlayer, turnEndTime } = useContext(TurnContext)
     const userList = isActive ? players.sort((a,b)=> b.score - a.score) : usersInRoom
     const socket = useSocket();
 

@@ -5,12 +5,14 @@ import { GameContext } from '../../../context/game.context';
 import { AuthContext } from "../../../context/auth.context";
 import { useSocket } from '../../../context/socket.context';
 import LoopIcon from '@mui/icons-material/Loop';
+import { SwapContext } from '../../../context/modal.context';
 
 function SwapModal() {
   const socket = useSocket();
   const User = useContext(AuthContext).user;
   const { roomId } = useContext(RoomContext)
-  const { rack, placedLetters, leftInBag, isLReplaceOpen, setIsLReplaceOpen, resetTurnActions, players } = useContext(GameContext)
+  const { rack, placedLetters, leftInBag, resetTurnActions, players } = useContext(GameContext)
+  const { isLReplaceOpen, setIsLReplaceOpen } = useContext(SwapContext)
   const isPlaying = players.find(player => player._id === User._id)
   const [selectedLetters, setSelectedLetters] = useState([])
 

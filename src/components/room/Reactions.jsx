@@ -3,11 +3,11 @@ import { IconButton, Tooltip, Box, Typography, Popover, Grow } from '@mui/materi
 import { useSocket } from '../../context/socket.context';
 import { RoomContext } from '../../context/room.context';
 import { AuthContext } from "../../context/auth.context";
-import { GameContext } from '../../context/game.context';
 import AddReactionIcon from '@mui/icons-material/AddReaction';
+import { ReactionContext } from '../../context/reaction.context';
 
 function Reactions({ message }) {
-  const { reactionTypes, reactionEmojis } = useContext(GameContext)
+  const { reactionTypes, reactionEmojis } = useContext(ReactionContext)
   const socket = useSocket();
   const User = useContext(AuthContext).user;
   const { roomId } = useContext(RoomContext)

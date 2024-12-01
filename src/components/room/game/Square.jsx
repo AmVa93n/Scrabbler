@@ -3,11 +3,13 @@ import { useDrop } from 'react-dnd';
 import Tile from './Tile';
 import { GameContext } from '../../../context/game.context';
 import { useContext } from 'react';
+import { BlankContext } from '../../../context/modal.context';
 
 const ItemType = 'LETTER';
 
 function Square({ square, isStart }) {
-  const { setBoard, setRack, setPlacedLetters, setBlank, setIsLSelectOpen } = useContext(GameContext)
+  const { setBoard, setRack, setPlacedLetters } = useContext(GameContext)
+  const { setBlank, setIsLSelectOpen } = useContext(BlankContext)
 
   const [{ isOver, canDrop }, drop] = useDrop({
     accept: ItemType,

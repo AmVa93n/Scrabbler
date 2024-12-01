@@ -14,13 +14,19 @@ import LoopIcon from '@mui/icons-material/Loop';
 import FastForwardIcon from '@mui/icons-material/FastForward';
 import TerminalIcon from '@mui/icons-material/Terminal';
 import UndoIcon from '@mui/icons-material/Undo';
+import { TurnContext } from '../../../context/turn.context';
+import { PromptContext, SwapContext } from '../../../context/modal.context';
+import { AntiSpamContext } from '../../../context/antispam';
 
 function GameActions() {
     const socket = useSocket();
     const User = useContext(AuthContext).user;
     const { roomId, gameMode } = useContext(RoomContext)
-    const { turnPlayer, placedLetters, board, leftInBag, setIsLReplaceOpen, canClick, setCanClick, setIsPromptOpen, promptData, 
-        setPromptData, resetTurnActions } = useContext(GameContext)
+    const { placedLetters, board, leftInBag, resetTurnActions } = useContext(GameContext)
+    const { turnPlayer } = useContext(TurnContext)
+    const { setIsLReplaceOpen } = useContext(SwapContext)
+    const { setIsPromptOpen, promptData, setPromptData } = useContext(PromptContext)
+    const { canClick, setCanClick } = useContext(AntiSpamContext)
 
     function handleSubmit() {
         const wordsWithScores = getWordsWithScores()

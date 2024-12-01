@@ -3,12 +3,14 @@ import { useDrag } from 'react-dnd';
 import { Paper, Typography } from '@mui/material';
 import { AuthContext } from "../../../context/auth.context";
 import { GameContext } from '../../../context/game.context';
+import { TurnContext } from '../../../context/turn.context';
 
 const ItemType = 'LETTER';
 
 function Tile({ id, letter, isBlank, points, fixed }) {
   const User = useContext(AuthContext).user;
-  const { turnPlayer, placedLetters, board } = useContext(GameContext)
+  const { placedLetters, board } = useContext(GameContext)
+  const { turnPlayer } = useContext(TurnContext)
 
   const [{ isDragging, canDrag }, drag] = useDrag({
     type: ItemType,

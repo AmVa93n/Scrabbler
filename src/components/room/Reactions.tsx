@@ -1,18 +1,18 @@
-import { useContext, useState } from 'react';
+import React, { useState } from 'react';
 import { IconButton, Tooltip, Box, Typography, Popover, Grow } from '@mui/material';
 import useSocket from '../../hooks/useSocket';
-import { RoomContext } from '../../context/room.context';
 import AddReactionIcon from '@mui/icons-material/AddReaction';
 import useReactions from '../../hooks/useReactions';
 import { Message } from '../../types';
 import useAuth from '../../hooks/useAuth';
+import { useParams } from 'react-router-dom';
 
 function Reactions({ message }: { message: Message }) {
   const { reactionTypes, reactionEmojis } = useReactions()
   const { socket } = useSocket();
   const { user: User } = useAuth();
-  const { roomId } = useContext(RoomContext)
-  const [anchorEl, setAnchorEl] = useState(null);
+  const { roomId } = useParams();
+  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const [isPanelOpen, setPanelOpen] = useState(false);
   const id = isPanelOpen ? 'reaction-popover' : undefined;
 
@@ -43,7 +43,7 @@ function Reactions({ message }: { message: Message }) {
     return reactors.join('\n')
   }
 
-  function openReactionPanel(event) {
+  function openReactionPanel(event: React.MouseEvent<HTMLButtonElement>) {
     setAnchorEl(event.currentTarget);
     setPanelOpen(true)
   };

@@ -18,27 +18,24 @@ import CountrySelect from '../components/CountrySelect';
 import accountService from "../services/account.service";
 import { useNotifications } from '@toolpad/core/useNotifications';
 import { blue } from '@mui/material/colors';
+import { CountryType, User } from '../types';
 
 function ProfilePage() {
-  const [fieldValues, setFieldValues] = useState({} as Input);
+  const [fieldValues, setFieldValues] = useState({} as User);
   const [editMode, setEditMode] = useState({} as {[key: string]: boolean}); // Manage edit state for each field
-  const [inputValues, setInputValues] = useState({} as {[key: string]: string | File | dayjs.Dayjs});
+  const [inputValues, setInputValues] = useState({} as ProfileForm);
   const fields = ['name', 'email', 'gender', 'birthdate', 'country']
   const icons = [<NameIcon />,<EmailIcon />,<GenderIcon />,<BirthdateIcon />,<CountryIcon />,]
   const notifications = useNotifications();
   const [pfpPreview, setPfpPreview] = useState<string | ArrayBuffer | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  interface Input {
-    name: string;
-    email: string;
-    gender: string;
+  interface ProfileForm {
+    name: string; email: string; gender: string;
     birthdate: dayjs.Dayjs;
-    country: { value: string; label: string };
-    profilePic: File | null;
+    country: CountryType;
+    profilePic: File;
   }
-
-  type InputKey = 'name' | 'email' | 'gender' | 'birthdate' | 'country' | 'profilePic';
 
   useEffect(() => {
     async function init() {
@@ -47,14 +44,14 @@ function ProfilePage() {
         setFieldValues(profile)
         setPfpPreview(profile.profilePic)
       } catch (error) {
-        const errorDescription = error.response.data.message;
-        alert(errorDescription)
+        console.error(error)
+        alert('Failed to load profile')
       }
     }
     init()
   }, [])
 
-  function handleEdit(field: string) {
+  function handleEdit(field: keyof ProfileForm) {
     setEditMode((prev) => ({ ...prev, [field]: true })); // Turn on edit mode
     setInputValues((prev) => ({ ...prev, [field]: fieldValues[field] }));
     if (fileInputRef.current && field === "profilePic") {
@@ -62,11 +59,11 @@ function ProfilePage() {
     }
   };
 
-  function handleInputChange(field: string, value: string) {
+  function handleInputChange(field: keyof ProfileForm, value: string | File | dayjs.Dayjs | null | CountryType) {
     setInputValues((prev) => ({ ...prev, [field]: value }));
   };
 
-  async function handleSave(field: string) {
+  async function handleSave(field: keyof ProfileForm) {
     try {
       const formData = new FormData();
       if (field === 'birthdate') {
@@ -83,33 +80,29 @@ function ProfilePage() {
       if (field === 'birthdate') setFieldValues((prev) => ({ ...prev, birthdate: inputValues.birthdate.startOf('day').format('YYYY-MM-DD')}));
       else if (field === 'country') setFieldValues((prev) => ({ ...prev, country: inputValues.country.label}));
       else setFieldValues((prev) => ({ ...prev, [field]: inputValues[field] }));
-      notify('Profile updated','success',5000)
+      notifications.show('Profile updated', { severity: 'success', autoHideDuration: 5000 });
     } catch (error) {
-      const errorDescription = error.response.data.message;
-      notify(errorDescription,'error',5000)
+      console.error(error);
+      notifications.show('Failed to update profile', { severity: 'error', autoHideDuration: 5000 });
     }
     setEditMode((prev) => ({ ...prev, [field]: false })); // Turn off edit mode
   };
 
-  function handleCancel(field: string) {
+  function handleCancel(field: keyof ProfileForm) {
     setInputValues((prev) => ({ ...prev, [field]: fieldValues[field] })); // Revert to the original value
     setEditMode((prev) => ({ ...prev, [field]: false }));          // Turn off edit mode
   };
-
-  function notify(message, type, duration) {
-    notifications.show(message, {
-      severity: type,
-      autoHideDuration: duration,
-    });
-  }
 
   function handleFilePreview(event: React.ChangeEvent<HTMLInputElement>) {
     const reader = new FileReader();
     reader.onload = function(){
       setPfpPreview(reader.result)
-      setInputValues((prev) => ({ ...prev, profilePic: event.target.files[0] }));
     }
-    reader.readAsDataURL(event.target.files[0]);
+    const file = event.target.files?.[0];
+    if (file) {
+      reader.readAsDataURL(file);
+      setInputValues((prev) => ({ ...prev, profilePic: file }));
+    }
   }
 
   return (
@@ -157,7 +150,7 @@ function ProfilePage() {
             {editMode[field] ? (
               field === 'gender' ? (
                 <RadioGroup
-                  defaultValue={inputValues[field]}
+                  defaultValue={inputValues['gender']}
                   name="gender"
                   row
                   onChange={(e) => handleInputChange(field, e.target.value)}
@@ -169,27 +162,27 @@ function ProfilePage() {
               ) : field === 'birthdate' ? (
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DatePicker
-                    value={dayjs(inputValues[field])}
+                    value={dayjs(inputValues['birthdate'])}
                     onChange={(newValue) => handleInputChange(field, newValue)}
                   />
                 </LocalizationProvider>
               ) : field === 'country' ? (
                 <CountrySelect
-                  value={inputValues[field]}
-                  onChange={(newValue: string) => handleInputChange(field, newValue)}
+                  value={inputValues['country']?.label || ''}
+                  onChange={(newValue: CountryType | null) => handleInputChange(field, newValue)}
                   />
               ) : (
               <TextField
                 fullWidth
-                value={inputValues[field]}
-                onChange={(e) => handleInputChange(field, e.target.value)}
+                value={inputValues[field as keyof ProfileForm]}
+                onChange={(e) => handleInputChange(field as keyof ProfileForm, e.target.value)}
                 variant="outlined"
               />
               )
               
             ) : (
             <ListItemText
-              primary={fieldValues ? fieldValues[field] : ''}
+              primary={fieldValues ? fieldValues[field as keyof User] : ''}
               secondary={null}
               sx={{minWidth: 250}}
             />
@@ -199,7 +192,7 @@ function ProfilePage() {
               <Tooltip title={editMode[field] ? "Save" : "Edit"}>
                 <IconButton
                   edge="end"
-                  onClick={() => (editMode[field] ? handleSave(field) : handleEdit(field))}
+                  onClick={() => (editMode[field] ? handleSave(field as keyof ProfileForm) : handleEdit(field as keyof ProfileForm))}
                 >
                   {editMode[field] ? <SaveIcon /> : <EditIcon />}
                 </IconButton>
@@ -207,7 +200,7 @@ function ProfilePage() {
 
               {editMode[field] && (
                 <Tooltip title="Cancel">
-                  <IconButton edge="end" onClick={() => handleCancel(field)}>
+                  <IconButton edge="end" onClick={() => handleCancel(field as keyof ProfileForm)}>
                     <CancelIcon />
                   </IconButton>
                 </Tooltip>

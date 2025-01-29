@@ -1,7 +1,7 @@
-import { createContext, useState, useEffect, useContext } from 'react';
+import { createContext, useState, useEffect } from 'react';
 import useSocket from '../hooks/useSocket';
-import { RoomContext } from './room.context';
-import { GameBoard, Tile, Player } from '../types';
+import { GameBoard, Tile, Player, TileOnBoard } from '../types';
+import useRoom from '../hooks/useRoom';
 
 const GameContext = createContext({} as Context);
 
@@ -12,8 +12,8 @@ interface Context {
     setBoard: React.Dispatch<React.SetStateAction<GameBoard | null>>,
     rack: Tile[],
     setRack: React.Dispatch<React.SetStateAction<Tile[]>>,
-    placedLetters: Tile[],
-    setPlacedLetters: React.Dispatch<React.SetStateAction<Tile[]>>,
+    placedLetters: TileOnBoard[],
+    setPlacedLetters: React.Dispatch<React.SetStateAction<TileOnBoard[]>>,
     leftInBag: number,
     resetTurnActions: () => void,
     reactionScore: number
@@ -23,11 +23,11 @@ function GameProvider(props: { children: React.ReactNode }) {
     const [players, setPlayers] = useState([] as Player[]);
     const [board, setBoard] = useState<GameBoard | null>(null);
     const [rack, setRack] = useState([] as Tile[]);
-    const [placedLetters, setPlacedLetters] = useState([] as Tile[]);
+    const [placedLetters, setPlacedLetters] = useState([] as TileOnBoard[]);
     const [leftInBag, setLeftInBag] = useState(100);
     const [reactionScore, setReactionScore] = useState(0);
     const { socket } = useSocket();
-    const { setIsActive, setRackSize, setGameMode } = useContext(RoomContext)
+    const { setRoom } = useRoom();
 
     function resetTurnActions() {
         if (board) {
@@ -73,20 +73,18 @@ function GameProvider(props: { children: React.ReactNode }) {
 
       // Listen for when a new game starts (public)
       socket.on('gameStarted', (rackSize, gameMode) => {
-          setIsActive(true)
-          setRackSize(rackSize)
-          setGameMode(gameMode)
+          setRoom(prev => prev ? ({...prev, gameSession: { settings: {rackSize, gameEnd: gameMode }}}) : null)
       });
 
       // Listen for when a game ends (public)
       socket.on('gameEnded', () => {
-          setIsActive(false)
-          setPlayers([])
-          setRack([])
-          setBoard(null)
-          setPlacedLetters([])
-          setLeftInBag(100)
-          setReactionScore(0)
+            setRoom(prev => prev ? ({...prev, gameSession: null}) : null)
+            setPlayers([])
+            setRack([])
+            setBoard(null)
+            setPlacedLetters([])
+            setLeftInBag(100)
+            setReactionScore(0)
       });
 
       // Listen for when your reaction score increased (private)

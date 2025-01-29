@@ -44,7 +44,7 @@ const Card = styled(MuiCard)(({ theme }) => ({
   }),
 }));
 
-const SignUpContainer = styled(Stack)(({ theme }) => ({
+const SignUpContainer = styled(Stack)(() => ({
   height: '100%',
   padding: 4,
 }));
@@ -68,15 +68,15 @@ export default function SignUp() {
   const [passwordErrorMessage, setPasswordErrorMessage] = useState('');
   const [nameError, setNameError] = useState(false);
   const [nameErrorMessage, setNameErrorMessage] = useState('');
-  const [date, setDate] = useState(dayjs());
-  const [pfpPreview, setPfpPreview] = useState("/broken-image.jpg");
+  const [date, setDate] = useState<dayjs.Dayjs | null>(dayjs());
+  const [pfpPreview, setPfpPreview] = useState<string | ArrayBuffer | null>("/broken-image.jpg");
   const navigate = useNavigate();
   const notifications = useNotifications();
 
   const validateInputs = () => {
-    const email = document.getElementById('email');
-    const password = document.getElementById('password');
-    const name = document.getElementById('name');
+    const email = document.getElementById('email') as HTMLInputElement;
+    const password = document.getElementById('password') as HTMLInputElement;
+    const name = document.getElementById('name') as HTMLInputElement;
 
     let isValid = true;
 
@@ -110,35 +110,29 @@ export default function SignUp() {
     return isValid;
   };
 
-  function handleFilePreview(event) {
+  function handleFilePreview(event: React.ChangeEvent<HTMLInputElement>) {
     const reader = new FileReader();
     reader.onload = function(){
       setPfpPreview(reader.result)
     }
-    reader.readAsDataURL(event.target.files[0]);
+    const file = event.target.files?.[0];
+    if (file) reader.readAsDataURL(file);
   }
 
-  async function handleSubmit(event) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-    formData.set('birthdate', date.startOf('day').format('YYYY-MM-DD'));
+    formData.set('birthdate', date ? date.startOf('day').format('YYYY-MM-DD') : '');
 
     try {
       await authService.signup(formData)
-      notify('Successfully created account!','success',5000)
+      notifications.show('Successfully created account!', { severity: 'success', autoHideDuration: 5000 });
       navigate("/login");
     } catch (error) {
-      const errorDescription = error.response.data.message;
-      notify(errorDescription,'error',5000)
+      console.error(error);
+      notifications.show('Failed to create account', { severity: 'error', autoHideDuration: 5000 });
     }
   };
-
-  function notify(message, type, duration) {
-    notifications.show(message, {
-      severity: type,
-      autoHideDuration: duration,
-    });
-  }
 
   return (
         <SignUpContainer direction="column" justifyContent="space-between">
@@ -239,7 +233,7 @@ export default function SignUp() {
 
                 <FormControl>
                   <FormLabel>Profile Picture</FormLabel>
-                  <Avatar src={pfpPreview} sx={{mx: "auto", width: '12rem', height: '12rem', mb: '1rem'}} />
+                  <Avatar src={pfpPreview as string} sx={{mx: "auto", width: '12rem', height: '12rem', mb: '1rem'}} />
                   <Button
                     component="label"
                     role={undefined}

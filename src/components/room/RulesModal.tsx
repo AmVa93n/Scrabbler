@@ -1,4 +1,3 @@
-import { useContext } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Accordion, AccordionDetails, 
           AccordionSummary } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -10,15 +9,17 @@ import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
 import TuneIcon from '@mui/icons-material/Tune';
 import SmartToyOutlinedIcon from '@mui/icons-material/SmartToyOutlined';
-import { RulesContext } from '../../context/modal.context';
 
-function RulesModal() {
-  const { isRulesOpen, setIsRulesOpen } = useContext(RulesContext)
+interface Props {
+  open: boolean;
+  onClose: () => void;
+}
 
+function RulesModal({ open, onClose }: Props) {
   return (
     <Dialog 
-      open={isRulesOpen}
-      onClose={()=>setIsRulesOpen(false)}
+      open={open}
+      onClose={onClose}
       >
       <DialogTitle>How to play Scrabble?</DialogTitle>
       <DialogContent>
@@ -140,7 +141,7 @@ function RulesModal() {
 
       <DialogActions>
         <Button 
-            onClick={()=>setIsRulesOpen(false)} 
+            onClick={onClose} 
             sx={{ textTransform: 'none' }} 
             >
               Close

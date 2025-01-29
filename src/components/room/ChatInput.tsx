@@ -1,18 +1,17 @@
-import { useState, useContext } from 'react';
-import { TextField, Button, Box, IconButton, Popover, InputAdornment } from '@mui/material';
+import { useState } from 'react';
+import { TextField, Button, Box, IconButton, InputAdornment } from '@mui/material';
 import useSocket from '../../hooks/useSocket';
-import { RoomContext } from '../../context/room.context';
 import Picker from '@emoji-mart/react';
 import data, { Skin } from '@emoji-mart/data';
 import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
 import useAuth from '../../hooks/useAuth';
+import { useParams } from 'react-router-dom';
 
 function ChatInput() {
     const [message, setMessage] = useState('');
     const { socket } = useSocket();
-    const { roomId } = useContext(RoomContext)
+    const { roomId } = useParams();
     const { user: User } = useAuth();
-    const [anchorEl, setAnchorEl] = useState(null); // For emoji picker popover
     const [isPickerOpen, setIsPickerOpen] = useState(false);
 
     function handleSend() {
@@ -28,17 +27,7 @@ function ChatInput() {
 
     function handleEmojiClick(emoji: Skin) {
         setMessage((prevMessage) => prevMessage + emoji.native); // Add emoji to message
-        closeEmojiPicker()
-    };
-
-    function openEmojiPicker(event) {
-        setAnchorEl(event.currentTarget);
-        setIsPickerOpen(true)
-    };
-
-    function closeEmojiPicker() {
-        setAnchorEl(null);
-        setIsPickerOpen(false)
+        setIsPickerOpen(false);
     };
 
     return (
@@ -57,29 +46,11 @@ function ChatInput() {
                         endAdornment: (
                             <InputAdornment position="end">
                                 <IconButton
-                                    onClick={openEmojiPicker}
+                                    onClick={() => setIsPickerOpen(!isPickerOpen)}
                                     sx={{ px: 0 }}
                                 >
                                     <EmojiEmotionsIcon />
                                 </IconButton>
-                                <Popover
-                                    open={isPickerOpen}
-                                    anchorEl={anchorEl}
-                                    onClose={closeEmojiPicker}
-                                    anchorOrigin={{
-                                        vertical: 'top',
-                                        horizontal: 'right',
-                                    }}
-                                    transformOrigin={{
-                                        vertical: 'bottom',
-                                        horizontal: 'right',
-                                    }}
-                                    disablePortal={true}
-                                >
-                                    <Box sx={{mr: 30}}>
-                                        <Picker data={data} onEmojiSelect={handleEmojiClick} />
-                                    </Box>
-                                </Popover>
                             </InputAdornment>
                         ),
                 }}}
@@ -94,6 +65,12 @@ function ChatInput() {
             >
                 Send
             </Button>
+
+            {isPickerOpen && 
+                <div style={{ position: 'absolute', bottom: 80, right: 20 }}>
+                    <Picker data={data} onEmojiSelect={handleEmojiClick} />
+                </div>
+            }
         </Box>
     );
 }

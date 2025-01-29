@@ -1,22 +1,25 @@
-import { useContext, useState } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Grid2, Paper, Typography } from '@mui/material';
-import { RoomContext } from '../../../context/room.context';
 import { GameContext } from '../../../context/game.context';
 import useSocket from '../../../hooks/useSocket';
 import LoopIcon from '@mui/icons-material/Loop';
-import { SwapContext } from '../../../context/modal.context';
 import useAuth from '../../../hooks/useAuth';
+import { useParams } from 'react-router-dom';
 
-function SwapModal() {
+interface Props {
+  open: boolean;
+  onClose: () => void;
+}
+
+function SwapModal({ open, onClose }: Props) {
   const { socket } = useSocket();
   const { user } = useAuth();
-  const { roomId } = useContext(RoomContext)
+  const { roomId } = useParams();
   const { rack, placedLetters, leftInBag, resetTurnActions, players } = useContext(GameContext)
-  const { isLReplaceOpen, setIsLReplaceOpen } = useContext(SwapContext)
   const isPlaying = players.find(player => player._id === user?._id)
-  const [selectedLetters, setSelectedLetters] = useState([])
+  const [selectedLetters, setSelectedLetters] = useState([] as number[])
 
-  function handleLetterClick(letterId) {
+  function handleLetterClick(letterId: number) {
     if (selectedLetters.includes(letterId)) {
         setSelectedLetters((prev) => prev.filter(id => id !== letterId));
     } else {
@@ -25,26 +28,34 @@ function SwapModal() {
   }
 
   async function handleSwap() {
-    setIsLReplaceOpen(false)
     socket?.emit('swapLetters', roomId, selectedLetters)
     setSelectedLetters([])
     resetTurnActions()
+    onClose()
   }
 
   function handleCancel() {
-    setIsLReplaceOpen(false)
     setSelectedLetters([])
+    onClose()
   }
+
+  useEffect(() => {
+    if (!socket) return;
+    socket.on('turnTimedOut', onClose); // Listen for turn timeout (private)
+    return () => { // Clean up listeners on component unmount
+      socket.off('turnTimedOut', onClose)
+    };
+  }, [socket]);
 
   return (
     <Dialog 
-      open={isLReplaceOpen} 
+      open={open} 
       >
       <DialogTitle>Select Letters</DialogTitle>
       <DialogContent>
         <Grid2 container spacing={1}>
           {isPlaying && [...rack, ...placedLetters].map((tile) => (
-            <Grid2 xs={3} key={tile.id}>
+            <Grid2 key={tile.id}>
               <Paper
                 onClick={() => handleLetterClick(tile.id)}
                 sx={{

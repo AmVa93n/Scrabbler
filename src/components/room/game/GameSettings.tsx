@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useState } from 'react';
 import { Button, InputLabel, Select, MenuItem, FormControl, Typography, Slider, Box, RadioGroup, FormControlLabel, 
     Radio, Stack,
     SelectChangeEvent} from '@mui/material';
-import { RoomContext } from '../../../context/room.context';
 import useSocket from '../../../hooks/useSocket';
 import accountService from "../../../services/account.service";
 import appService from "../../../services/app.service";
@@ -10,9 +9,10 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import PlayCircleIcon from '@mui/icons-material/PlayCircle';
 import { AntiSpamContext } from '../../../context/antispam';
 import { Board, TileBag } from '../../../types';
+import useRoom from '../../../hooks/useRoom';
 
 function GameSettings() {
-    const { roomId, usersInRoom, hostId } = useContext(RoomContext)
+    const { usersInRoom, room } = useRoom();
     const { canClick, setCanClick } = useContext(AntiSpamContext)
     const { socket } = useSocket();
     const [settings, setSettings] = useState({ 
@@ -54,7 +54,7 @@ function GameSettings() {
         const gameSession = {players: [...usersInRoom], settings: gameSettings}
         const response = await appService.ping()
         if (response) {
-            socket?.emit('startGame', roomId, hostId, gameSession)
+            socket?.emit('startGame', room?._id, room?.creator, gameSession)
             setCanClick(false)
         } else {
             alert('The server is down. Refresh the page and try again')

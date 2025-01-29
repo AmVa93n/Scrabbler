@@ -11,50 +11,43 @@ import FileUploadIcon from '@mui/icons-material/FileUpload';
 import { Room } from '../../types';
 
 interface Props {
-  editing: boolean;
-  setEditing: (value: boolean) => void;
-  setRooms: React.Dispatch<React.SetStateAction<Room[]>>;
   room: Room;
+  setRooms: React.Dispatch<React.SetStateAction<Room[]>>;
+  onClose: () => void;
 }
 
-function EditRoom({ editing, setEditing, setRooms, room }: Props) {
+function EditRoom({ room, setRooms, onClose }: Props) {
   const notifications = useNotifications();
-  const [imagePreview, setImagePreview] = useState(room?.image || "/room-default.jpg");
+  const [imagePreview, setImagePreview] = useState<string | ArrayBuffer | null>(room.image || "/room-default.jpg");
 
-  async function handleSave(event) {
+  async function handleSave(event: React.FormEvent) {
     event.preventDefault();
-    const formData = new FormData(event.currentTarget);
+    const formData = new FormData(event.currentTarget as HTMLFormElement);
 
     try {
         const editedRoom = await accountService.updateRoom(room._id, formData)
         setRooms(prev => prev.map(room => room._id === editedRoom._id ? editedRoom : room))
-        notify('Successfully edited room!','success',5000)
-    
+        notifications.show('Successfully edited room!', { severity: 'success', autoHideDuration: 5000 });
     } catch (error) {
-        const errorDescription = error.response.data.message;
-        notify(errorDescription,'error',5000)
+        console.error(error)
+        const errorDescription = "Failed to edit room";
+        notifications.show(errorDescription, { severity: 'error', autoHideDuration: 5000 });
     }
-    setEditing(false)
+    onClose()
   }
 
-  function notify(message, type, duration) {
-    notifications.show(message, {
-      severity: type,
-      autoHideDuration: duration,
-    });
-  }
-
-  function handleFilePreview(event) {
+  function handleFilePreview(event: React.ChangeEvent<HTMLInputElement>) {
     const reader = new FileReader();
     reader.onload = function(){
       setImagePreview(reader.result)
     }
-    reader.readAsDataURL(event.target.files[0]);
+    const file = event.target.files?.[0];
+    if (file) reader.readAsDataURL(file);
   }
 
   return (
     <Dialog
-        open={editing}
+        open={!!room}
         TransitionProps={{onEnter: ()=>setImagePreview(room?.image || "/room-default.jpg")}}
         component="form"
         onSubmit={handleSave}
@@ -98,7 +91,7 @@ function EditRoom({ editing, setEditing, setRooms, room }: Props) {
 
         <FormControl>
           <FormLabel>Room Image</FormLabel>
-          <img src={imagePreview} alt='' />
+          <img src={imagePreview as string} alt='' />
           <Button
             component="label"
             role={undefined}
@@ -122,7 +115,7 @@ function EditRoom({ editing, setEditing, setRooms, room }: Props) {
         <Button variant="contained" sx={{textTransform: 'none'}} startIcon={<SaveIcon />} type="submit">
             Save Changes
         </Button>
-        <Button sx={{textTransform: 'none'}} onClick={()=>setEditing(false)}>
+        <Button sx={{textTransform: 'none'}} onClick={onClose}>
             Cancel
         </Button>
       </DialogActions>

@@ -23,7 +23,7 @@ function Tile({ id, letter, isBlank, points, fixed }: Props) {
   const [{ isDragging, canDrag }, drag] = useDrag({
     type: ItemType,
     item: { id, letter, isBlank, points, fixed },
-    canDrag: () => !fixed && turnPlayer && user?._id === turnPlayer._id,
+    canDrag: () => !fixed && user?._id === turnPlayer?._id,
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
       canDrag: monitor.canDrag(),

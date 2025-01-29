@@ -1,4 +1,4 @@
-import { useContext, useRef, useEffect, Fragment } from 'react';
+import { useRef, useEffect, Fragment, useState } from 'react';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import Divider from '@mui/material/Divider';
@@ -6,14 +6,47 @@ import ListItemText from '@mui/material/ListItemText';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import Avatar from '@mui/material/Avatar';
 import Typography from '@mui/material/Typography';
-import { RoomContext } from '../../context/room.context';
 import { Box } from '@mui/material';
 import Reactions from './Reactions';
 import { Message } from '../../types';
+import useSocket from '../../hooks/useSocket';
+import { useParams } from 'react-router-dom';
+import accountService from '../../services/account.service';
 
 export default function RoomChat() {
-    const { messages } = useContext(RoomContext)
+    const { roomId } = useParams();
+    const { socket } = useSocket();
+    const [messages, setMessages] = useState([] as Message[]);
     const chatContainerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        async function fetchMessages() {
+            const { messages } = await accountService.getRoom(roomId || '');
+            setMessages(messages);
+        }
+        fetchMessages();
+
+        if (!socket) return;
+        // Listen for new messages (public)
+        socket.on('chatUpdated', (newMsg) => {
+            setMessages(prevMessages => [...prevMessages, newMsg]);
+        });
+
+        // Listen for new reactions (public)
+        socket.on('reactionsUpdated', (messageId, updatedReactions) => {
+            setMessages((prevMessages) =>
+                prevMessages.map((message) =>
+                  message._id === messageId ? {...message, reactions: updatedReactions} : message
+                )
+              );
+        });
+
+        // Clean up listeners on component unmount
+        return () => {
+            socket.off('chatUpdated');
+            socket.off('reactionsUpdated');
+        };
+    }, [socket, roomId]);
 
   // Scroll chat to the bottom whenever messages array changes
   useEffect(() => {

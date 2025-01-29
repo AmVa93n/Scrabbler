@@ -1,6 +1,10 @@
 export interface User {
     _id: string;
     name: string;
+    email: string;
+    gender: string;
+    birthdate: string;
+    country: string;
     profilePic: string;
 }
 
@@ -9,7 +13,15 @@ export interface Room {
     name: string;
     description: string;
     image: string;
+    creator: string;
+    messages: Message[];
+    kickedUsers: string[];
+    gameSession: GameSession | null;
 }
+
+export interface GameSession {
+    settings: Pick<GameSettings, "rackSize" | "gameEnd">;
+};
 
 export interface Game {
     _id: string;
@@ -81,14 +93,24 @@ export interface Square {
 }
 
 export interface Tile {
-    x: number;
-    y: number;
     id: number;
     letter: string;
     points: number;
     isBlank: boolean;
 }
 
+export interface TileOnBoard extends Tile {
+    x: number;
+    y: number;
+}
+
 export interface Player extends User {
     score: number;
 }
+
+export interface CountryType {
+    code: string;
+    label: string;
+    phone: string;
+    suggested?: boolean;
+  }

@@ -1,49 +1,40 @@
-import { useContext, useState } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, FormControl, FormLabel, 
     TextField, ToggleButtonGroup, ToggleButton, Typography, Tooltip } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { TurnContext } from '../../../context/turn.context';
-import { PromptContext } from '../../../context/modal.context';
 import useReactions from '../../../hooks/useReactions';
+import useSocket from '../../../hooks/useSocket';
 
-function PromptModal({ word }) {
+interface Props {
+  open: boolean;
+  onClose: () => void;
+  setPromptData: React.Dispatch<React.SetStateAction<{promptText : string, targetReaction: string} | null>>;
+  word: string | undefined
+}
+
+function PromptModal({ open, onClose, setPromptData, word }: Props) {
   const { reactionTypes, reactionEmojis } = useReactions()
-  const { promptData, setPromptData, isPromptOpen, setIsPromptOpen } = useContext(PromptContext)
   const { turnPlayer } = useContext(TurnContext)
-  const defaultText = `${turnPlayer ? turnPlayer.name : '<player>'} was thinking about ${word ? word?.toLowerCase() : '<word>'} because`
-  const [text, setText] = useState('')
-
-  function handleInputChange(event) {
-    setText(event.target.value)
-  }
-
-  function handleToggleChange(event, newReaction) {
-    if (newReaction !== null) {
-      setPromptData(prevState => ({ ...prevState, targetReaction: newReaction }));
-    }
-  }
-
-  function OnOpen() {
-    if (promptData) {
-        setText(promptData?.promptText)
-    } else {
-        setPromptData({promptText: defaultText, targetReaction: 'funny'})
-        setText(defaultText)
-    }
-  }
+  const defaultText = `${turnPlayer?.name || '<player>'} was thinking about ${word?.toLowerCase() || '<word>'} because`
+  const [text, setText] = useState(defaultText)
+  const [reaction, setReaction] = useState('funny')
+  const { socket } = useSocket();
 
   function handleConfirm() {
-    setPromptData(prevState => ({...prevState, promptText: text}));
-    setIsPromptOpen(false)
+    setPromptData({ promptText: text, targetReaction: reaction });
+    onClose()
   }
 
   function handleReset() {
-    setIsPromptOpen(false)
+    onClose()
     setPromptData(null)
-    setText('')
+    setText(defaultText)
+    setReaction('funny')
   }
 
   function isPromptTextValid() {
+    if (!word) return false
     if (text.trim() === word.toLowerCase()) return false // the prompt must include other words too
     if (text.includes(` ${word.toLowerCase()} `)) return true
     if (text.startsWith(`${word.toLowerCase()} `)) return true
@@ -51,10 +42,18 @@ function PromptModal({ word }) {
     return false
   }
 
+  useEffect(() => {
+    if (!socket) return;
+    socket.on('turnTimedOut', onClose); // Listen for turn timeout (private)
+    return () => { // Clean up listeners on component unmount
+      socket.off('turnTimedOut', onClose)
+    };
+  }, [socket]);
+
   return (
     <Dialog 
-      open={isPromptOpen} 
-      TransitionProps={{onEnter: OnOpen}}
+      open={open} 
+      onClose={onClose}
       >
       <DialogTitle>Customize Prompt</DialogTitle>
       <DialogContent sx={{
@@ -71,7 +70,7 @@ function PromptModal({ word }) {
                 required
                 fullWidth
                 value={text}
-                onChange={handleInputChange}
+                onChange={(e) => setText(e.target.value)}
                 multiline
                 rows={3}
                 slotProps={{
@@ -83,9 +82,8 @@ function PromptModal({ word }) {
         <FormControl>
             <FormLabel htmlFor="targetReaction">Choose the reaction you're aiming to get for the generated text</FormLabel>
             <ToggleButtonGroup
-                name="targetReaction"
-                value={promptData?.targetReaction}
-                onChange={handleToggleChange}
+                value={reaction}
+                onChange={(_, newReaction) => setReaction(newReaction)}
                 exclusive
                 size='small'
             >
@@ -107,7 +105,7 @@ function PromptModal({ word }) {
             sx={{ textTransform: 'none' }} 
             variant="contained"
             startIcon={<CheckCircleIcon />}
-            disabled={word && !isPromptTextValid()}
+            disabled={!isPromptTextValid()}
             >
                     Confirm
                 </Button>

@@ -2,31 +2,39 @@ import { Box, Typography } from '@mui/material';
 import { useDrop } from 'react-dnd';
 import Tile from './Tile';
 import { GameContext } from '../../../context/game.context';
-import { useContext } from 'react';
-import { BlankContext } from '../../../context/modal.context';
+import { useContext, useState } from 'react';
+import { Square as SquareType, Tile as TileType } from '../../../types';
+import BlankModal from './BlankModal';
 
 const ItemType = 'LETTER';
 
-function Square({ square, isStart }) {
+interface Props {
+  square: SquareType;
+  isStart: boolean;
+}
+
+function Square({ square, isStart }: Props) {
   const { setBoard, setRack, setPlacedLetters } = useContext(GameContext)
-  const { setBlank, setIsLSelectOpen } = useContext(BlankContext)
+  const [isBlankOpen, setIsBlankOpen] = useState(false);
+  const [tileCoords, setTileCoords] = useState({ x: 0, y: 0 });
 
   const [{ isOver, canDrop }, drop] = useDrop({
     accept: ItemType,
     canDrop: () => !square.occupied,
-    drop: (letter) => handleDrop(square.x, square.y, letter),
+    drop: (letter: TileType) => handleDrop(square.x, square.y, letter),
     collect: (monitor) => ({
       isOver: monitor.isOver(),
       canDrop: monitor.canDrop(),
     }),
   });
 
-  function handleDrop(x, y, tile) {
+  function handleDrop(x: number, y: number, tile: TileType) {
     setBoard((prevBoard) => {
+      if (!prevBoard) return prevBoard;
       const newBoard = [...prevBoard];
       // Find the previous position of the letter
-      for (let row of newBoard) {
-        for (let square of row) {
+      for (const row of newBoard) {
+        for (const square of row) {
           if (square.content && square.content.id === tile.id) {
             square.content = null; // Remove the letter from the previous square
             square.occupied = false
@@ -57,12 +65,12 @@ function Square({ square, isStart }) {
 
     if (tile.isBlank) {
       // Trigger the modal for blank tile selection
-      setBlank({ x, y, tile });
-      setIsLSelectOpen(true);
+      setTileCoords({ x, y });
+      setIsBlankOpen(true);
     }
   };
 
-  function getSquareColor(bonus) {
+  function getSquareColor(bonus: string) {
     switch(bonus) {
       case 'quadrupleWord': return '#CC0000'
       case 'tripleWord': return '#FF3333'
@@ -98,6 +106,8 @@ function Square({ square, isStart }) {
       ) : (
         isStart && (<Typography variant="h4">★</Typography>)
       )}
+
+      <BlankModal open={isBlankOpen} onClose={() => setIsBlankOpen(false)} tileCoords={tileCoords} />
     </Box>
   );
 }

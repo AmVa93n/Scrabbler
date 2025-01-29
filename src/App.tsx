@@ -20,7 +20,6 @@ import '@fontsource/roboto/500.css';
 import { RoomProvider } from "./context/room.context";
 import { GameProvider } from './context/game.context';
 import { TurnProvider } from "./context/turn.context";
-import { ModalsWrapper } from "./context/modal.context";
 import { AntiSpamWrapper } from "./context/antispam";
 
 function App() {
@@ -72,11 +71,9 @@ function App() {
               <RoomProvider>
                 <GameProvider>
                   <TurnProvider>
-                    <ModalsWrapper>
-                      <AntiSpamWrapper>
-                        <RoomPage />
-                      </AntiSpamWrapper>
-                    </ModalsWrapper>
+                    <AntiSpamWrapper>
+                      <RoomPage />
+                    </AntiSpamWrapper>
                   </TurnProvider>
                 </GameProvider>
               </RoomProvider>

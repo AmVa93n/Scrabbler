@@ -1,31 +1,42 @@
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import { Dialog, DialogTitle, DialogContent, Grid2, Paper, Typography } from '@mui/material';
 import { GameContext } from '../../../context/game.context';
-import { BlankContext } from '../../../context/modal.context';
+import useSocket from '../../../hooks/useSocket';
 
-function BlankModal() {
+interface Props {
+  open: boolean;
+  onClose: () => void;
+  tileCoords: { x: number; y: number };
+}
+
+function BlankModal({ open, onClose, tileCoords }: Props) {
   const { setBoard } = useContext(GameContext)
-  const { isLSelectOpen, setIsLSelectOpen, blank, setBlank } = useContext(BlankContext)
   const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+  const { socket } = useSocket();
 
   function handleLetterSelect(selectedLetter: string) {
-    if (blank) {
-      // Update the blank tile with the chosen letter
-      const { x, y } = blank;
-      setBoard((prevBoard) => {
-        if (!prevBoard) return null;
-        const newBoard = [...prevBoard];
-        newBoard[y][x].content!.letter = selectedLetter;
-        return newBoard;
-      });
-      setBlank(null); // Reset after placement
-      setIsLSelectOpen(false);
-    }
+    // Update the blank tile with the chosen letter
+    const { x, y } = tileCoords;
+    setBoard((prevBoard) => {
+      if (!prevBoard) return null;
+      const newBoard = [...prevBoard];
+      newBoard[y][x].content!.letter = selectedLetter;
+      return newBoard;
+    });
+    onClose();
   }
+
+  useEffect(() => {
+    if (!socket) return;
+    socket.on('turnTimedOut', onClose); // Listen for turn timeout (private)
+    return () => { // Clean up listeners on component unmount
+      socket.off('turnTimedOut', onClose)
+    };
+  }, [socket]);
 
   return (
     <Dialog 
-      open={isLSelectOpen} 
+      open={open} 
       >
       <DialogTitle>Select a Letter</DialogTitle>
       <DialogContent>

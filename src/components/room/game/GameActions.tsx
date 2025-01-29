@@ -1,45 +1,42 @@
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import useSocket from '../../../hooks/useSocket';
-import { RoomContext } from '../../../context/room.context';
 import { GameContext } from '../../../context/game.context';
 import { Button, Stack, Typography, Box } from '@mui/material';
-import BlankModal from './BlankModal';
 import SwapModal from './SwapModal';
 import PromptModal from './PromptModal';
-import AlertModal from './AlertModal';
-import InactiveModal from './InactiveModal';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import LoopIcon from '@mui/icons-material/Loop';
 import FastForwardIcon from '@mui/icons-material/FastForward';
 import TerminalIcon from '@mui/icons-material/Terminal';
 import UndoIcon from '@mui/icons-material/Undo';
 import { TurnContext } from '../../../context/turn.context';
-import { PromptContext, SwapContext } from '../../../context/modal.context';
 import { AntiSpamContext } from '../../../context/antispam';
 import useAuth from '../../../hooks/useAuth';
 import { Square } from '../../../types';
+import useRoom from '../../../hooks/useRoom';
 
 function GameActions() {
     const { socket } = useSocket();
     const { user } = useAuth();
-    const { roomId, gameMode } = useContext(RoomContext)
+    const { room } = useRoom();
     const { placedLetters, board, leftInBag, resetTurnActions } = useContext(GameContext)
     const { turnPlayer } = useContext(TurnContext)
-    const { setIsLReplaceOpen } = useContext(SwapContext)
-    const { setIsPromptOpen, promptData, setPromptData } = useContext(PromptContext)
     const { canClick, setCanClick } = useContext(AntiSpamContext)
+    const [promptData, setPromptData] = useState<{promptText : string, targetReaction: string} | null>(null)
+    const [isPromptOpen, setIsPromptOpen] = useState(false);
+    const [isSwapOpen, setIsSwapOpen] = useState(false);
 
     function handleSubmit() {
         const wordsWithScores = getWordsWithScores()
-        socket?.emit('validateMove', roomId, placedLetters, board, wordsWithScores, promptData)
+        socket?.emit('validateMove', room?._id, placedLetters, board, wordsWithScores, promptData)
         setCanClick(false)
         setPromptData(null)
     }
 
     function handleSwapOrPass() {
-        if (leftInBag > 0) setIsLReplaceOpen(true)
+        if (leftInBag > 0) setIsSwapOpen(true)
         else {
-            socket?.emit('passTurn', roomId)
+            socket?.emit('passTurn', room?._id)
             setCanClick(false)
             resetTurnActions()
         }
@@ -282,7 +279,7 @@ function GameActions() {
     }
 
     function canSwap() {
-        if (gameMode === 'classic') {
+        if (room?.gameSession?.settings.gameEnd === 'classic') {
             return leftInBag >= 7
         } else {
             return leftInBag > 0
@@ -340,11 +337,8 @@ function GameActions() {
             </Stack>
             }
 
-            <BlankModal />
-            <SwapModal />
-            <PromptModal word={board && getWordForPrompt()} />
-            <AlertModal />
-            <InactiveModal />
+            <SwapModal open={isSwapOpen} onClose={() => setIsSwapOpen(false)} />
+            <PromptModal open={isPromptOpen} onClose={() => setIsPromptOpen(false)} setPromptData={setPromptData} word={getWordForPrompt()} />
         </>
     )
 }

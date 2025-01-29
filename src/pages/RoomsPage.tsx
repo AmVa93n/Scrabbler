@@ -14,8 +14,7 @@ import { Room } from '../types';
 function RoomsPage() {
   const [rooms, setRooms] = useState([] as Room[])
   const [creating, setCreating] = useState(false)
-  const [editing, setEditing] = useState(false)
-  const [currentRoom, setCurrentRoom] = useState<Room | null>(null)
+  const [editedRoom, setEditedRoom] = useState<Room | null>(null)
   const navigate = useNavigate();
   const notifications = useNotifications();
 
@@ -55,8 +54,7 @@ function RoomsPage() {
 
   function handleEdit(roomId: string) {
     const roomToEdit = rooms.find(room => room._id === roomId)!
-    setCurrentRoom(roomToEdit)
-    setEditing(true)
+    setEditedRoom(roomToEdit)
   }
 
   return (
@@ -124,7 +122,7 @@ function RoomsPage() {
           </Button>
         </Box>
         <CreateRoom creating={creating} setCreating={setCreating} setRooms={setRooms}/>
-        <EditRoom editing={editing} setEditing={setEditing} setRooms={setRooms} room={currentRoom}/>
+        {editedRoom && <EditRoom room={editedRoom} onClose={() => setEditedRoom(null)} setRooms={setRooms}/>}
     </>
   );
 }

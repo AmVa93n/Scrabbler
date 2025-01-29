@@ -38,12 +38,13 @@ function CreateRoom({ creating, setCreating, setRooms }: Props) {
     setCreating(false)
   }
 
-  function handleFilePreview(event) {
+  function handleFilePreview(event: React.ChangeEvent<HTMLInputElement>) {
     const reader = new FileReader();
     reader.onload = function(){
       setImagePreview(reader.result)
     }
-    reader.readAsDataURL(event.target.files[0]);
+    const file = event.target.files?.[0];
+    if (file) reader.readAsDataURL(file);
   }
 
   return (

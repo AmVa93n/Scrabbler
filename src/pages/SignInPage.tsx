@@ -36,29 +36,20 @@ const Card = styled(MuiCard)(({ theme }) => ({
   }),
 }));
 
-const SignInContainer = styled(Stack)(({ theme }) => ({
+const SignInContainer = styled(Stack)(() => ({
   padding: 20,
   height: '100%',
 }));
 
-export default function SignIn(props) {
+export default function SignInPage() {
   const [emailError, setEmailError] = useState(false);
   const [emailErrorMessage, setEmailErrorMessage] = useState('');
   const [passwordError, setPasswordError] = useState(false);
   const [passwordErrorMessage, setPasswordErrorMessage] = useState('');
-  const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const { storeToken, authenticateUser } = useContext(AuthContext);
 
-  function handleClickOpen() {
-    setOpen(true);
-  };
-
-  function handleClose() {
-    setOpen(false);
-  };
-
-  async function handleSubmit(event) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     const email = formData?.get('email');
@@ -76,15 +67,15 @@ export default function SignIn(props) {
       
     } catch (error) {
       // If the request resolves with an error, set the error message in the state
-      const errorDescription = error.response.data.message;
-      alert(errorDescription);
+      console.error(error);
+      alert("Failed to sign in");
     }
     
   };
 
   const validateInputs = () => {
-    const email = document.getElementById('email');
-    const password = document.getElementById('password');
+    const email = document.getElementById('email') as HTMLInputElement;
+    const password = document.getElementById('password') as HTMLInputElement;
 
     let isValid = true;
 
@@ -151,14 +142,6 @@ export default function SignIn(props) {
             <FormControl>
               <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                 <FormLabel htmlFor="password">Password</FormLabel>
-                <Link
-                  component="button"
-                  onClick={handleClickOpen}
-                  variant="body2"
-                  sx={{ alignSelf: 'baseline' }}
-                >
-                  Forgot your password?
-                </Link>
               </Box>
               <TextField
                 error={passwordError}

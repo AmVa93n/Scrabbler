@@ -1,7 +1,6 @@
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import useSocket from '../../hooks/useSocket';
-import { RoomContext } from '../../context/room.context';
 import { AppBar, Box, Toolbar, Typography, Button, Snackbar } from '@mui/material';
 import HelpIcon from '@mui/icons-material/Help';
 import DoorBackIcon from '@mui/icons-material/DoorBack';
@@ -9,8 +8,8 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import RulesModal from './RulesModal';
 import ChairIcon from '@mui/icons-material/Chair';
 
-function RoomBar() {
-    const { roomName, setIsRulesOpen } = useContext(RoomContext)
+function RoomBar({ roomName }: { roomName: string }) {
+    const [isRulesOpen, setIsRulesOpen] = useState(false)
     const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
     const { socket } = useSocket();
 
@@ -48,7 +47,7 @@ function RoomBar() {
                     Rules
             </Button>
 
-            <RulesModal />
+            <RulesModal open={isRulesOpen} onClose={() => setIsRulesOpen(false)} />
 
             <Button 
                 variant="contained" 

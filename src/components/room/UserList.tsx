@@ -5,7 +5,6 @@ import ListItemText from '@mui/material/ListItemText';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import IconButton from '@mui/material/IconButton';
 import Avatar from '@mui/material/Avatar';
-import { RoomContext } from '../../context/room.context';
 import { GameContext } from '../../context/game.context';
 import BlockIcon from '@mui/icons-material/Block';
 import Tooltip from '@mui/material/Tooltip';
@@ -20,6 +19,7 @@ import StarIcon from '@mui/icons-material/Star';
 import { TurnContext } from '../../context/turn.context';
 import useAuth from '../../hooks/useAuth';
 import { Player, User } from '../../types';
+import useRoom from '../../hooks/useRoom';
 
 const shine = keyframes`
   from {background-position: 100% 0;}
@@ -28,14 +28,15 @@ const shine = keyframes`
 
 export default function UserList() {
     const { user: User } = useAuth();
-    const { roomId, hostId, usersInRoom, isActive } = useContext(RoomContext)
+    const { room, usersInRoom } = useRoom();
+    const isActive = room?.gameSession !== null;
     const { reactionScore, players } = useContext(GameContext)
     const { turnPlayer, turnEndTime } = useContext(TurnContext)
     const userList = isActive ? players.sort((a,b)=> b.score - a.score) : usersInRoom
     const { socket } = useSocket();
 
     function handleKick(user: User) {
-      socket?.emit('kickUser', roomId, user)
+      socket?.emit('kickUser', room?._id, user)
     }
 
   return (
@@ -49,7 +50,7 @@ export default function UserList() {
                     overlap="circular"
                     anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
                     badgeContent={'👑'}
-                    invisible={user._id !== hostId}
+                    invisible={user._id !== room?.creator}
                 >
                     <Avatar
                         alt={user.name}
@@ -61,7 +62,7 @@ export default function UserList() {
                 fontWeight: isActive && turnPlayer && user._id === turnPlayer._id ? 'bold' : 'normal'
             }} />
             {
-              (!isActive && User?._id === hostId && User?._id !== user._id) && 
+              (!isActive && User?._id === room.creator && User?._id !== user._id) && 
               <Tooltip title="Kick">
                 <IconButton edge="end" onClick={() => handleKick(user)}>
                   <BlockIcon />

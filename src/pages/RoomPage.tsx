@@ -1,6 +1,5 @@
-import { useContext } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import useSocket from '../hooks/useSocket';
-import { RoomContext } from '../context/room.context';
 import { GameContext } from '../context/game.context';
 import GameSettings from '../components/room/game/GameSettings';
 import GameActions from '../components/room/game/GameActions';
@@ -16,21 +15,70 @@ import ChatIcon from '@mui/icons-material/Chat';
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
 import CancelIcon from '@mui/icons-material/Cancel';
 import useAuth from '../hooks/useAuth';
+import InactiveModal from '../components/room/game/InactiveModal';
+import AlertModal from '../components/room/game/AlertModal';
+import useRoom from '../hooks/useRoom';
 
 function RoomPage() {
     const { socket } = useSocket();
-    const { user: User } = useAuth();
-    const { roomId, isRoomLoaded, usersInRoom, isActive, hostId } = useContext(RoomContext)
+    const { user } = useAuth();
+    const { room, usersInRoom } = useRoom();
+    const isActive = room?.gameSession !== null;
     const { leftInBag } = useContext(GameContext)
+    const [isAlertOpen, setIsAlertOpen] = useState(false);
+    const [alertMessage, setAlertMessage] = useState('');
+    const [isInactiveOpen, setIsInactiveOpen] = useState(false);
+    const autoClose = 2000
     
     function handleEndGame() {
-        socket?.emit('endGame', roomId)
+        socket?.emit('endGame', room?._id)
     }
+
+    useEffect(() => {
+        if (!socket) return;
+        let timer: number;
+
+        const onTurnStart = (sessionData) => {
+            if (sessionData.turnPlayer._id === user?._id) { // this is private
+                setAlertMessage("It's your turn!");
+                setIsAlertOpen(true);
+            }
+            timer = setTimeout(() => setIsAlertOpen(false), autoClose);
+        }
+
+        const onTimeout = (hasBecomeInactive: boolean) => {
+            if (hasBecomeInactive) {
+                setIsInactiveOpen(true)
+            } else {
+                setAlertMessage("Your turn has timed out!");
+                setIsAlertOpen(true);
+                timer = setTimeout(() => setIsAlertOpen(false), autoClose);
+            }
+        }
+
+        const onReject = (invalidWords: string[]) => {
+            setAlertMessage(`Some of your words are not valid: ${invalidWords.join(', ')}`);
+            setIsAlertOpen(true);
+            timer = setTimeout(() => setIsAlertOpen(false), autoClose);
+        }
+        
+        socket.on('turnStarted', onTurnStart); // Listen for turn start (public)
+        socket.on('turnTimedOut', onTimeout); // Listen for turn timeout (private)
+        socket.on('moveRejected', onReject); // Listen for when a move was rejected (private)
+
+        return () => { // Clean up listeners on component unmount
+            socket.off('turnStarted', onTurnStart);
+            socket.off('turnTimedOut', onTimeout);
+            socket.off('moveRejected', onReject);
+            clearTimeout(timer);
+        };
+
+    }, [socket, user?._id]);
 
     return (
         <>
-        <RoomBar />
-        {isRoomLoaded ? (
+        <RoomBar roomName={room?.name || ''} />
+        {room ? (
             <Grid2 
                 container 
                 columnSpacing={2} 
@@ -49,7 +97,7 @@ function RoomPage() {
                             <Typography variant="h5">{isActive ? 'Players' : `${usersInRoom.length} Users in room`}</Typography>
                         </Box>
                         <UserList />
-                        {(User?._id === hostId && isActive) && <Button 
+                        {(user?._id === room.creator && isActive) && <Button 
                                 variant="contained" 
                                 color="error" 
                                 startIcon={<CancelIcon />}
@@ -89,7 +137,7 @@ function RoomPage() {
                                 <Board />
                             </>
                         ) : (
-                            User?._id === hostId && 
+                            user?._id === room.creator && 
                             <GameSettings />
                         )} 
                     </Paper>
@@ -112,6 +160,8 @@ function RoomPage() {
     ) : (
         <Loading />
     )}
+    <AlertModal open={isAlertOpen} onClose={() => setIsAlertOpen(false)} message={alertMessage} />
+    <InactiveModal open={isInactiveOpen} onClose={() => setIsInactiveOpen(false)} />
     </>
     );
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, TableSortLabel, Typography, 
   Paper, AvatarGroup, Avatar } from '@mui/material';
@@ -8,25 +8,9 @@ import accountService from "../services/account.service";
 import { Game } from '../types';
 import useAuth from '../hooks/useAuth';
 
-function descendingComparator(a: Game, b: Game, orderBy: string) {
-  if (b[orderBy] < a[orderBy]) {
-    return -1;
-  }
-  if (b[orderBy] > a[orderBy]) {
-    return 1;
-  }
-  return 0;
-}
-
-function getComparator(order: 'asc' | 'desc', orderBy: string) {
-  return order === 'desc'
-    ? (a: Game, b: Game) => descendingComparator(a, b, orderBy)
-    : (a: Game, b: Game) => -descendingComparator(a, b, orderBy);
-}
-
 export default function GameHistoryPage() {
   const [order, setOrder] = useState<'asc' | 'desc'>('asc');
-  const [orderBy, setOrderBy] = useState('Date');
+  const [orderBy, setOrderBy] = useState('date');
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [games, setGames] = useState([] as Game[]);
@@ -45,56 +29,51 @@ export default function GameHistoryPage() {
     init()
   }, [])
 
-  function createRows(gameData: Game[]) {
-    const games = []
-    for (const game of gameData) {
-        const { _id, room, host, settings, createdAt, players } = game
-        const { board, tileBag, turnDuration, rackSize, gameEnd } = settings
-        const player = players.find(player => player._id === user?._id)!
-        const place = players.indexOf(player) + 1
-        games.push({ 
-            gameId: _id, 
-            'Date': createdAt.slice(0,10),
-            'Score': player.score || 0,
-            'Place': place,
-            'Players': players,
-            'Room': room?.name,
-            'Host': host.name,
-            'Board': board.name, 
-            'Tile Bag': tileBag.name, 
-            'Turn Duration': turnDuration, 
-            'Rack Size': rackSize, 
-            'Mode': gameEnd,
-          })
+  const headCells = [ 'Date','Score','Place','Players','Room','Host','Board', 'Tile Bag', 'Turn Duration', 'Rack Size', 'Mode']
+
+  function descendingComparator(a: Game, b: Game, orderBy: string) {
+    const value = (game: Game) => {
+      switch (orderBy) {
+        case 'Date': return game.createdAt;
+        case 'Score': return game.players.find(player => player._id === user?._id)!.score;
+        case 'Place': return game.players.indexOf(game.players.find(player => player._id === user?._id)!) + 1;
+        case 'Players': return game.players.map(player => player._id).length;
+        case 'Room': return game.room?.name;
+        case 'Host': return game.host.name;
+        case 'Board': return game.settings.board.name;
+        case 'Tile Bag': return game.settings.tileBag.name;
+        case 'Turn Duration': return game.settings.turnDuration;
+        case 'Rack Size': return game.settings.rackSize;
+        case 'Mode': return game.settings.gameEnd;
+        default: return game.createdAt;
+    }}
+  
+    if (value(b) < value(a)) {
+      return -1;
     }
-    return games
+    if (value(b) > value(a)) {
+      return 1;
+    }
+    return 0;
+  }
+  
+  function getComparator(order: 'asc' | 'desc', orderBy: string) {
+    return order === 'desc'
+      ? (a: Game, b: Game) => descendingComparator(a, b, orderBy)
+      : (a: Game, b: Game) => -descendingComparator(a, b, orderBy);
   }
 
-  const headCells = [ 
-    'Date',
-    'Score',
-    'Place',
-    'Players',
-    'Room',
-    'Host',
-    'Board', 
-    'Tile Bag', 
-    'Turn Duration', 
-    'Rack Size', 
-    'Mode',
-  ]
-
-  const handleRequestSort = (event, property) => {
+  const handleRequestSort = (property: string) => {
     const isAsc = orderBy === property && order === 'asc';
     setOrder(isAsc ? 'desc' : 'asc');
     setOrderBy(property);
   };
 
-  const handleChangePage = (event, newPage) => {
+  const handleChangePage = (newPage: number) => {
     setPage(newPage);
   };
 
-  const handleChangeRowsPerPage = (event) => {
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
@@ -110,12 +89,13 @@ export default function GameHistoryPage() {
     [order, orderBy, page, rowsPerPage, games],
   );
 
-  function EnhancedTableHead(props) {
-    const { order, orderBy, onRequestSort } = props;
-    const createSortHandler = (property) => (event) => {
-      onRequestSort(event, property);
-    };
-  
+  interface Props {
+    order: 'asc' | 'desc';
+    orderBy: string;
+    onRequestSort: (event: React.MouseEvent, property: string) => void;
+  }
+
+  function EnhancedTableHead({ order, orderBy, onRequestSort}: Props) {
     return (
       <TableHead>
         <TableRow>
@@ -129,7 +109,7 @@ export default function GameHistoryPage() {
               <TableSortLabel
                 active={orderBy === headCell}
                 direction={orderBy === headCell ? order : 'asc'}
-                onClick={createSortHandler(headCell)}
+                onClick={(event: React.MouseEvent) => onRequestSort(event, headCell)}
               >
                 {headCell}
                 {orderBy === headCell ? (
@@ -171,7 +151,7 @@ export default function GameHistoryPage() {
             <EnhancedTableHead
               order={order}
               orderBy={orderBy}
-              onRequestSort={handleRequestSort}
+              onRequestSort={(_, property) => handleRequestSort(property)}
               rowCount={games.length}
             />
             <TableBody>
@@ -194,8 +174,8 @@ export default function GameHistoryPage() {
                         ))}
                       </AvatarGroup>
                     </TableCell>
-                    <TableCell sx={{color: !row.room.name ? 'red' : 'black', fontStyle: !row.room.name ? 'italic' : 'none'}}>
-                      {row.room.name || 'Deleted Room'}
+                    <TableCell sx={{color: !row.room?.name ? 'red' : 'black', fontStyle: !row.room?.name ? 'italic' : 'none'}}>
+                      {row.room?.name || 'Deleted Room'}
                     </TableCell>
                     <TableCell>{row.host.name}</TableCell>
                     <TableCell>{row.settings.board.name}</TableCell>
@@ -224,7 +204,7 @@ export default function GameHistoryPage() {
           count={games.length}
           rowsPerPage={rowsPerPage}
           page={page}
-          onPageChange={handleChangePage}
+          onPageChange={(_, newPage) => handleChangePage(newPage)}
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </Paper>

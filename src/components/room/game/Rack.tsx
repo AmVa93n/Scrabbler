@@ -1,17 +1,18 @@
 import Tile from './Tile';
 import { Paper } from '@mui/material';
 import { GameContext } from '../../../context/game.context';
-import { RoomContext } from '../../../context/room.context';
 import { useContext } from 'react';
 import { useDrop } from 'react-dnd';
 import useAuth from '../../../hooks/useAuth';
 import { Tile as TileType } from '../../../types';
+import useRoom from '../../../hooks/useRoom';
 
 const ItemType = 'LETTER';
 
 function Rack() {
     const { rack, setBoard, setRack, setPlacedLetters, players } = useContext(GameContext)
-    const { rackSize } = useContext(RoomContext)
+    const { room } = useRoom();
+    const rackSize = room?.gameSession?.settings.rackSize || 7;
     const { user } = useAuth();
     const isPlaying = players.find(player => player._id === user?._id)
 

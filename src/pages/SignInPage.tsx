@@ -1,21 +1,13 @@
 import { useState, useContext } from 'react';
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Checkbox from '@mui/material/Checkbox';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Divider from '@mui/material/Divider';
-import FormLabel from '@mui/material/FormLabel';
-import FormControl from '@mui/material/FormControl';
-import Link from '@mui/material/Link';
-import TextField from '@mui/material/TextField';
-import Typography from '@mui/material/Typography';
-import Stack from '@mui/material/Stack';
+import { Avatar, Box, Button, Checkbox, Divider, FormControl, FormControlLabel, FormLabel, Link, Stack, TextField, 
+  Typography } from '@mui/material';
 import MuiCard from '@mui/material/Card';
 import { styled } from '@mui/material/styles';
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/auth.context";
 import authService from "../services/auth.service";
-import GoogleSignInButton from "../components/GoogleAuth";
+import { useGoogleLogin, TokenResponse } from '@react-oauth/google';
+import axios from 'axios';
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
@@ -72,6 +64,44 @@ export default function SignInPage() {
     }
     
   };
+
+  async function handleGoogleAuthSuccess(codeResponse: TokenResponse) {
+    try {
+        const response = await axios.get(`https://www.googleapis.com/oauth2/v1/userinfo?access_token=${codeResponse.access_token}`, 
+          {
+            headers: {
+                Authorization: `Bearer ${codeResponse.access_token}`,
+                Accept: 'application/json'
+            }
+          })
+        try {
+          const response2 = await authService.google({ userData: response.data })
+          storeToken(response2.data.authToken);
+          authenticateUser();
+          navigate('/');
+      } catch (error: unknown) {
+          console.error(error);
+          if (axios.isAxiosError(error) && error.response) {
+            alert(error.response.data.message);
+          } else {
+            console.error(error);
+            alert('An unknown error occurred');
+          }
+      }
+    } catch (error) {
+      console.error(error);
+    }
+    
+  };
+
+  function handleGoogleAuthFailure() {
+    console.error('Google sign-in failed');
+  };
+
+  const login = useGoogleLogin({
+    onSuccess: handleGoogleAuthSuccess,
+    onError: handleGoogleAuthFailure
+  });
 
   const validateInputs = () => {
     const email = document.getElementById('email') as HTMLInputElement;
@@ -186,15 +216,27 @@ export default function SignInPage() {
           </Box>
           <Divider>or</Divider>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <GoogleSignInButton />
-            {/*
-            <Button fullWidth variant="outlined" startIcon={<GoogleIcon />}>
-              Sign in with Google
+            <Button
+                variant="contained"
+                startIcon={
+                  <Avatar sx={{width: 32, height: 32, bgcolor: 'white'}}>
+                    <img src={'/Googlelogo.svg'} alt='google' width={16} height={16}/>
+                  </Avatar>}
+                sx={{
+                  fontWeight: 'bold',
+                  fontSize: 16,
+                  textTransform: 'none',
+                  bgcolor: 'rgb(237, 242, 247)',
+                  color: 'black',
+                  '&:hover': {
+                    bgcolor: 'rgb(228, 234, 241)',
+                  }
+                }}
+                disableElevation
+                onClick={login as React.MouseEventHandler<HTMLButtonElement>}
+            >
+              Sign In with Google
             </Button>
-            <Button fullWidth variant="outlined" startIcon={<FacebookIcon />}>
-              Sign in with Facebook
-            </Button>
-            */}
           </Box>
         </Card>
       </SignInContainer>

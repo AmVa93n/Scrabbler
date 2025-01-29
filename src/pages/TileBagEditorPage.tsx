@@ -3,7 +3,6 @@ import { ChangeEvent, useEffect, useState } from 'react';
 import accountService from "../services/account.service";
 import FontDownloadIcon from '@mui/icons-material/FontDownload';
 import { Button, Select, MenuItem, Typography, Box, Grid2, Paper, TextField, SelectChangeEvent } from '@mui/material';
-import NumberInput from '../components/NumberInput';
 import SaveIcon from '@mui/icons-material/Save';
 import CreateIcon from '@mui/icons-material/AddCircle';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -174,17 +173,17 @@ function TileBagEditorPage() {
                         {/* Header Row */}
                         <Grid2 container spacing={2}>
                             <Grid2 size={4}>
-                                <Typography variant="body2" sx={{ textAlign: 'center' }}>
+                                <Typography variant="body2" sx={{ textAlign: 'left' }}>
                                     Letter
                                 </Typography>
                             </Grid2>
                             <Grid2 size={4}>
-                                <Typography variant="body2" sx={{ textAlign: 'center', minWidth: 105 }}>
+                                <Typography variant="body2" sx={{ textAlign: 'left', minWidth: 105 }}>
                                     Count
                                 </Typography>
                             </Grid2>
                             <Grid2 size={4}>
-                                <Typography variant="body2" sx={{ textAlign: 'center', minWidth: 105 }}>
+                                <Typography variant="body2" sx={{ textAlign: 'left', minWidth: 105 }}>
                                     Score
                                 </Typography>
                             </Grid2>
@@ -214,20 +213,22 @@ function TileBagEditorPage() {
                             </Grid2>
 
                             <Grid2 size={4}>
-                                <NumberInput
+                                <input 
+                                    type="number"
                                     placeholder="Count"
                                     value={letter.count}
-                                    onChange={(_: Event, val: number) => handleNumberInputChange(letter.originalIndex!, 'count', val)}
+                                    onChange={(e) => handleNumberInputChange(letter.originalIndex!, 'count', e.target.valueAsNumber)}
                                     min={0} 
                                     max={25}
                                     />
                             </Grid2>
 
                             <Grid2 size={4}>
-                                <NumberInput
+                                <input
+                                    type="number"
                                     placeholder="Score"
                                     value={letter.points}
-                                    onChange={(_: Event, val: number) => handleNumberInputChange(letter.originalIndex!, 'points', val)}
+                                    onChange={(e) => handleNumberInputChange(letter.originalIndex!, 'points', e.target.valueAsNumber)}
                                     min={0} 
                                     max={10}
                                     />

@@ -23,7 +23,6 @@ import Avatar from '@mui/material/Avatar';
 import authService from "../services/auth.service";
 import { useNavigate } from "react-router-dom";
 import { useNotifications } from '@toolpad/core/useNotifications';
-import GoogleSignInButton from "../components/GoogleAuth";
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
@@ -276,7 +275,6 @@ export default function SignUp() {
                 <Typography sx={{ color: 'text.secondary' }}>or</Typography>
               </Divider>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <GoogleSignInButton />
                 {/*
                 <Button fullWidth variant="outlined" startIcon={<GoogleIcon />}>
                   Sign up with Google

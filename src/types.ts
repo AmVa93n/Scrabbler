@@ -30,6 +30,7 @@ export interface Game {
     createdAt: string;
     players: Player[];
     settings: GameSettings;
+    state: GameState;
 }
 
 export interface GameSettings {
@@ -38,6 +39,14 @@ export interface GameSettings {
     turnDuration: number;
     rackSize: number;
     gameEnd: string;
+}
+
+export interface GameState {
+    turnPlayer: Player;
+    turnEndTime: Date;
+    turnNumber: number;
+    board: GameBoard;
+    leftInBag: number;
 }
 
 export interface Board {
@@ -105,7 +114,9 @@ export interface TileOnBoard extends Tile {
 }
 
 export interface Player extends User {
+    rack: Tile[];
     score: number;
+    reactionScore: number,
 }
 
 export interface CountryType {

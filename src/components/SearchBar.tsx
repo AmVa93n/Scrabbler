@@ -44,7 +44,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
     },
 }));
 
-function SearchBar({ onSearch }) {
+function SearchBar({ onSearch }: { onSearch: (search: string) => void }) {
     return (
         <Search>
             <SearchIconWrapper>

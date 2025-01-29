@@ -18,6 +18,7 @@ import useAuth from '../hooks/useAuth';
 import InactiveModal from '../components/room/game/InactiveModal';
 import AlertModal from '../components/room/game/AlertModal';
 import useRoom from '../hooks/useRoom';
+import { GameState } from '../types';
 
 function RoomPage() {
     const { socket } = useSocket();
@@ -38,7 +39,7 @@ function RoomPage() {
         if (!socket) return;
         let timer: number;
 
-        const onTurnStart = (sessionData) => {
+        const onTurnStart = (sessionData: GameState) => {
             if (sessionData.turnPlayer._id === user?._id) { // this is private
                 setAlertMessage("It's your turn!");
                 setIsAlertOpen(true);

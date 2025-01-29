@@ -15,7 +15,7 @@ function TileBagEditorPage() {
     const { socket } = useSocket();
     const { user } = useAuth();
     const [tileBags, setTileBags] = useState([] as TileBag[])
-    const [currentBag, setCurrentBag] = useState<TileBag | Omit<TileBag, '_id'> | null>(null)
+    const [editedBag, setEditedBag] = useState<TileBag | null>(null)
     const notifications = useNotifications();
 
     useEffect(() => {
@@ -36,15 +36,15 @@ function TileBagEditorPage() {
 
     function handleChangeBag(e: SelectChangeEvent) {
         const selectedBag = tileBags.find(bag => bag._id === e.target.value)!
-        setCurrentBag(selectedBag)
+        setEditedBag(selectedBag)
     };
 
     function handleChange(e: SelectChangeEvent | ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
-        setCurrentBag(prev => prev && ({...prev, name: e.target.value}))
+        setEditedBag(prev => prev && ({...prev, name: e.target.value}))
     };
 
     function handleNumberInputChange(index: number, key: string, value: number) {
-        setCurrentBag((prevBag) => {
+        setEditedBag((prevBag) => {
             if (!prevBag) return prevBag;
             const updatedLetterData = [...prevBag.letterData];
             updatedLetterData[index] = {...updatedLetterData[index], [key]: value,};
@@ -65,7 +65,7 @@ function TileBagEditorPage() {
         return a.letter.localeCompare(b.letter); // Standard alphabetical sorting
     }
 
-    function handleCreate() {
+    async function handleCreate() {
         const NewBag = {
             name: 'Unnamed Bag',
             letterData: [
@@ -99,48 +99,43 @@ function TileBagEditorPage() {
               ],
               creator: user!._id
         } as Omit<TileBag, '_id'>
-        setCurrentBag(NewBag)
+        try {
+            const createdBag = await accountService.createTileBag(NewBag)
+            setTileBags((prev)=> [...prev, createdBag])
+            notifications.show('Successfully created bag!', { severity: 'success', autoHideDuration: 5000 });
+            setEditedBag(createdBag)
+        } catch (error) {
+            console.error(error)
+            notifications.show("Failed to create new bag", { severity: 'error', autoHideDuration: 5000 });
+        }
     }
 
     async function handleSave() {
-        if (!currentBag) return;
-        if (currentBag.creator) { // edit existing bag
-            try {
-                const updatedBag = await accountService.updateTileBag(currentBag as TileBag)
-                setTileBags(prev => prev.map(bag => bag === currentBag ? updatedBag : bag));
-                notifications.show('Successfully saved changes!', { severity: 'success', autoHideDuration: 5000 });
-            } catch (error) {
-                console.error(error)
-                const errorDescription = "Failed to save changes to bag"
-                notifications.show(errorDescription, { severity: 'error', autoHideDuration: 5000 });
-            }
-        } else { // create new bag
-            try {
-                const createdBag = await accountService.createTileBag(currentBag)
-                setTileBags((prev)=> [...prev, createdBag])
-                notifications.show('Successfully created bag!', { severity: 'success', autoHideDuration: 5000 });
-                setCurrentBag(createdBag)
-            } catch (error) {
-                console.error(error)
-                const errorDescription = "Failed to create new bag"
-                notifications.show(errorDescription, { severity: 'error', autoHideDuration: 5000 });
-            }
+        if (!editedBag) return;
+        try {
+            const updatedBag = await accountService.updateTileBag(editedBag)
+            setTileBags(prev => prev.map(bag => bag._id === editedBag._id ? updatedBag : bag));
+            notifications.show('Successfully saved changes to bag!', { severity: 'success', autoHideDuration: 5000 });
+            setEditedBag(null)
+        } catch (error) {
+            console.error(error)
+            const errorDescription = "Failed to save changes to bag"
+            notifications.show(errorDescription, { severity: 'error', autoHideDuration: 5000 });
         }
     }
 
     async function handleDelete() {
-        if (currentBag?.creator) { // delete existing bag
-            try {
-                await accountService.deleteTileBag((currentBag as TileBag)._id)
-                notifications.show('Successfully deleted bag!', { severity: 'success', autoHideDuration: 5000 });
-                setTileBags((prev) => prev.filter((bag) => bag._id !== (currentBag as TileBag)._id));
-            } catch (error) {
-                console.error(error)
-                const errorDescription = "Failed to delete bag"
-                notifications.show(errorDescription, { severity: 'error', autoHideDuration: 5000 });
-            }
+        if (!editedBag) return;
+        try {
+            await accountService.deleteTileBag(editedBag._id)
+            setTileBags((prev) => prev.filter((bag) => bag._id !== editedBag._id));
+            notifications.show('Successfully deleted bag!', { severity: 'success', autoHideDuration: 5000 });
+            setEditedBag(null)
+        } catch (error) {
+            console.error(error)
+            const errorDescription = "Failed to delete bag"
+            notifications.show(errorDescription, { severity: 'error', autoHideDuration: 5000 });
         }
-        setCurrentBag(null)
     }
 
     return (
@@ -152,7 +147,7 @@ function TileBagEditorPage() {
 
             <Select
                 sx={{ width: 200, mx: 'auto', mb: 4, display: 'block' }} size="small"
-                value={!currentBag ? '' : (currentBag as TileBag)._id}
+                value={!editedBag ? '' : (editedBag as TileBag)._id}
                 onChange={handleChangeBag}
                 MenuProps={{disableScrollLock: true}}
                 >
@@ -161,17 +156,17 @@ function TileBagEditorPage() {
                 ))}
             </Select>
             
-            {currentBag &&
+            {editedBag &&
             <Box sx={{display: 'flex', alignItems: 'center', mb: 2, mx: 'auto', width: '50%', justifyContent: 'space-between'}}>
-                <TextField label="Name" size="small" value={currentBag?.name || ''} onChange={handleChange}/>
+                <TextField label="Name" size="small" value={editedBag?.name || ''} onChange={handleChange}/>
                 <Typography variant="body2" sx={{fontSize: 16}}>
-                    Total Letters: {currentBag?.letterData?.reduce((acc, letter) => acc + letter.count, 0)}
+                    Total Letters: {editedBag?.letterData?.reduce((acc, letter) => acc + letter.count, 0)}
                 </Typography>
             </Box>}
 
             <Grid2 container spacing={4}>
                 {/* Split sorted array into two parts */}
-                {currentBag && currentBag.letterData.sort(sortAlphabetically)
+                {editedBag && editedBag.letterData.sort(sortAlphabetically)
                 .reduce(createThreeColumns, [[], [], []]) // Initial accumulator with two empty arrays
                 .map((columnData, columnIndex) => (
                     <Grid2 size={4} key={columnIndex}>
@@ -245,7 +240,7 @@ function TileBagEditorPage() {
             </Grid2>
 
             <Box sx={{mt: 3, mx: 'auto', width: 'fit-content'}}>
-                {currentBag ?
+                {editedBag ?
                 <>
                     <Button 
                         variant="contained" 

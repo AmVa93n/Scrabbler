@@ -18,7 +18,7 @@ function BoardEditorPage() {
   const { socket } = useSocket();
   const { user } = useAuth();
   const [boards, setBoards] = useState([] as Board[])
-  const [currentBoard, setCurrentBoard] = useState<Board | Omit<Board, '_id'> | null>(null);
+  const [editedBoard, setEditedBoard] = useState<Board | null>(null);
   const notifications = useNotifications();
   const [currentBonusDraw, setCurrentBonusDraw] = useState<{ value: string; color: string } | null>(null);
   const [isMouseDown, setIsMouseDown] = useState(false);
@@ -54,79 +54,72 @@ function BoardEditorPage() {
 
   function handleChangeBoard(e: SelectChangeEvent) {
     const selectedBoard = boards.find(board => board._id === e.target.value)!
-    setCurrentBoard(selectedBoard)
+    setEditedBoard(selectedBoard)
   };
 
   function handleChange(e: SelectChangeEvent | ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
     const field = e.target.name
-    setCurrentBoard(prev => prev && ({...prev, [field]: e.target.value}))
+    setEditedBoard(prev => prev && ({...prev, [field]: e.target.value}))
   };
 
-  function handleCreate() {
+  async function handleCreate() {
     const NewBoard = {
         name: 'Unnamed Board',
         size: 15,
         bonusSquares: [],
         creator: user!._id
     } as Omit<Board, '_id'>
-    setCurrentBoard(NewBoard)
+    try {
+      const createdBoard = await accountService.createBoard(NewBoard)
+      setBoards((prev)=> [...prev, createdBoard])
+      notifications.show('Successfully created board!', { severity: 'success', autoHideDuration: 5000 });
+      setEditedBoard(createdBoard)
+    } catch (error) {
+      console.error(error)
+      notifications.show("Error creating board", { severity: 'error', autoHideDuration: 5000 });
+    }
   }
 
   async function handleSave() {
-    if (!currentBoard) return
-    if (currentBoard?.creator) { // edit existing board
-        try {
-            const updatedBoard = await accountService.updateBoard(currentBoard as Board)
-            setBoards(prev => prev.map(board => board === currentBoard ? updatedBoard : board));
-            notifications.show('Successfully edited board!', { severity: 'success', autoHideDuration: 5000 });
-        } catch (error) {
-            console.error(error)
-            const errorDescription = "Error editing board"
-            notifications.show(errorDescription, { severity: 'error', autoHideDuration: 5000 });
-        }
-    } else { // create new board
-        try {
-            const createdBoard = await accountService.createBoard(currentBoard)
-            setBoards((prev)=> [...prev, createdBoard])
-            notifications.show('Successfully created board!', { severity: 'success', autoHideDuration: 5000 });
-            setCurrentBoard(createdBoard)
-        } catch (error) {
-            console.error(error)
-            const errorDescription = "Error creating board"
-            notifications.show(errorDescription, { severity: 'error', autoHideDuration: 5000 });
-        }
+    if (!editedBoard) return
+    try {
+        const updatedBoard = await accountService.updateBoard(editedBoard)
+        setBoards(prev => prev.map(board => board._id === editedBoard._id ? updatedBoard : board));
+        notifications.show('Successfully saved changes to board!', { severity: 'success', autoHideDuration: 5000 });
+        setEditedBoard(null)
+    } catch (error) {
+        console.error(error)
+        notifications.show("Error editing board", { severity: 'error', autoHideDuration: 5000 });
     }
   }
 
   async function handleDelete() {
-    if (currentBoard?.creator) { // delete existing board
-        try {
-            await accountService.deleteBoard((currentBoard as Board)._id)
-            notifications.show('Successfully deleted board!', { severity: 'success', autoHideDuration: 5000 });
-            setBoards((prev) => prev.filter((board) => board._id !== (currentBoard as Board)._id));
-        } catch (error) {
-            console.error(error)
-            const errorDescription = "Error deleting board"
-            notifications.show(errorDescription, { severity: 'error', autoHideDuration: 5000 });
-        }
+    if (!editedBoard) return
+    try {
+        await accountService.deleteBoard(editedBoard._id)
+        setBoards((prev) => prev.filter((board) => board._id !== editedBoard._id));
+        notifications.show('Successfully deleted board!', { severity: 'success', autoHideDuration: 5000 });
+        setEditedBoard(null)
+    } catch (error) {
+        console.error(error)
+        notifications.show("Error deleting board", { severity: 'error', autoHideDuration: 5000 });
     }
-    setCurrentBoard(null)
   }
 
   function createBoard() {
-    if (!currentBoard) return
-    const { size, bonusSquares } = currentBoard
+    if (!editedBoard) return
+    const { size, bonusSquares } = editedBoard
     const boardDisplay = Array.from({ length: size }, (_, row) =>
       Array.from({ length: size }, (_, col) => ({
           x: col,
           y: row,
-          bonusType: bonusSquares.find(square => square.x === col && square.y === row)!.bonusType
+          bonusType: bonusSquares.find(square => square.x === col && square.y === row)?.bonusType
       }))
     )
     return boardDisplay
   }
 
-  function getSquareColor(bonus: string) {
+  function getSquareColor(bonus: string | undefined) {
     switch(bonus) {
       case 'quadrupleWord': return '#CC0000'
       case 'tripleWord': return '#FF3333'
@@ -156,7 +149,7 @@ function BoardEditorPage() {
   function handleDrawSquare(e: React.MouseEvent<HTMLDivElement>, x: number, y: number) {
     if (!currentBonusDraw) return
     e.preventDefault()
-    setCurrentBoard(prev => {
+    setEditedBoard(prev => {
       if (!prev) return null
       // Create the new BonusSquare object with the x, y coordinates and the bonusType from currentBonusDraw
       const newBonusSquare = { x, y, bonusType: currentBonusDraw.value };
@@ -375,8 +368,8 @@ function BoardEditorPage() {
       { x: 20, y: 17, bonusType: 'doubleLetter' },
       { x: 17, y: 20, bonusType: 'doubleLetter' },
   ]
-    const layout = currentBoard?.size === 15 ? default15x15 : default21x21
-    setCurrentBoard(prev=> prev && ({...prev, bonusSquares: layout}))
+    const layout = editedBoard?.size === 15 ? default15x15 : default21x21
+    setEditedBoard(prev=> prev && ({...prev, bonusSquares: layout}))
   }
 
   return (
@@ -388,7 +381,7 @@ function BoardEditorPage() {
         
             <Select
                 sx={{ width: 200, mx: 'auto', mb: 4, display: 'block' }} size="small"
-                value={!currentBoard ? '' : (currentBoard as Board)._id}
+                value={!editedBoard ? '' : (editedBoard as Board)._id}
                 onChange={handleChangeBoard}
                 MenuProps={{disableScrollLock: true}}
                 >
@@ -397,17 +390,17 @@ function BoardEditorPage() {
                 ))}
             </Select>
             
-            {currentBoard &&
+            {editedBoard &&
             <>
             <Box sx={{display: 'flex', alignItems: 'center', mb: 2, mx: 'auto', width: '55%', justifyContent: 'space-between'}}>
-                <TextField name="name" label="Name" size="small" value={currentBoard?.name || ''} onChange={handleChange}/>
+                <TextField name="name" label="Name" size="small" value={editedBoard?.name || ''} onChange={handleChange}/>
                 <FormControl size="small">
                   <InputLabel id="size">Size</InputLabel>
                   <Select name="size"
                     labelId='size'
                     label='Size'
                     sx={{ width: 200 }} 
-                    value={String(currentBoard?.size) || ''}
+                    value={String(editedBoard?.size) || ''}
                     onChange={handleChange}
                     MenuProps={{disableScrollLock: true}}
                     >
@@ -445,7 +438,7 @@ function BoardEditorPage() {
                 sx={{textTransform: 'none', backgroundColor: 'grey', mt: 3}}
                 variant="contained" 
                 startIcon={<CancelIcon />} 
-                onClick={()=> setCurrentBoard(prev=> prev && ({...prev, bonusSquares: []}))}
+                onClick={()=> setEditedBoard(prev=> prev && ({...prev, bonusSquares: []}))}
               >
                 Clear Board
               </Button>
@@ -453,7 +446,7 @@ function BoardEditorPage() {
                 sx={{textTransform: 'none', backgroundColor: 'grey', mt: 1}}
                 variant="contained" 
                 startIcon={<AutoFixHighIcon />} 
-                disabled={[17,19].includes(currentBoard.size)}
+                disabled={[17,19].includes(editedBoard.size)}
                 onClick={handleDefaultLayout}
               >
                 Default Layout
@@ -462,7 +455,7 @@ function BoardEditorPage() {
              
               <Grid2 
                   container 
-                  columns={currentBoard.size}
+                  columns={editedBoard.size}
                   justifyContent="center"
                   sx={{
                       width: 600,
@@ -477,8 +470,8 @@ function BoardEditorPage() {
                           <Grid2 
                               key={`${rowIndex}-${colIndex}`}
                               sx={{
-                                  width: `calc(100% / ${currentBoard.size})`, // Set width based on number of columns
-                                  height: `calc(100% / ${currentBoard.size})`, // Set height based on number of rows
+                                  width: `calc(100% / ${editedBoard.size})`, // Set width based on number of columns
+                                  height: `calc(100% / ${editedBoard.size})`, // Set height based on number of rows
                               }}
                               >
                                   <Box
@@ -496,7 +489,7 @@ function BoardEditorPage() {
                                       userSelect: isMouseDown ? 'none' : 'default'
                                     }}
                                   >
-                                    {(rowIndex === currentBoard.size/2-0.5 && colIndex === currentBoard.size/2-0.5) && 
+                                    {(rowIndex === editedBoard.size/2-0.5 && colIndex === editedBoard.size/2-0.5) && 
                                       (<Typography variant="h4">★</Typography>)}
                                   </Box>
                           </Grid2>
@@ -508,7 +501,7 @@ function BoardEditorPage() {
               </>}
 
         <Box sx={{mt: 3, mx: 'auto', width: 'fit-content'}}>
-            {currentBoard ?
+            {editedBoard ?
             <>
                 <Button 
                     variant="contained" 

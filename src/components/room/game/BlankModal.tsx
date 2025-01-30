@@ -1,16 +1,16 @@
-import { useContext, useEffect } from 'react';
+import { useEffect } from 'react';
 import { Dialog, DialogTitle, DialogContent, Grid2, Paper, Typography } from '@mui/material';
-import { GameContext } from '../../../context/game.context';
 import useSocket from '../../../hooks/useSocket';
+import { GameBoard } from '../../../types';
 
 interface Props {
   open: boolean;
   onClose: () => void;
   tileCoords: { x: number; y: number };
+  setBoard: React.Dispatch<React.SetStateAction<GameBoard | null>>;
 }
 
-function BlankModal({ open, onClose, tileCoords }: Props) {
-  const { setBoard } = useContext(GameContext)
+function BlankModal({ open, onClose, tileCoords, setBoard }: Props) {
   const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
   const { socket } = useSocket();
 

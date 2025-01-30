@@ -12,34 +12,35 @@ interface Context {
     setBoard: React.Dispatch<React.SetStateAction<GameBoard | null>>,
     rack: Tile[],
     setRack: React.Dispatch<React.SetStateAction<Tile[]>>,
-    placedLetters: TileOnBoard[],
-    setPlacedLetters: React.Dispatch<React.SetStateAction<TileOnBoard[]>>,
+    tilesPlacedThisTurn: TileOnBoard[],
+    setTilesPlacedThisTurn: React.Dispatch<React.SetStateAction<TileOnBoard[]>>,
     leftInBag: number,
-    resetTurnActions: () => void,
-    reactionScore: number
+    resetTurnActions: () => void
 }
 
 function GameProvider(props: { children: React.ReactNode }) {
     const [players, setPlayers] = useState([] as Player[]);
     const [board, setBoard] = useState<GameBoard | null>(null);
     const [rack, setRack] = useState([] as Tile[]);
-    const [placedLetters, setPlacedLetters] = useState([] as TileOnBoard[]);
+    const [tilesPlacedThisTurn, setTilesPlacedThisTurn] = useState([] as TileOnBoard[]);
     const [leftInBag, setLeftInBag] = useState(100);
-    const [reactionScore, setReactionScore] = useState(0);
     const { socket } = useSocket();
     const { setRoom } = useRoom();
 
     function resetTurnActions() {
-        if (board) {
-            const clearedBoard = [...board] // reset any placed tiles
-            for (const letter of placedLetters) {
-                clearedBoard[letter.y][letter.x].content = null;
-                clearedBoard[letter.y][letter.x].occupied = false;
-            }
-            setBoard(clearedBoard)
-          }
-          setRack(prev => [...prev, ...placedLetters]);
-          setPlacedLetters([]);
+        if (tilesPlacedThisTurn.length === 0) return; // nothing to reset
+        setBoard(prev => {
+            if (!prev) return null;
+            return prev.map(row => row.map(cell => {
+                const isPlacedTile = tilesPlacedThisTurn.some(tile => tile.x === cell.x && tile.y === cell.y);
+                return isPlacedTile ? { ...cell, content: null, occupied: false } : cell;
+            }));
+        });
+        setRack(prev => [...prev, ...tilesPlacedThisTurn]);
+        setTilesPlacedThisTurn(prev => {
+            console.log('Clearing tilesPlacedThisTurn, previous value:', prev);
+            return [];
+        });
     }
 
     useEffect(() => {
@@ -50,7 +51,6 @@ function GameProvider(props: { children: React.ReactNode }) {
           setLeftInBag(sessionData.leftInBag)
           setPlayers(sessionData.players)
           setRack(sessionData.rack) 
-          setReactionScore(sessionData.reactionScore)
       });
 
       // Listen for game updates (public)
@@ -63,13 +63,11 @@ function GameProvider(props: { children: React.ReactNode }) {
       // Listen for rack updates (private)
       socket.on('rackUpdated', (rack) => {
           setRack(rack)
-          setPlacedLetters([]) // reset placed letters
+          setTilesPlacedThisTurn([]) // reset placed letters
       });
       
       // Listen for turn timeout (private)
-      socket.on('turnTimedOut', () => {
-          resetTurnActions()
-      });
+      socket.on('turnTimedOut', resetTurnActions);
 
       // Listen for when a new game starts (public)
       socket.on('gameStarted', (rackSize, gameMode) => {
@@ -82,14 +80,8 @@ function GameProvider(props: { children: React.ReactNode }) {
             setPlayers([])
             setRack([])
             setBoard(null)
-            setPlacedLetters([])
+            setTilesPlacedThisTurn([])
             setLeftInBag(100)
-            setReactionScore(0)
-      });
-
-      // Listen for when your reaction score increased (private)
-      socket.on('reactionScoreUpdated', (newScore) => {
-          setReactionScore(newScore)
       });
 
       // Clean up listeners on component unmount
@@ -97,10 +89,9 @@ function GameProvider(props: { children: React.ReactNode }) {
           socket.off('refreshGame');
           socket.off('gameUpdated');
           socket.off('rackUpdated');
-          socket.off('turnTimedOut');
+          socket.off('turnTimedOut', resetTurnActions);
           socket.off('gameStarted');
           socket.off('gameEnded');
-          socket.off('reactionScoreUpdated');
       };
   }, [socket]);
 
@@ -109,10 +100,9 @@ function GameProvider(props: { children: React.ReactNode }) {
             players, setPlayers,
             board, setBoard,
             rack, setRack,
-            placedLetters, setPlacedLetters,
+            tilesPlacedThisTurn, setTilesPlacedThisTurn,
             leftInBag,
-            resetTurnActions,
-            reactionScore
+            resetTurnActions
         }}>
             {props.children}
         </GameContext.Provider>

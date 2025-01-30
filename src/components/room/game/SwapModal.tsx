@@ -1,41 +1,40 @@
-import { useContext, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Grid2, Paper, Typography } from '@mui/material';
-import { GameContext } from '../../../context/game.context';
 import useSocket from '../../../hooks/useSocket';
 import LoopIcon from '@mui/icons-material/Loop';
-import useAuth from '../../../hooks/useAuth';
 import { useParams } from 'react-router-dom';
+import { Tile } from '../../../types';
 
 interface Props {
   open: boolean;
   onClose: () => void;
+  tiles: Tile[];
+  leftInBag: number;
+  resetTurnActions: () => void;
 }
 
-function SwapModal({ open, onClose }: Props) {
+function SwapModal({ open, onClose, tiles, leftInBag, resetTurnActions }: Props) {
   const { socket } = useSocket();
-  const { user } = useAuth();
   const { roomId } = useParams();
-  const { rack, placedLetters, leftInBag, resetTurnActions, players } = useContext(GameContext)
-  const isPlaying = players.find(player => player._id === user?._id)
-  const [selectedLetters, setSelectedLetters] = useState([] as number[])
+  const [selectedTiles, setSelectedTiles] = useState([] as number[])
 
   function handleLetterClick(letterId: number) {
-    if (selectedLetters.includes(letterId)) {
-        setSelectedLetters((prev) => prev.filter(id => id !== letterId));
+    if (selectedTiles.includes(letterId)) {
+        setSelectedTiles((prev) => prev.filter(id => id !== letterId));
     } else {
-        setSelectedLetters(letters => [...letters, letterId]);
+        setSelectedTiles(letters => [...letters, letterId]);
     }
   }
 
   async function handleSwap() {
-    socket?.emit('swapLetters', roomId, selectedLetters)
-    setSelectedLetters([])
+    socket?.emit('swapLetters', roomId, selectedTiles)
+    setSelectedTiles([])
     resetTurnActions()
     onClose()
   }
 
   function handleCancel() {
-    setSelectedLetters([])
+    setSelectedTiles([])
     onClose()
   }
 
@@ -54,7 +53,7 @@ function SwapModal({ open, onClose }: Props) {
       <DialogTitle>Select Letters</DialogTitle>
       <DialogContent>
         <Grid2 container spacing={1}>
-          {isPlaying && [...rack, ...placedLetters].map((tile) => (
+          {tiles.map((tile) => (
             <Grid2 key={tile.id}>
               <Paper
                 onClick={() => handleLetterClick(tile.id)}
@@ -64,7 +63,7 @@ function SwapModal({ open, onClose }: Props) {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  backgroundColor: selectedLetters.includes(tile.id) ? 'lightgreen' : 'beige',
+                  backgroundColor: selectedTiles.includes(tile.id) ? 'lightgreen' : 'beige',
                   cursor: 'pointer',
                   position: 'relative'
                 }}
@@ -91,7 +90,7 @@ function SwapModal({ open, onClose }: Props) {
             sx={{ textTransform: 'none' }} 
             variant="contained"
             startIcon={<LoopIcon />}
-            disabled={selectedLetters.length < 1 || selectedLetters.length > leftInBag}
+            disabled={selectedTiles.length < 1 || selectedTiles.length > leftInBag}
             >
                     Swap
                 </Button>

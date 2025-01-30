@@ -1,10 +1,8 @@
 import Grid2 from '@mui/material/Grid2';
 import Square from './Square';
-import { GameContext } from '../../../context/game.context';
-import { useContext } from 'react';
+import { GameBoard } from '../../../types';
 
-function Board() {
-    const { board } = useContext(GameContext)
+function Board({ board }: { board: GameBoard | null }) {
     const boardSize = board?.length || 15;
 
   return (

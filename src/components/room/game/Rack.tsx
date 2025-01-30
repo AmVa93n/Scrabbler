@@ -1,20 +1,19 @@
 import Tile from './Tile';
 import { Paper } from '@mui/material';
-import { GameContext } from '../../../context/game.context';
-import { useContext } from 'react';
 import { useDrop } from 'react-dnd';
-import useAuth from '../../../hooks/useAuth';
-import { Tile as TileType } from '../../../types';
-import useRoom from '../../../hooks/useRoom';
+import { Tile as TileType, GameBoard, TileOnBoard } from '../../../types';
 
 const ItemType = 'LETTER';
 
-function Rack() {
-    const { rack, setBoard, setRack, setPlacedLetters, players } = useContext(GameContext)
-    const { room } = useRoom();
-    const rackSize = room?.gameSession?.settings.rackSize || 7;
-    const { user } = useAuth();
-    const isPlaying = players.find(player => player._id === user?._id)
+interface Props {
+    tilesOnRack: TileType[],
+    setTilesOnRack: React.Dispatch<React.SetStateAction<TileType[]>>,
+    setBoard: React.Dispatch<React.SetStateAction<GameBoard | null>>,
+    setTilesPlacedThisTurn: React.Dispatch<React.SetStateAction<TileOnBoard[]>>,
+    rackSize: number
+}
+
+function Rack({ tilesOnRack, setTilesOnRack, setBoard, setTilesPlacedThisTurn, rackSize }: Props) {
 
     const [{ isOver }, drop] = useDrop({
         accept: ItemType,
@@ -41,15 +40,13 @@ function Rack() {
         });
         // add tile to rack
         if (tile.isBlank) tile.letter = ''
-        setRack(prev => prev.some(tileOnRack => tileOnRack.id === tile.id) ? prev : [...prev, tile]);
+        setTilesOnRack(prev => prev.some(tileOnRack => tileOnRack.id === tile.id) ? prev : [...prev, tile]);
         // remove from letters placed this turn
-        setPlacedLetters((prev) => prev.filter(placedLetter => placedLetter.id !== tile.id));
+        setTilesPlacedThisTurn((prev) => prev.filter(placedLetter => placedLetter.id !== tile.id));
         
     };
   
     return (
-        <>
-        {(rack && isPlaying) && (
         <Paper 
             ref={drop}
             sx={{ 
@@ -62,19 +59,16 @@ function Rack() {
                 height: ((35 * rackSize) + (5 * (rackSize-1))),
                 //position: 'absolute',
             }}>
-                {rack.map((tile) => (
+                {tilesOnRack.map((tile) => (
                     <Tile 
                         key={tile.id} 
-                        id={tile.id} 
-                        letter={tile.letter}
-                        isBlank={tile.isBlank}
-                        points={tile.points}
-                        fixed={false}
+                        tile={tile}
+                        isOnRack={true}
+                        isOnBoard={false}
+                        wasPlacedThisTurn={false}
                     />
                 ))}
         </Paper>
-        )}
-        </>
     );
 }
 

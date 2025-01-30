@@ -1,29 +1,30 @@
 import { useContext } from 'react';
 import { useDrag } from 'react-dnd';
 import { Paper, Typography } from '@mui/material';
-import { GameContext } from '../../../context/game.context';
 import { TurnContext } from '../../../context/turn.context';
 import useAuth from '../../../hooks/useAuth';
+import useGame from '../../../hooks/useGame';
+import { Tile as TileType } from '../../../types';
 
 const ItemType = 'LETTER';
 
 interface Props {
-  id: number;
-  letter: string;
-  isBlank: boolean;
-  points: number;
-  fixed: boolean;
+  tile: TileType;
+  isOnRack: boolean;
+  isOnBoard: boolean;
+  wasPlacedThisTurn: boolean;
 }
 
-function Tile({ id, letter, isBlank, points, fixed }: Props) {
+function Tile({ tile, isOnRack, isOnBoard, wasPlacedThisTurn }: Props) {
   const { user } = useAuth();
-  const { placedLetters, board } = useContext(GameContext)
+  const { board } = useGame();
   const { turnPlayer } = useContext(TurnContext)
+  const isDraggable = isOnRack || (isOnBoard && wasPlacedThisTurn);
 
   const [{ isDragging, canDrag }, drag] = useDrag({
     type: ItemType,
-    item: { id, letter, isBlank, points, fixed },
-    canDrag: () => !fixed && user?._id === turnPlayer?._id,
+    item: tile,
+    canDrag: () => isDraggable && user?._id === turnPlayer?._id,
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
       canDrag: monitor.canDrag(),
@@ -32,7 +33,7 @@ function Tile({ id, letter, isBlank, points, fixed }: Props) {
 
   function needsToFit() {
     // letter needs to fit square size because it's too small for the default 35x35
-    return board!.length > 15 && (placedLetters.find(letter => letter.id === id) || fixed)
+    return board!.length > 15 && isOnBoard
   }
 
   return (
@@ -44,21 +45,21 @@ function Tile({ id, letter, isBlank, points, fixed }: Props) {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: isDragging ? 'lightgrey' : placedLetters.find(letter => letter.id === id) ? 'lightgreen' : 'beige',
+        backgroundColor: isDragging ? 'lightgrey' : wasPlacedThisTurn ? 'lightgreen' : 'beige',
         cursor: canDrag ? 'move' : 'default',
         position: 'relative'
       }}
     >
       <Typography 
         variant="body2"
-        sx={{fontWeight: 400, fontSize: 20, color: isBlank ? 'red' : 'black'}}
+        sx={{fontWeight: 400, fontSize: 20, color: tile.isBlank ? 'red' : 'black'}}
         >
-          {letter}</Typography>
+          {tile.letter}</Typography>
       <Typography 
         variant="body2"
         sx={{position: 'absolute', right: 1, bottom: 1, fontSize: 10}}
         >
-          {points}</Typography>
+          {tile.points}</Typography>
     </Paper>
   );
 }

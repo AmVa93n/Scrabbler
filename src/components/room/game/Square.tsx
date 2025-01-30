@@ -1,10 +1,10 @@
 import { Box, Typography } from '@mui/material';
 import { useDrop } from 'react-dnd';
 import Tile from './Tile';
-import { GameContext } from '../../../context/game.context';
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import { Square as SquareType, Tile as TileType } from '../../../types';
 import BlankModal from './BlankModal';
+import useGame from '../../../hooks/useGame';
 
 const ItemType = 'LETTER';
 
@@ -14,7 +14,7 @@ interface Props {
 }
 
 function Square({ square, isStart }: Props) {
-  const { setBoard, setRack, setPlacedLetters } = useContext(GameContext)
+  const { setBoard, setRack, setTilesPlacedThisTurn } = useGame();
   const [isBlankOpen, setIsBlankOpen] = useState(false);
   const [tileCoords, setTileCoords] = useState({ x: 0, y: 0 });
 
@@ -50,7 +50,7 @@ function Square({ square, isStart }: Props) {
     // remove letter from rack
     setRack((prev) => prev.filter(tileOnRack => tileOnRack.id !== tile.id));
     
-    setPlacedLetters((prevPlacedLetters) => {
+    setTilesPlacedThisTurn((prevPlacedLetters) => {
       // Check if the letter is already on the board
       const letterIndex = prevPlacedLetters.findIndex(placedLetter => placedLetter.id === tile.id);
       if (letterIndex !== -1) { // If the letter is already on the board, update its coordinates
@@ -97,17 +97,16 @@ function Square({ square, isStart }: Props) {
     >
       {square.content ? ( // Conditionally render the letter
         <Tile 
-            id={square.content.id} 
-            letter={square.content.letter} 
-            isBlank={square.content.isBlank} 
-            points={square.content.points}
-            fixed={square.fixed} 
+            tile={square.content}
+            isOnRack={false}
+            isOnBoard={true}
+            wasPlacedThisTurn={!square.fixed}
           /> 
       ) : (
         isStart && (<Typography variant="h4">★</Typography>)
       )}
 
-      <BlankModal open={isBlankOpen} onClose={() => setIsBlankOpen(false)} tileCoords={tileCoords} />
+      <BlankModal open={isBlankOpen} onClose={() => setIsBlankOpen(false)} tileCoords={tileCoords} setBoard={setBoard} />
     </Box>
   );
 }

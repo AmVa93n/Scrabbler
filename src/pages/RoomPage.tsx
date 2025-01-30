@@ -1,16 +1,12 @@
-import { useContext, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import useSocket from '../hooks/useSocket';
-import { GameContext } from '../context/game.context';
 import GameSettings from '../components/room/game/GameSettings';
-import GameActions from '../components/room/game/GameActions';
 import { Grid2, Paper, Box, Typography, Button } from '@mui/material';
 import RoomBar from '../components/room/RoomBar';
 import UserList from '../components/room/UserList';
 import RoomChat from '../components/room/RoomChat';
 import Loading from '../components/Loading/Loading';
 import ChatInput from '../components/room/ChatInput';
-import Board from '../components/room/game/Board';
-import Rack from '../components/room/game/Rack';
 import ChatIcon from '@mui/icons-material/Chat';
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -19,13 +15,13 @@ import InactiveModal from '../components/room/game/InactiveModal';
 import AlertModal from '../components/room/game/AlertModal';
 import useRoom from '../hooks/useRoom';
 import { GameState } from '../types';
+import GameScreen from '../components/room/game/GameScreen';
 
 function RoomPage() {
     const { socket } = useSocket();
     const { user } = useAuth();
     const { room, usersInRoom } = useRoom();
     const isActive = room?.gameSession !== null;
-    const { leftInBag } = useContext(GameContext)
     const [isAlertOpen, setIsAlertOpen] = useState(false);
     const [alertMessage, setAlertMessage] = useState('');
     const [isInactiveOpen, setIsInactiveOpen] = useState(false);
@@ -114,29 +110,7 @@ function RoomPage() {
                 <Grid2 size={2} sx={{ height: '100%', boxSizing: 'border-box' }}>
                     <Paper sx={{ padding: '10px', height: '97%', display: 'flex'}}>
                         {isActive ? (
-                            <>
-                                <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', flexGrow: 1}}>
-                                    <Box sx={{display: 'flex'}}>
-                                        <Box sx={{
-                                            backgroundImage: `url('/tilebag.png')`, 
-                                            backgroundSize: '100%', 
-                                            backgroundRepeat: 'no-repeat',
-                                            display: 'flex',
-                                            justifyContent: 'center',
-                                            alignItems: 'center',
-                                            width: '50%',
-                                            minWidth: 60,
-                                            height: '31%',
-                                            mr: 1
-                                            }}>
-                                            <Typography color='beige' variant="h6" sx={{mt: 2}}>{leftInBag}</Typography>
-                                        </Box>
-                                        <Rack />
-                                    </Box>
-                                    <GameActions />
-                                </Box>
-                                <Board />
-                            </>
+                            <GameScreen />
                         ) : (
                             user?._id === room.creator && 
                             <GameSettings />

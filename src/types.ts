@@ -47,6 +47,7 @@ export interface GameState {
     turnNumber: number;
     board: GameBoard;
     leftInBag: number;
+    reactionScore: number;
 }
 
 export interface Board {

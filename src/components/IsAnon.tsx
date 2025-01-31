@@ -1,10 +1,9 @@
-import { useContext } from "react";
-import { AuthContext } from "../context/auth.context";
 import { Navigate } from "react-router-dom";
 import Loading from "./Loading/Loading";
+import useAuth from "../hooks/useAuth";
 
 function IsAnon({ children }: { children: React.ReactNode }) {
-  const { isLoggedIn, isLoading } = useContext(AuthContext);
+  const { isLoggedIn, isLoading } = useAuth();
 
   // If the authentication is still loading ⏳
   if (isLoading) {

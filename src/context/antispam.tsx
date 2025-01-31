@@ -2,6 +2,7 @@ import { createContext, useState, useEffect } from 'react';
 import useSocket from '../hooks/useSocket';
 import appService from "../services/app.service";
 import useAuth from '../hooks/useAuth';
+import { GameState } from '../types';
 
 const AntiSpamContext = createContext({} as Context);
 
@@ -18,29 +19,30 @@ function AntiSpamWrapper(props: { children: React.ReactNode }) {
     useEffect(() => {
         if (!socket) return
 
-        // Listen for turn start (public)
-        socket.on('turnStarted', async (sessionData) => {
+        const onTurnStart = async (sessionData: GameState) => {
             if (sessionData.turnPlayer._id === user?._id) { // this is private
                 setCanClick(true)
                 await appService.ping()
             }
-        });
+        }
 
-        // Listen for when a move was rejected (private)
-        socket.on('moveRejected', () => {
+        const onReject = () => {
             setCanClick(true)
-        });
+        }
 
-        // Listen for when a game ends (public)
-        socket.on('gameEnded', () => {
+        const onGameEnd = () => {
             setCanClick(true)
-        });
+        }
+        
+        socket.on('turnStarted', onTurnStart); // Listen for turn start (public)
+        socket.on('moveRejected', onReject); // Listen for when a move was rejected (private)
+        socket.on('gameEnded', onGameEnd); // Listen for when a game ends (public)
 
         // Clean up listeners on component unmount
         return () => {
-            socket.off('turnStarted');
-            socket.off('moveRejected');
-            socket.off('gameEnded');
+            socket.off('turnStarted', onTurnStart);
+            socket.off('moveRejected', onReject);
+            socket.off('gameEnded', onGameEnd);
         };
 
     }, [socket, user?._id]);

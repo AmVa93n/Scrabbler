@@ -1,19 +1,16 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { Button, InputLabel, Select, MenuItem, FormControl, Typography, Slider, Box, RadioGroup, FormControlLabel, 
-    Radio, Stack,
-    SelectChangeEvent} from '@mui/material';
+import { useEffect, useState } from 'react';
+import { Button, InputLabel, Select, MenuItem, FormControl, Typography, Slider, Box, RadioGroup, FormControlLabel, Radio, 
+    Stack,SelectChangeEvent, Avatar} from '@mui/material';
 import useSocket from '../../../hooks/useSocket';
-import accountService from "../../../services/account.service";
 import appService from "../../../services/app.service";
 import SettingsIcon from '@mui/icons-material/Settings';
 import PlayCircleIcon from '@mui/icons-material/PlayCircle';
-import { AntiSpamContext } from '../../../context/antispam';
-import { Board, TileBag } from '../../../types';
 import useRoom from '../../../hooks/useRoom';
+import useAntiSpam from '../../../hooks/useAntiSpam';
 
 function GameSettings() {
-    const { usersInRoom, room } = useRoom();
-    const { canClick, setCanClick } = useContext(AntiSpamContext)
+    const { usersInRoom, room, boards, tileBags } = useRoom();
+    const { canClick, setCanClick } = useAntiSpam();
     const { socket } = useSocket();
     const [settings, setSettings] = useState({ 
         board: '', 
@@ -23,24 +20,12 @@ function GameSettings() {
         turnsUntilSkip: 3,
         rackSize: 7
     })
-    const [boards, setBoards] = useState([] as Board[])
-    const [tileBags, setTileBags] = useState([] as TileBag[])
+    const [selectedUserIds, setSelectedUserIds] = useState([] as string[])
+    const selectedUsers = usersInRoom.filter(user => selectedUserIds.includes(user._id))
 
     useEffect(() => {
-        async function init() {
-          try {
-            const boards = await accountService.getBoards()
-            setBoards(boards)
-            const tileBags = await accountService.getTileBags()
-            setTileBags(tileBags)
-            setSettings((prev) => ({ ...prev, board: boards[0]._id, tileBag: tileBags[0]._id }));
-          } catch (error) {
-            console.error(error)
-            alert('An error occurred. Please refresh the page and try again')
-          }
-        }
-        init()
-    }, [])
+        setSettings((prev) => ({ ...prev, board: boards[0]?._id || '', tileBag: tileBags[0]?._id || '' }));
+    }, [boards, tileBags])
 
     function handleChange(e: Event | SelectChangeEvent<string> | React.ChangeEvent<HTMLInputElement>, field: string) {
         const value = e.target ? (e.target as HTMLInputElement).value : (e as SelectChangeEvent<string>).target.value
@@ -51,7 +36,7 @@ function GameSettings() {
         const board = boards.find(board => board._id === settings.board)
         const tileBag = tileBags.find(bag => bag._id === settings.tileBag)
         const gameSettings = { ...settings, board, tileBag}
-        const gameSession = {players: [...usersInRoom], settings: gameSettings}
+        const gameSession = {players: selectedUsers, settings: gameSettings}
         const response = await appService.ping()
         if (response) {
             socket?.emit('startGame', room?._id, room?.creator, gameSession)
@@ -74,6 +59,26 @@ function GameSettings() {
                 <SettingsIcon sx={{mr: 1}} />
                 <Typography variant="h5">Game Settings</Typography>
             </Box>
+
+            <FormControl sx={{ m: 1, minWidth: 200 }} size="small">
+                <InputLabel id="players">Players</InputLabel>
+                <Select
+                    fullWidth
+                    labelId="players"
+                    label="Players"
+                    value={selectedUserIds}
+                    onChange={(e) => setSelectedUserIds(e.target.value as string[])}
+                    multiple
+                    renderValue={(selected) => selected.map(id => usersInRoom.find(user => user._id === id)?.name).join(', ')}
+                >
+                    {usersInRoom.map(user => (
+                        <MenuItem key={user._id} value={user._id}>
+                            <Avatar src={user.profilePic} sx={{mr: 1, width: 24, height: 24}} />
+                            {user.name}
+                        </MenuItem>
+                    ))}
+                </Select>
+            </FormControl>
 
             <Stack direction={'row'} sx={{mb: 3}}>
                 <FormControl sx={{ m: 1, minWidth: 200 }} size="small">
@@ -184,7 +189,7 @@ function GameSettings() {
                 startIcon={<PlayCircleIcon />} 
                 color="success"
                 onClick={handleStartGame} 
-                disabled={usersInRoom.length < 1 || !canClick}>
+                disabled={selectedUsers.length === 0 || !canClick}>
                     Start Game
             </Button>
                 

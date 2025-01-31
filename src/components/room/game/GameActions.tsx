@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import useSocket from '../../../hooks/useSocket';
 import { Button, Stack } from '@mui/material';
 import SwapModal from './SwapModal';
@@ -8,11 +8,11 @@ import LoopIcon from '@mui/icons-material/Loop';
 import FastForwardIcon from '@mui/icons-material/FastForward';
 import TerminalIcon from '@mui/icons-material/Terminal';
 import UndoIcon from '@mui/icons-material/Undo';
-import { TurnContext } from '../../../context/turn.context';
-import { AntiSpamContext } from '../../../context/antispam';
 import useAuth from '../../../hooks/useAuth';
 import { GameBoard, Tile, TileOnBoard } from '../../../types';
 import useRoom from '../../../hooks/useRoom';
+import useTurn from '../../../hooks/useTurn';
+import useAntiSpam from '../../../hooks/useAntiSpam';
 
 interface Props {
     tilesOnRack: Tile[],
@@ -28,8 +28,8 @@ function GameActions({ tilesOnRack, tilesPlacedThisTurn, board, leftInBag, reset
     const { socket } = useSocket();
     const { user } = useAuth();
     const { room } = useRoom();
-    const { turnPlayer } = useContext(TurnContext)
-    const { canClick, setCanClick } = useContext(AntiSpamContext)
+    const { turnPlayer } = useTurn();
+    const { canClick, setCanClick } = useAntiSpam();
     const [promptData, setPromptData] = useState<{promptText : string, targetReaction: string} | null>(null)
     const [isPromptOpen, setIsPromptOpen] = useState(false);
     const [isSwapOpen, setIsSwapOpen] = useState(false);

@@ -1,58 +1,59 @@
 import { createContext, useState, useEffect } from 'react';
 import useSocket from '../hooks/useSocket';
-import { User } from '../types';
+import { Player, GameState } from '../types';
 
 const TurnContext = createContext({} as Context);
 
 interface Context {
-    turnPlayer: User | null;
+    turnPlayer: Player | null;
     turnEndTime: number | null;
     turnNumber: number | null;
 }
 
 function TurnProvider(props: { children: React.ReactNode }) {
     const { socket } = useSocket();
-    const [turnPlayer, setTurnPlayer] = useState<User | null>(null);
+    const [turnPlayer, setTurnPlayer] = useState<Player | null>(null);
     const [turnEndTime, setTurnEndTime] = useState<number | null>(null);
     const [turnNumber, setTurnNumber] = useState<number | null>(null);
 
     useEffect(() => {
         if (!socket) return;
 
-        // Get non-DB game data when user joins (private)
-        socket.on('refreshGame', (sessionData) => {
+        const onRefresh = (sessionData: GameState) => {
             setTurnPlayer(sessionData.turnPlayer);
             setTurnEndTime(new Date(sessionData.turnEndTime).getTime());
-            setTurnNumber(sessionData.turnNumber)
-        });
-        
-        // Listen for turn start (public)
-        socket.on('turnStarted', async (sessionData) => {
+            setTurnNumber(sessionData.turnNumber);
+        }
+
+        const onTurnStart = (sessionData: GameState) => {
             setTurnPlayer(sessionData.turnPlayer);
             setTurnEndTime(new Date(sessionData.turnEndTime).getTime()); // Convert ISO string back to a timestamp (milliseconds)
-            setTurnNumber(sessionData.turnNumber)
-        });
+            setTurnNumber(sessionData.turnNumber);
+        }
 
-        // Listen for turn end (public)
-        socket.on('turnEnded', () => {
+        const onTurnEnd = () => {
             setTurnPlayer(null); 
             setTurnEndTime(null); 
             setTurnNumber(null);
-        });
+        }
 
-        // Listen for when a game ends (public)
-        socket.on('gameEnded', () => {
+        const onGameEnd = () => {
             setTurnPlayer(null); 
             setTurnEndTime(null); 
             setTurnNumber(null);
-        });
+        }
+
+        socket.on('refreshGame', onRefresh); // Get non-DB game data when user joins (private)
+        socket.on('turnStarted', onTurnStart); // Listen for turn start (public)
+        socket.on('turnEnded', onTurnEnd); // Listen for turn end (public)
+        socket.on('gameEnded', onGameEnd); // Listen for when a game ends (public)
 
         // Clean up listeners on component unmount
         return () => {
-            socket.off('refreshGame');
-            socket.off('turnStarted');
-            socket.off('turnEnded');
-            socket.off('gameEnded');
+            socket.off('refreshGame', onRefresh);
+            socket.off('turnStarted', onTurnStart);
+            socket.off('turnEnded', onTurnEnd);
+            socket.off('gameEnded', onGameEnd);
         };
         
     }, [socket]);

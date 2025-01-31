@@ -43,10 +43,12 @@ export interface GameSettings {
 
 export interface GameState {
     turnPlayer: Player;
-    turnEndTime: Date;
+    turnEndTime: string;
     turnNumber: number;
     board: GameBoard;
     leftInBag: number;
+    players: Player[];
+    rack: Tile[];
     reactionScore: number;
 }
 

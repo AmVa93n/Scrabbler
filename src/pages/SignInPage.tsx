@@ -1,13 +1,13 @@
-import { useState, useContext } from 'react';
+import { useState } from 'react';
 import { Avatar, Box, Button, Checkbox, Divider, FormControl, FormControlLabel, FormLabel, Link, Stack, TextField, 
   Typography } from '@mui/material';
 import MuiCard from '@mui/material/Card';
 import { styled } from '@mui/material/styles';
 import { useNavigate } from "react-router-dom";
-import { AuthContext } from "../context/auth.context";
 import authService from "../services/auth.service";
 import { useGoogleLogin, TokenResponse } from '@react-oauth/google';
 import axios from 'axios';
+import useAuth from '../hooks/useAuth';
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
@@ -39,7 +39,7 @@ export default function SignInPage() {
   const [passwordError, setPasswordError] = useState(false);
   const [passwordErrorMessage, setPasswordErrorMessage] = useState('');
   const navigate = useNavigate();
-  const { storeToken, authenticateUser } = useContext(AuthContext);
+  const { storeToken, authenticateUser } = useAuth();
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();

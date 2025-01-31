@@ -91,9 +91,10 @@ function RoomPage() {
                     <Paper sx={{ padding: '10px', height: '97%', display: 'flex', flexDirection: 'column' }}>
                         <Box sx={{display: 'flex', mb: 'auto', alignItems: 'center', mx: 'auto'}}>
                             <PeopleAltIcon sx={{mr: 1}} />
-                            <Typography variant="h5">{isActive ? 'Players' : `${usersInRoom.length} Users in room`}</Typography>
+                            <Typography variant="h5">{`${usersInRoom.length} Users in room`}</Typography>
                         </Box>
-                        <UserList />
+                        {isActive && <UserList type={'players'} />}
+                        <UserList type={'spectators'} />
                         {(user?._id === room.creator && isActive) && <Button 
                                 variant="contained" 
                                 color="error" 

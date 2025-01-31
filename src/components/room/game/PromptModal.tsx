@@ -1,10 +1,10 @@
-import { useContext, useState, useEffect } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, FormControl, FormLabel, 
-    TextField, ToggleButtonGroup, ToggleButton, Typography, Tooltip } from '@mui/material';
+import { useState, useEffect } from 'react';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, FormControl, FormLabel, TextField, ToggleButtonGroup, ToggleButton, 
+  Typography, Tooltip } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import { TurnContext } from '../../../context/turn.context';
 import useReactions from '../../../hooks/useReactions';
 import useSocket from '../../../hooks/useSocket';
+import useTurn from '../../../hooks/useTurn';
 
 interface Props {
   open: boolean;
@@ -15,7 +15,7 @@ interface Props {
 
 function PromptModal({ open, onClose, setPromptData, word }: Props) {
   const { reactionTypes, reactionEmojis } = useReactions()
-  const { turnPlayer } = useContext(TurnContext)
+  const { turnPlayer } = useTurn();
   const defaultText = `${turnPlayer?.name || '<player>'} was thinking about ${word?.toLowerCase() || '<word>'} because`
   const [text, setText] = useState(defaultText)
   const [reaction, setReaction] = useState('funny')

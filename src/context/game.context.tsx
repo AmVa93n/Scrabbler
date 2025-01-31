@@ -1,6 +1,6 @@
 import { createContext, useState, useEffect } from 'react';
 import useSocket from '../hooks/useSocket';
-import { GameBoard, Tile, Player, TileOnBoard } from '../types';
+import { GameBoard, Tile, Player, TileOnBoard, GameState } from '../types';
 import useRoom from '../hooks/useRoom';
 
 const GameContext = createContext({} as Context);
@@ -37,63 +37,60 @@ function GameProvider(props: { children: React.ReactNode }) {
             }));
         });
         setRack(prev => [...prev, ...tilesPlacedThisTurn]);
-        setTilesPlacedThisTurn(prev => {
-            console.log('Clearing tilesPlacedThisTurn, previous value:', prev);
-            return [];
-        });
+        setTilesPlacedThisTurn([]);
     }
 
     useEffect(() => {
         if (!socket) return;
-      // Get non-DB game data when user joins (private)
-      socket.on('refreshGame', (sessionData) => {
-          setBoard(sessionData.board);
-          setLeftInBag(sessionData.leftInBag)
-          setPlayers(sessionData.players)
-          setRack(sessionData.rack) 
-      });
+        
+        const onRefresh = (sessionData: GameState) => {
+            setBoard(sessionData.board);
+            setLeftInBag(sessionData.leftInBag)
+            setPlayers(sessionData.players)
+            setRack(sessionData.rack) 
+        }
+        
+        const onGameUpdate = (sessionData: GameState) => {
+            setBoard(sessionData.board);
+            setLeftInBag(sessionData.leftInBag)
+            setPlayers(sessionData.players)
+        }
+        
+        const onRackUpdate = (rack: Tile[]) => {
+            setRack(rack)
+            setTilesPlacedThisTurn([])
+        }
 
-      // Listen for game updates (public)
-      socket.on('gameUpdated', (sessionData) => {
-          setBoard(sessionData.board);
-          setLeftInBag(sessionData.leftInBag)
-          setPlayers(sessionData.players)
-      });
-
-      // Listen for rack updates (private)
-      socket.on('rackUpdated', (rack) => {
-          setRack(rack)
-          setTilesPlacedThisTurn([]) // reset placed letters
-      });
-      
-      // Listen for turn timeout (private)
-      socket.on('turnTimedOut', resetTurnActions);
-
-      // Listen for when a new game starts (public)
-      socket.on('gameStarted', (rackSize, gameMode) => {
-          setRoom(prev => prev ? ({...prev, gameSession: { settings: {rackSize, gameEnd: gameMode }}}) : null)
-      });
-
-      // Listen for when a game ends (public)
-      socket.on('gameEnded', () => {
+        const onGameStart = (rackSize: number, gameMode: string) => {
+            setRoom(prev => prev ? ({...prev, gameSession: { settings: {rackSize, gameEnd: gameMode }}}) : null)
+        }
+        
+        const onGameEnd = () => {
             setRoom(prev => prev ? ({...prev, gameSession: null}) : null)
             setPlayers([])
             setRack([])
             setBoard(null)
             setTilesPlacedThisTurn([])
             setLeftInBag(100)
-      });
+        }
 
-      // Clean up listeners on component unmount
-      return () => {
-          socket.off('refreshGame');
-          socket.off('gameUpdated');
-          socket.off('rackUpdated');
-          socket.off('turnTimedOut', resetTurnActions);
-          socket.off('gameStarted');
-          socket.off('gameEnded');
-      };
-  }, [socket]);
+        socket.on('refreshGame', onRefresh); // Get non-DB game data when user joins (private)
+        socket.on('gameUpdated', onGameUpdate); // Listen for game updates (public)
+        socket.on('rackUpdated', onRackUpdate); // Listen for rack updates (private)
+        socket.on('turnTimedOut', resetTurnActions); // Listen for turn timeout (private)
+        socket.on('gameStarted', onGameStart); // Listen for when a new game starts (public)
+        socket.on('gameEnded', onGameEnd); // Listen for when a game ends (public)
+
+        // Clean up listeners on component unmount
+        return () => {
+            socket.off('refreshGame', onRefresh);
+            socket.off('gameUpdated', onGameUpdate);
+            socket.off('rackUpdated', onRackUpdate);
+            socket.off('turnTimedOut', resetTurnActions);
+            socket.off('gameStarted', onGameStart);
+            socket.off('gameEnded', onGameEnd);
+        };
+    }, [socket, resetTurnActions]);
 
     return (
         <GameContext.Provider value={{

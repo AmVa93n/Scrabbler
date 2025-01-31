@@ -225,20 +225,17 @@ function GameScreen() {
     return (
         <>
             <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', flexGrow: 1}}>
-                <Box sx={{display: 'flex'}}>
+                <Box sx={{display: 'flex', gap: 1}}>
                     <Box sx={{
-                        backgroundImage: `url('/tilebag.png')`, 
-                        backgroundSize: '100%', 
-                        backgroundRepeat: 'no-repeat',
                         display: 'flex',
                         justifyContent: 'center',
                         alignItems: 'center',
-                        width: '50%',
-                        minWidth: 60,
-                        height: '31%',
-                        mr: 1
+                        width: '75px',
+                        height: '80px',
+                        position: 'relative',
                         }}>
-                        <Typography color='beige' variant="h6" sx={{mt: 2}}>{leftInBag}</Typography>
+                        <img src="/tilebag.png" alt="TileBag" style={{width: '100%', height: '100%'}} />
+                        <Typography color='beige' variant="h6" sx={{position: 'absolute', top: '45%'}}>{leftInBag}</Typography>
                     </Box>
                     {isPlaying && 
                         <Rack 

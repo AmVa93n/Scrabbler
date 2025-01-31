@@ -2,7 +2,7 @@ import { createContext, useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import useSocket from "../hooks/useSocket";
 import accountService from "../services/account.service";
-import { User, Room } from '../types';
+import { User, Room, Board, TileBag } from '../types';
 import useAuth from '../hooks/useAuth';
 
 const RoomContext = createContext({} as Context);
@@ -11,6 +11,8 @@ interface Context {
     usersInRoom: User[],
     room: Room | null,
     setRoom: React.Dispatch<React.SetStateAction<Room | null>>,
+    boards: Board[],
+    tileBags: TileBag[],
 }
 
 function RoomProvider(props: { children: React.ReactNode }) {
@@ -19,10 +21,12 @@ function RoomProvider(props: { children: React.ReactNode }) {
     const { user } = useAuth();
     const [room, setRoom] = useState<Room | null>(null);
     const [usersInRoom, setUsersInRoom] = useState([] as User[]);
+    const [boards, setBoards] = useState([] as Board[])
+    const [tileBags, setTileBags] = useState([] as TileBag[])
     const navigate = useNavigate();
 
     useEffect(() => {
-        async function init() {
+        async function fetchRoom() {
             try { // Get DB room data when user joins
                 const room = await accountService.getRoom(roomId || '')
                 const { kickedUsers } = room
@@ -37,8 +41,24 @@ function RoomProvider(props: { children: React.ReactNode }) {
                 alert('Error joining room')
             }
         }
-        init()
 
+        async function fetchResources() {
+            try {
+              const boards = await accountService.getBoards()
+              setBoards(boards)
+              const tileBags = await accountService.getTileBags()
+              setTileBags(tileBags)
+            } catch (error) {
+              console.error(error)
+              alert('An error occurred. Please refresh the page and try again')
+            }
+        }
+
+        fetchRoom()
+        if (user?._id === room?.creator) fetchResources() // fetch resources only if user is the room creator
+    }, [roomId, socket, user?._id, room?.creator]);
+
+    useEffect(() => {
         if (!socket) return;
 
         // Get non-DB room data when user joins (private)
@@ -69,13 +89,11 @@ function RoomProvider(props: { children: React.ReactNode }) {
             socket.off('userLeft');
             socket.off('userKicked');
         };
-    }, [roomId, socket, user?._id]);
+    }, [socket]);
 
     return (
         <RoomContext.Provider value={{
-            usersInRoom,
-            room,
-            setRoom,
+            usersInRoom, room, setRoom, boards, tileBags
         }}>
             {props.children}
         </RoomContext.Provider>

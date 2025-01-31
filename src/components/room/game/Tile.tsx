@@ -1,10 +1,9 @@
-import { useContext } from 'react';
 import { useDrag } from 'react-dnd';
 import { Paper, Typography } from '@mui/material';
-import { TurnContext } from '../../../context/turn.context';
 import useAuth from '../../../hooks/useAuth';
 import useGame from '../../../hooks/useGame';
 import { Tile as TileType } from '../../../types';
+import useTurn from '../../../hooks/useTurn';
 
 const ItemType = 'LETTER';
 
@@ -18,7 +17,7 @@ interface Props {
 function Tile({ tile, isOnRack, isOnBoard, wasPlacedThisTurn }: Props) {
   const { user } = useAuth();
   const { board } = useGame();
-  const { turnPlayer } = useContext(TurnContext)
+  const { turnPlayer } = useTurn();
   const isDraggable = isOnRack || (isOnBoard && wasPlacedThisTurn);
 
   const [{ isDragging, canDrag }, drag] = useDrag({

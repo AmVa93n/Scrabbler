@@ -5,8 +5,6 @@ import MuiCard from '@mui/material/Card';
 import { styled } from '@mui/material/styles';
 import { useNavigate } from "react-router-dom";
 import authService from "../services/auth.service";
-import { useGoogleLogin, TokenResponse } from '@react-oauth/google';
-import axios from 'axios';
 import useAuth from '../hooks/useAuth';
 
 const Card = styled(MuiCard)(({ theme }) => ({
@@ -39,7 +37,7 @@ export default function SignInPage() {
   const [passwordError, setPasswordError] = useState(false);
   const [passwordErrorMessage, setPasswordErrorMessage] = useState('');
   const navigate = useNavigate();
-  const { storeToken, authenticateUser } = useAuth();
+  const { storeToken, authenticateUser, googleLogin } = useAuth();
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -64,44 +62,6 @@ export default function SignInPage() {
     }
     
   };
-
-  async function handleGoogleAuthSuccess(codeResponse: TokenResponse) {
-    try {
-        const response = await axios.get(`https://www.googleapis.com/oauth2/v1/userinfo?access_token=${codeResponse.access_token}`, 
-          {
-            headers: {
-                Authorization: `Bearer ${codeResponse.access_token}`,
-                Accept: 'application/json'
-            }
-          })
-        try {
-          const response2 = await authService.google({ userData: response.data })
-          storeToken(response2.data.authToken);
-          authenticateUser();
-          navigate('/');
-      } catch (error: unknown) {
-          console.error(error);
-          if (axios.isAxiosError(error) && error.response) {
-            alert(error.response.data.message);
-          } else {
-            console.error(error);
-            alert('An unknown error occurred');
-          }
-      }
-    } catch (error) {
-      console.error(error);
-    }
-    
-  };
-
-  function handleGoogleAuthFailure() {
-    console.error('Google sign-in failed');
-  };
-
-  const login = useGoogleLogin({
-    onSuccess: handleGoogleAuthSuccess,
-    onError: handleGoogleAuthFailure
-  });
 
   const validateInputs = () => {
     const email = document.getElementById('email') as HTMLInputElement;
@@ -233,7 +193,7 @@ export default function SignInPage() {
                   }
                 }}
                 disableElevation
-                onClick={login as React.MouseEventHandler<HTMLButtonElement>}
+                onClick={googleLogin as React.MouseEventHandler<HTMLButtonElement>}
             >
               Sign In with Google
             </Button>

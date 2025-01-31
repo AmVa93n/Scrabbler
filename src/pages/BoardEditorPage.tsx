@@ -511,6 +511,14 @@ function BoardEditorPage() {
                     >
                     Save Changes
                 </Button>
+                <Button
+                    variant="contained"
+                    sx={{textTransform: 'none', mx: 1}}
+                    startIcon={<CancelIcon />}
+                    onClick={()=> setEditedBoard(null)}
+                    >
+                    Discard Changes
+                </Button>
                 <Button 
                     variant="contained" 
                     sx={{textTransform: 'none', mx: 1}}

@@ -12,8 +12,8 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <Router>
-      <AuthProviderWrapper>
-        <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+      <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+        <AuthProviderWrapper>
           <SocketProvider>
             <NotificationsProvider>
               <DragDropContext>
@@ -21,8 +21,8 @@ createRoot(document.getElementById('root')!).render(
               </DragDropContext>
             </NotificationsProvider>
           </SocketProvider>
-        </GoogleOAuthProvider>
-      </AuthProviderWrapper>
+        </AuthProviderWrapper>
+      </GoogleOAuthProvider>
     </Router>
   </StrictMode>,
 )

@@ -1,6 +1,9 @@
 import { createContext, useState, useEffect } from "react";
 import authService from "../services/auth.service";
 import { User } from "../types";
+import { useGoogleLogin, TokenResponse } from '@react-oauth/google';
+import axios from 'axios';
+import { useNavigate } from "react-router-dom";
 
 const AuthContext = createContext({} as Context);
 
@@ -11,12 +14,14 @@ interface Context {
   storeToken: (token: string) => void;
   authenticateUser: () => void;
   logOutUser: () => void;
+  googleLogin: () => void;
 }
 
 function AuthProviderWrapper(props: { children: React.ReactNode }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState(null);
+  const navigate = useNavigate();
 
   const storeToken = (token: string) => {
     localStorage.setItem("authToken", token);
@@ -64,6 +69,44 @@ function AuthProviderWrapper(props: { children: React.ReactNode }) {
     authenticateUser();
   };
 
+  async function handleGoogleAuthSuccess(codeResponse: TokenResponse) {
+    try {
+        const response = await axios.get(`https://www.googleapis.com/oauth2/v1/userinfo?access_token=${codeResponse.access_token}`, 
+          {
+            headers: {
+                Authorization: `Bearer ${codeResponse.access_token}`,
+                Accept: 'application/json'
+            }
+          })
+        try {
+          const response2 = await authService.google({ userData: response.data })
+          storeToken(response2.data.authToken);
+          authenticateUser();
+          navigate('/');
+      } catch (error: unknown) {
+          console.error(error);
+          if (axios.isAxiosError(error) && error.response) {
+            alert(error.response.data.message);
+          } else {
+            console.error(error);
+            alert('An unknown error occurred');
+          }
+      }
+    } catch (error) {
+      console.error(error);
+    }
+    
+  };
+
+  function handleGoogleAuthFailure() {
+    console.error('Google sign-in failed');
+  };
+
+  const googleLogin = useGoogleLogin({
+    onSuccess: handleGoogleAuthSuccess,
+    onError: handleGoogleAuthFailure
+  });
+
   useEffect(() => {
     // Run this code once the AuthProviderWrapper component in the App loads for the first time.
     // This effect runs when the application and the AuthProviderWrapper component load for the first time.
@@ -79,6 +122,7 @@ function AuthProviderWrapper(props: { children: React.ReactNode }) {
         storeToken,
         authenticateUser,
         logOutUser,
+        googleLogin
       }}
     >
       {props.children}

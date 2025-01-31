@@ -23,6 +23,7 @@ import Avatar from '@mui/material/Avatar';
 import authService from "../services/auth.service";
 import { useNavigate } from "react-router-dom";
 import { useNotifications } from '@toolpad/core/useNotifications';
+import useAuth from '../hooks/useAuth';
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
@@ -71,6 +72,7 @@ export default function SignUp() {
   const [pfpPreview, setPfpPreview] = useState<string | ArrayBuffer | null>("/broken-image.jpg");
   const navigate = useNavigate();
   const notifications = useNotifications();
+  const { googleLogin } = useAuth();
 
   const validateInputs = () => {
     const email = document.getElementById('email') as HTMLInputElement;
@@ -275,14 +277,27 @@ export default function SignUp() {
                 <Typography sx={{ color: 'text.secondary' }}>or</Typography>
               </Divider>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                {/*
-                <Button fullWidth variant="outlined" startIcon={<GoogleIcon />}>
-                  Sign up with Google
-                </Button>
-                <Button fullWidth variant="outlined" startIcon={<FacebookIcon />}>
-                  Sign up with Facebook
-                </Button>
-                */}
+              <Button
+                variant="contained"
+                startIcon={
+                  <Avatar sx={{width: 32, height: 32, bgcolor: 'white'}}>
+                    <img src={'/Googlelogo.svg'} alt='google' width={16} height={16}/>
+                  </Avatar>}
+                sx={{
+                  fontWeight: 'bold',
+                  fontSize: 16,
+                  textTransform: 'none',
+                  bgcolor: 'rgb(237, 242, 247)',
+                  color: 'black',
+                  '&:hover': {
+                    bgcolor: 'rgb(228, 234, 241)',
+                  }
+                }}
+                disableElevation
+                onClick={googleLogin as React.MouseEventHandler<HTMLButtonElement>}
+            >
+              Sign In with Google
+            </Button>
               </Box>
             </Card>
           </Stack>

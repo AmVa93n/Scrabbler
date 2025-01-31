@@ -6,6 +6,7 @@ import { Button, Select, MenuItem, Typography, Box, Grid2, Paper, TextField, Sel
 import SaveIcon from '@mui/icons-material/Save';
 import CreateIcon from '@mui/icons-material/AddCircle';
 import DeleteIcon from '@mui/icons-material/Delete';
+import CancelIcon from '@mui/icons-material/Cancel';
 import { useNotifications } from '@toolpad/core/useNotifications';
 import { TileBag, TileData } from '../types';
 import useAuth from '../hooks/useAuth';
@@ -250,6 +251,14 @@ function TileBagEditorPage() {
                         onClick={handleSave}
                         >
                         Save Changes
+                    </Button>
+                    <Button
+                        variant="contained"
+                        sx={{textTransform: 'none', mx: 1}}
+                        startIcon={<CancelIcon />}
+                        onClick={()=> setEditedBag(null)}
+                        >
+                        Discard Changes
                     </Button>
                     <Button 
                         variant="contained" 

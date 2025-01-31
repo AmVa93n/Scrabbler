@@ -26,7 +26,7 @@ function Navbar() {
     {text: 'Game History', route: '/games', icon: <HistoryIcon sx={{mr: 1}} />},
     {text: 'Board Editor', route: '/boardeditor', icon: <GridOnIcon sx={{mr: 1}} />},
     {text: 'Tile Bag Editor', route: '/tilebageditor', icon: <FontDownloadIcon sx={{mr: 1}} />},
-    {text: 'Sign out', route: '/logout', icon: <LogoutIcon sx={{mr: 1}} />},
+    {text: 'Sign out', route: '/login', icon: <LogoutIcon sx={{mr: 1}} />},
   ] : [
     {text: 'Sign in', route: '/login', icon: <LoginIcon sx={{mr: 1}} />},
   ]
